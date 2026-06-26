@@ -143,7 +143,7 @@ export default function ProfilePage() {
         <div className="relative z-10 flex flex-col items-center text-center">
           <div className="relative mb-1">
             <Avatar className="w-24 h-24 border-4 border-white/30 shadow-2xl">
-              <AvatarImage src={user?.photoURL || ""} />
+              <AvatarImage src="" />
               <AvatarFallback className="text-2xl font-extrabold bg-white/20 text-white font-serif">
                 {initials}
               </AvatarFallback>
@@ -283,24 +283,6 @@ export default function ProfilePage() {
               <p className="text-sm font-medium text-foreground mt-0.5">{user?.email || "—"}</p>
             </div>
             <Badge className="text-[10px] bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">Verified</Badge>
-          </div>
-          {/* Member since */}
-          <div className="px-4 py-3">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Member Since</p>
-            <p className="text-sm font-medium text-foreground mt-0.5">
-              {user?.metadata?.creationTime
-                ? new Date(user.metadata.creationTime).toLocaleDateString("en-US", { month: "long", year: "numeric" })
-                : "—"}
-            </p>
-          </div>
-          {/* Last sign-in */}
-          <div className="px-4 py-3">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Last Sign In</p>
-            <p className="text-sm font-medium text-foreground mt-0.5">
-              {user?.metadata?.lastSignInTime
-                ? new Date(user.metadata.lastSignInTime).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
-                : "—"}
-            </p>
           </div>
         </div>
       </div>

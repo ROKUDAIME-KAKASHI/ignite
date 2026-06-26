@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { login, signup } from "@/app/actions/auth";
@@ -84,14 +85,16 @@ export default function LoginPage() {
         className="relative z-10 w-full max-w-sm"
       >
         <div className="flex flex-col items-center mb-8">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-            className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center shadow-xl halo-glow mb-4"
-          >
-            <Cross className="w-8 h-8 text-white" />
-          </motion.div>
+          <Link href="/">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+              className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center shadow-xl halo-glow mb-4 hover:scale-[1.05] transition-transform"
+            >
+              <Cross className="w-8 h-8 text-white" />
+            </motion.div>
+          </Link>
           <h1 className="text-3xl font-extrabold text-gradient-gold font-serif">Ignite</h1>
           <p className="text-muted-foreground text-sm mt-1 font-medium uppercase tracking-widest text-center">Youth Ministry Platform</p>
           <p className="text-xs text-muted-foreground italic font-serif mt-2 text-center px-4">
