@@ -16,12 +16,12 @@ const SYSTEM_ALERTS = [
 ];
 
 import { useRouter } from "next/navigation";
-import { getAdminDashboardData } from "../actions";
+import { getAdminDashboardData, getPendingPrayers, approvePrayer, deletePrayer } from "../actions";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "notices" | "events">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events">("overview");
 
   // Real data state
   const [stats, setStats] = useState({
@@ -31,6 +31,12 @@ export default function AdminDashboardPage() {
     chaptersRead: 0
   });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
+  const [pendingPrayers, setPendingPrayers] = useState<any[]>([]);
+
+  const fetchPrayers = async () => {
+    const res = await getPendingPrayers();
+    if (res.success && res.prayers) setPendingPrayers(res.prayers);
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -39,6 +45,7 @@ export default function AdminDashboardPage() {
         setStats(res.stats);
         setRecentUsers(res.recentUsers);
       }
+      await fetchPrayers();
     }
     fetchData();
   }, []);
@@ -82,6 +89,17 @@ export default function AdminDashboardPage() {
     } else setEvStatus("error");
   };
 
+  const handleApprovePrayer = async (id: string) => {
+    await approvePrayer(id);
+    await fetchPrayers();
+  };
+
+  const handleDeletePrayer = async (id: string) => {
+    if (!confirm("Delete this prayer request?")) return;
+    await deletePrayer(id);
+    await fetchPrayers();
+  };
+
 
 
   return (
@@ -108,13 +126,15 @@ export default function AdminDashboardPage() {
       <div className="px-4 py-6 space-y-6">
         
         {/* ── Navigation Tabs ── */}
-        <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm">
-          {(["overview", "notices", "events"] as const).map(t => (
+        <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto">
+          {(["overview", "prayers", "notices", "events"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
-              "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors",
+              "flex-1 py-2 px-3 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors whitespace-nowrap",
               activeTab === t ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
             )}>
-              {t}
+              {t} {t === "prayers" && pendingPrayers.length > 0 && (
+                <span className="ml-1.5 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[9px]">{pendingPrayers.length}</span>
+              )}
             </button>
           ))}
         </div>
@@ -194,6 +214,64 @@ export default function AdminDashboardPage() {
                   ))}
                 </div>
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === "prayers" && (
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl gradient-lent text-white flex items-center justify-center shadow-md">
+                  <Heart className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="font-bold font-serif text-lg">Prayer Moderation</h2>
+                  <p className="text-xs text-muted-foreground">Approve or reject community prayer requests.</p>
+                </div>
+              </div>
+
+              {pendingPrayers.length === 0 ? (
+                <div className="text-center py-10 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+                  <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm font-bold text-slate-500">All Caught Up</p>
+                  <p className="text-xs text-slate-400 mt-1">No pending prayer requests to review.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pendingPrayers.map((prayer) => (
+                    <div key={prayer.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border/50">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-0 text-[10px]">
+                              {prayer.isAnonymous ? "Anonymous" : `${prayer.user?.firstName} ${prayer.user?.lastName}`}
+                            </Badge>
+                            <span className="text-[10px] text-muted-foreground">{new Date(prayer.createdAt).toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-sm text-foreground font-medium leading-relaxed">
+                            "{prayer.content}"
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-2 shrink-0">
+                          <button 
+                            onClick={() => handleApprovePrayer(prayer.id)}
+                            className="w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-lg flex items-center justify-center transition-colors"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeletePrayer(prayer.id)}
+                            className="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}

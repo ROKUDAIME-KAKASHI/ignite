@@ -93,3 +93,43 @@ export async function getAdminDashboardData() {
     recentUsers
   };
 }
+
+export async function getPendingPrayers() {
+  const cookieStore = await cookies();
+  if (cookieStore.get("admin_session")?.value !== "super_admin_verified") {
+    return { error: "Unauthorized" };
+  }
+
+  const prayers = await prisma.prayerRequest.findMany({
+    where: { isApproved: false },
+    orderBy: { createdAt: "desc" },
+    include: { user: { select: { firstName: true, lastName: true } } }
+  });
+
+  return { success: true, prayers };
+}
+
+export async function approvePrayer(id: string) {
+  const cookieStore = await cookies();
+  if (cookieStore.get("admin_session")?.value !== "super_admin_verified") {
+    return { error: "Unauthorized" };
+  }
+
+  await prisma.prayerRequest.update({
+    where: { id },
+    data: { isApproved: true }
+  });
+  return { success: true };
+}
+
+export async function deletePrayer(id: string) {
+  const cookieStore = await cookies();
+  if (cookieStore.get("admin_session")?.value !== "super_admin_verified") {
+    return { error: "Unauthorized" };
+  }
+
+  await prisma.prayerRequest.delete({
+    where: { id }
+  });
+  return { success: true };
+}
