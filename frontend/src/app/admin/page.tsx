@@ -20,7 +20,7 @@ const RECENT_USERS = [
 ];
 
 const SYSTEM_ALERTS = [
-  { id: 1, type: "warning", message: "Firebase Auth rate limit approaching (85%)" },
+  { id: 1, type: "warning", message: "Database connection pool near capacity (85%)" },
   { id: 2, type: "info", message: "Database backup completed successfully at 03:00 AM" },
 ];
 
