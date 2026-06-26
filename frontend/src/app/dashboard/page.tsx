@@ -2,12 +2,17 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronRight } from "lucide-react";
 
+import prisma from "@/lib/prisma";
+
 async function getJourney() {
   try {
-    const res = await fetch("http://127.0.0.1:3001/api/journey/today", { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
-  } catch { return null; }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const journey = await prisma.dailyJourney.findUnique({ where: { date: today } });
+    return journey;
+  } catch { 
+    return null; 
+  }
 }
 
 function getLiturgicalGreeting() {

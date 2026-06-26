@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  firebaseUid   String    @unique
+  email         String    @unique
+  firstName     String
+  lastName      String
+  avatarUrl     String?
+  role          String    @default("MEMBER") // "MEMBER", "LEADER", "ADMIN"
+  churchId      String?
+  church        Church?   @relation(fields: [churchId], references: [id])
+  
+  // Gamification
+  xp            Int       @default(0)
+  level         Int       @default(1)
+  streak        Int       @default(0)
+  lastActiveAt  DateTime?
+
+  // Relations
+  groups        UserGroup[]
+  attendances   Attendance[]
+  prayerRequests PrayerRequest[]
+  badges        UserBadge[]
+  xpLogs        XPLog[]
+  quizAttempts  QuizAttempt[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Church {
+  id          String   @id @default(uuid())
+  name        String
+  location    String?
+  users       User[]
+  events      Event[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  churchId    String?
+  users       UserGroup[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model UserGroup {
+  userId      String
+  groupId     String
+  user        User     @relation(fields: [userId], references: [id])
+  group       Group    @relation(fields: [groupId], references: [id])
+
+  @@id([userId, groupId])
+}
+
+model DailyJourney {
+  id          String   @id @default(uuid())
+  date        DateTime @unique
+  verse       String
+  verseRef    String
+  reflection  String
+  prayer      String
+  missionId   String?
+  mission     Mission? @relation(fields: [missionId], references: [id])
+  quizId      String?
+  quiz        Quiz?    @relation(fields: [quizId], references: [id])
+  
+  createdAt   DateTime @default(now())
+}
+
+model Mission {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  xpReward      Int      @default(50)
+  dailyJourneys DailyJourney[]
+  createdAt     DateTime @default(now())
+}
+
+model Quiz {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  type          String   // e.g., DAILY, WEEKLY, TOPIC
+  xpReward      Int      @default(100)
+  questions     Question[]
+  attempts      QuizAttempt[]
+  dailyJourneys DailyJourney[]
+  createdAt     DateTime @default(now())
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id])
+  text          String
+  type          String   // e.g., MCQ, TRUE_FALSE
+  answers       Answer[]
+}
+
+model Answer {
+  id            String   @id @default(uuid())
+  questionId    String
+  question      Question @relation(fields: [questionId], references: [id])
+  text          String
+  isCorrect     Boolean  @default(false)
+}
+
+model QuizAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id])
+  score       Int
+  completedAt DateTime @default(now())
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  date        DateTime
+  location    String?
+  churchId    String?
+  church      Church?  @relation(fields: [churchId], references: [id])
+  attendances Attendance[]
+  createdAt   DateTime @default(now())
+}
+
+model Attendance {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  checkedInAt DateTime @default(now())
+}
+
+model PrayerRequest {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  content     String
+  isAnonymous Boolean  @default(false)
+  isApproved  Boolean  @default(false)
+  prayCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Badge {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  imageUrl    String?
+  users       UserBadge[]
+}
+
+model UserBadge {
+  userId      String
+  badgeId     String
+  user        User     @relation(fields: [userId], references: [id])
+  badge       Badge    @relation(fields: [badgeId], references: [id])
+  awardedAt   DateTime @default(now())
+
+  @@id([userId, badgeId])
+}
+
+model XPLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Int
+  reason      String   // e.g., "DAILY_JOURNEY", "EVENT_ATTENDANCE"
+  awardedAt   DateTime @default(now())
+}
+
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  targetRole  String?    // null means everyone
+  createdAt   DateTime @default(now())
+}
