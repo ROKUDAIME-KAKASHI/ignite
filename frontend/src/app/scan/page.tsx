@@ -76,7 +76,6 @@ export default function ScanPage() {
             <div className="rounded-3xl overflow-hidden border-4 border-amber-400 shadow-[0_0_40px_rgba(251,191,36,0.3)] bg-black relative">
               <Scanner
                 onScan={(result) => handleScan(result[0].rawValue)}
-                components={{ tracker: true }}
                 styles={{ container: { width: "100%", height: "350px", position: "relative" } }}
               />
               <div className="absolute inset-0 border-[40px] border-black/40 pointer-events-none z-10" />
