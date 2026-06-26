@@ -57,15 +57,14 @@ Deploying Ignite to the world is incredibly simple.
 
 ```env
 # Database (Neon)
-DATABASE_URL="postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-fragrant-heart-adhfyuuq-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-
+DATABASE_URL="postgresql
 # Firebase Auth Configuration
-NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSy..."
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="ignite-72c8b.firebaseapp.com"
-NEXT_PUBLIC_FIREBASE_PROJECT_ID="ignite-72c8b"
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="ignite-72c8b.firebasestorage.app"
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="1071264021784"
-NEXT_PUBLIC_FIREBASE_APP_ID="1:1071264021784:web:..."
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
 ```
 
 4. **Deploy**: Vercel will automatically run `npm run build`, which triggers `prisma generate` and compiles the Next.js application.
