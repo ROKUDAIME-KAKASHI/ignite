@@ -10,31 +10,38 @@ import { cn } from "@/lib/utils";
 import { createAnnouncement, createEvent } from "../actions";
 import QRCode from "react-qr-code";
 
-const STATS = [
-  { label: "Total Users", value: "1,248", change: "+12%", icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-  { label: "Prayers Offered", value: "8,432", change: "+34%", icon: Heart, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" },
-  { label: "Quizzes Taken", value: "4,190", change: "+8%", icon: Activity, color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
-  { label: "Chapters Read", value: "12,845", change: "+21%", icon: BookOpen, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-900/20" },
-];
-
-const RECENT_USERS = [
-  { id: "1", name: "Maria S.", email: "maria@example.com", joined: "2 mins ago", status: "active" },
-  { id: "2", name: "David M.", email: "david@example.com", joined: "1 hour ago", status: "active" },
-  { id: "3", name: "Sarah J.", email: "sarah@example.com", joined: "3 hours ago", status: "pending" },
-  { id: "4", name: "John C.", email: "john@example.com", joined: "5 hours ago", status: "active" },
-];
-
 const SYSTEM_ALERTS = [
   { id: 1, type: "warning", message: "Database connection pool near capacity (85%)" },
   { id: 2, type: "info", message: "Database backup completed successfully at 03:00 AM" },
 ];
 
 import { useRouter } from "next/navigation";
+import { getAdminDashboardData } from "../actions";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<"overview" | "notices" | "events">("overview");
+
+  // Real data state
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    prayersOffered: 0,
+    quizzesTaken: 0,
+    chaptersRead: 0
+  });
+  const [recentUsers, setRecentUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const res = await getAdminDashboardData();
+      if (res.success && res.stats && res.recentUsers) {
+        setStats(res.stats);
+        setRecentUsers(res.recentUsers);
+      }
+    }
+    fetchData();
+  }, []);
 
   // Forms state
   const [noticeTitle, setNoticeTitle] = useState("");
@@ -132,9 +139,14 @@ export default function AdminDashboardPage() {
 
             {/* ── Key Metrics ── */}
             <div>
-              <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Key Metrics (24h)</h2>
+              <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Key Metrics (All Time)</h2>
               <div className="grid grid-cols-2 gap-3">
-                {STATS.map((stat, i) => {
+                {[
+                  { label: "Total Users", value: stats.totalUsers.toLocaleString(), icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
+                  { label: "Prayers Offered", value: stats.prayersOffered.toLocaleString(), icon: Heart, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" },
+                  { label: "Quizzes Taken", value: stats.quizzesTaken.toLocaleString(), icon: Activity, color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
+                  { label: "Chapters Read", value: stats.chaptersRead.toLocaleString(), icon: BookOpen, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-900/20" },
+                ].map((stat, i) => {
                   const Icon = stat.icon;
                   return (
                     <div key={stat.label} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between h-28">
@@ -142,9 +154,6 @@ export default function AdminDashboardPage() {
                         <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", stat.bg)}>
                           <Icon className={cn("w-4 h-4", stat.color)} />
                         </div>
-                        <Badge variant="secondary" className="text-[10px] bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border-0 flex items-center gap-0.5">
-                          <TrendingUp className="w-3 h-3" /> {stat.change}
-                        </Badge>
                       </div>
                       <div>
                         <p className="text-2xl font-bold text-foreground leading-none">{stat.value}</p>
@@ -164,7 +173,7 @@ export default function AdminDashboardPage() {
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-border/50 shadow-sm overflow-hidden">
                 <div className="divide-y divide-border/50">
-                  {RECENT_USERS.map((user) => (
+                  {recentUsers.map((user) => (
                     <div key={user.id} className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold text-xs">

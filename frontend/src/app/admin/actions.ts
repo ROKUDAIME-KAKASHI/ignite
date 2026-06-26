@@ -47,3 +47,50 @@ export async function createEvent(title: string, description: string, dateStr: s
   });
   return { success: true, event };
 }
+}
+
+export async function getAdminDashboardData() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("admin_session")?.value;
+  if (token !== "super_admin_verified") {
+    return { error: "Unauthorized" };
+  }
+
+  const [totalUsers, prayersOffered, quizzesTaken, chaptersRead] = await Promise.all([
+    prisma.user.count(),
+    prisma.prayerRequest.count(),
+    prisma.quizAttempt.count(),
+    prisma.xPLog.count({ where: { reason: { contains: "Chapter" } } }),
+  ]);
+
+  const recentUsersData = await prisma.user.findMany({
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      createdAt: true
+    }
+  });
+
+  const recentUsers = recentUsersData.map(u => ({
+    id: u.id,
+    name: `${u.firstName} ${u.lastName}`,
+    email: u.email,
+    joined: new Date(u.createdAt).toLocaleDateString(),
+    status: "active"
+  }));
+
+  return {
+    success: true,
+    stats: {
+      totalUsers,
+      prayersOffered,
+      quizzesTaken,
+      chaptersRead
+    },
+    recentUsers
+  };
+}
