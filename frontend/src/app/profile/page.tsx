@@ -121,6 +121,12 @@ export default function ProfilePage() {
     : user?.email?.charAt(0).toUpperCase() ?? "A";
 
   const displayName = user?.displayName || user?.email?.split("@")[0] || "Beloved";
+  
+  const xp = user?.xp || 0;
+  const level = user?.level || 1;
+  const streak = user?.streak || 0;
+  const nextLevelXp = level * 500;
+  const progress = Math.min(100, Math.round((xp / nextLevelXp) * 100));
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -159,7 +165,7 @@ export default function ProfilePage() {
           {/* Rank badges */}
           <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
             <Badge className="bg-white/20 text-white border border-white/30 backdrop-blur-sm text-xs font-bold px-3 py-1">
-              🛡️ Disciple · Level 8
+              🛡️ Disciple · Level {level}
             </Badge>
             <Badge className="bg-white/20 text-white border border-white/30 backdrop-blur-sm text-xs font-bold px-3 py-1">
               🕊️ Ordinary Time
@@ -178,11 +184,11 @@ export default function ProfilePage() {
           <div className="flex justify-between items-center mb-2">
             <div>
               <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Grace Points · Progress</p>
-              <p className="text-2xl font-extrabold text-gradient-gold mt-0.5">2,450 XP</p>
+              <p className="text-2xl font-extrabold text-gradient-gold mt-0.5">{xp.toLocaleString()} XP</p>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground">50 until <span className="text-primary font-bold">Apostle</span></p>
+            <p className="text-sm font-semibold text-muted-foreground">{nextLevelXp - xp} until <span className="text-primary font-bold">Next Rank</span></p>
           </div>
-          <Progress value={98} className="h-2 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full" />
+          <Progress value={progress} className="h-2 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full" />
         </motion.div>
       </div>
 
@@ -190,10 +196,10 @@ export default function ProfilePage() {
       <div className="px-4 mb-5">
         <div className="grid grid-cols-4 gap-2">
           {[
-            { emoji: "⚡", value: "2,450", label: "Grace Pts" },
-            { emoji: "🕯️", value: "12",    label: "Day Streak" },
-            { emoji: "🏅", value: "14",    label: "Badges" },
-            { emoji: "📖", value: "47",    label: "Chapters" },
+            { emoji: "⚡", value: xp.toLocaleString(), label: "Grace Pts" },
+            { emoji: "🕯️", value: streak.toString(),    label: "Day Streak" },
+            { emoji: "🏅", value: "0",    label: "Badges" },
+            { emoji: "📖", value: "0",    label: "Chapters" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -217,7 +223,7 @@ export default function ProfilePage() {
             <div>
               <p className="font-bold text-foreground flex items-center gap-2">
                 <span className="candle-flicker text-xl">🕯️</span>
-                12 Day Streak
+                {streak} Day Streak
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 italic font-serif">"Persevere in prayer." — Romans 12:12</p>
             </div>

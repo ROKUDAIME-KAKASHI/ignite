@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { ChevronRight } from "lucide-react";
 
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 async function getJourney() {
   try {
@@ -29,6 +30,14 @@ function getLiturgicalGreeting() {
 export default async function DashboardPage() {
   const journey = await getJourney();
   const { greeting, sub } = getLiturgicalGreeting();
+  
+  const session = await getSession();
+  const dbUser = session?.id ? await prisma.user.findUnique({ where: { id: session.id }, select: { xp: true, streak: true, level: true } }) : null;
+  const xp = dbUser?.xp || 0;
+  const streak = dbUser?.streak || 0;
+  const level = dbUser?.level || 1;
+  const nextLevelXp = level * 500;
+  const progress = Math.min(100, Math.round((xp / nextLevelXp) * 100));
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -41,7 +50,7 @@ export default async function DashboardPage() {
         <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-yellow-300/20 blur-3xl" />
         <div className="relative z-10">
           <p className="text-amber-200/80 text-xs font-bold uppercase tracking-[0.2em] mb-1">{greeting} · Hour of Prayer</p>
-          <h1 className="text-3xl font-extrabold text-white font-serif leading-tight">Welcome, Beloved.</h1>
+          <h1 className="text-3xl font-extrabold text-white font-serif leading-tight">Welcome, {session?.firstName || "Beloved"}.</h1>
           <p className="text-white/70 text-sm mt-1">{sub}</p>
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
@@ -50,7 +59,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
               <span className="candle-flicker">🕯️</span>
-              <span className="text-white text-xs font-semibold">12 Day Streak</span>
+              <span className="text-white text-xs font-semibold">{streak} Day Streak</span>
             </div>
           </div>
         </div>
@@ -62,14 +71,13 @@ export default async function DashboardPage() {
           <div className="flex justify-between items-center mb-3">
             <div>
               <p className="text-[10px] font-bold text-primary uppercase tracking-widest group-hover:text-amber-500 transition-colors">Your Grace Points & Rank</p>
-              <p className="text-2xl font-extrabold text-gradient-gold mt-0.5">2,450 <span className="text-base font-normal text-muted-foreground">/ 2,500</span></p>
+              <p className="text-2xl font-extrabold text-gradient-gold mt-0.5">{xp.toLocaleString()} <span className="text-base font-normal text-muted-foreground">/ {nextLevelXp.toLocaleString()}</span></p>
             </div>
             <div className="w-14 h-14 rounded-full gradient-gold flex items-center justify-center halo-glow text-2xl shadow-lg group-hover:scale-105 transition-transform">🏆</div>
           </div>
-          <Progress value={98} className="h-2.5 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full" />
-          <div className="flex items-center justify-between mt-1.5">
-            <p className="text-[11px] text-muted-foreground">50 GP until <span className="text-primary font-bold">Apostle</span> rank</p>
-            <p className="text-[10px] font-bold text-amber-600 flex items-center">View Leaderboard <ChevronRight className="w-3 h-3 ml-0.5" /></p>
+          <div className="flex items-center gap-3">
+            <Progress value={progress} className="h-2 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full flex-1" />
+            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">{nextLevelXp - xp} to rank up</span>
           </div>
         </a>
       </div>

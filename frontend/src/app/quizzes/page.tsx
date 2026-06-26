@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { Trophy, ChevronRight, RotateCcw, CheckCircle2, XCircle } from "lucide-react";
+import { Trophy, ChevronRight, RotateCcw, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { awardXP } from "@/app/actions/gamification";
+import { useAuth } from "@/context/AuthContext";
 
 /* ─── Quiz data ──────────────────────────────────────────────────────────── */
 interface Question {
@@ -90,6 +92,9 @@ export default function QuizzesPage() {
   const [selected, setSelected] = useState<string | boolean | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
+  const [submittingXP, setSubmittingXP] = useState(false);
+
+  const { user, setUser } = useAuth();
 
   const questions = activeSet.questions;
   const q = questions[currentQ];
@@ -116,8 +121,17 @@ export default function QuizzesPage() {
   };
 
   /* Next question */
-  const nextQuestion = () => {
+  const nextQuestion = async () => {
     if (currentQ + 1 >= totalQ) {
+      const earnedXP = Math.round((score / totalQ) * activeSet.xp);
+      if (earnedXP > 0 && user) {
+        setSubmittingXP(true);
+        const res = await awardXP(earnedXP, `Completed Quiz: ${activeSet.label}`);
+        if (res.success && res.xp) {
+          setUser({ ...user, xp: res.xp, level: res.level });
+        }
+        setSubmittingXP(false);
+      }
       setPhase("result");
     } else {
       setCurrentQ((n) => n + 1);
@@ -256,8 +270,8 @@ export default function QuizzesPage() {
                   Submit Answer
                 </Button>
               ) : (
-                <Button onClick={nextQuestion} className="w-full h-11 rounded-xl gradient-gold text-white font-bold shadow-md halo-glow">
-                  {currentQ + 1 >= totalQ ? "See Results" : "Next Question →"}
+                <Button onClick={nextQuestion} disabled={submittingXP} className="w-full h-11 rounded-xl gradient-gold text-white font-bold shadow-md halo-glow">
+                  {submittingXP ? <Loader2 className="w-4 h-4 animate-spin" /> : currentQ + 1 >= totalQ ? "See Results" : "Next Question →"}
                 </Button>
               )}
             </motion.div>

@@ -11,6 +11,9 @@ interface AuthUser {
   lastName: string;
   role: string;
   displayName?: string;
+  xp?: number;
+  level?: number;
+  streak?: number;
 }
 
 interface AuthContextType {
