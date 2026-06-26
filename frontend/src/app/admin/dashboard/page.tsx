@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle, Send, CalendarPlus, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createAnnouncement, createEvent } from "./actions";
+import { createAnnouncement, createEvent } from "../actions";
 import QRCode from "react-qr-code";
 
 const STATS = [
