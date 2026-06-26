@@ -24,7 +24,42 @@ const SYSTEM_ALERTS = [
   { id: 2, type: "info", message: "Database backup completed successfully at 03:00 AM" },
 ];
 
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { Lock } from "lucide-react";
+
 export default function AdminDashboardPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Define your admin email(s) here
+  const ADMIN_EMAILS = ["admin@ignite.com", "your.email@gmail.com"]; // Change this to your actual email
+
+  if (loading) {
+    return <div className="flex-1 flex items-center justify-center">Loading...</div>;
+  }
+
+  // If the user isn't logged in, or their email isn't in the admin list, block access
+  if (!user || !user.email || !ADMIN_EMAILS.includes(user.email)) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+        <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mb-2">
+          <Lock className="w-10 h-10" />
+        </div>
+        <h1 className="text-2xl font-bold font-serif">Access Denied</h1>
+        <p className="text-muted-foreground text-sm max-w-xs">
+          You must be logged in with an administrator account to view this console.
+        </p>
+        <button 
+          onClick={() => router.push("/dashboard")}
+          className="px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-sm mt-4"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
       
