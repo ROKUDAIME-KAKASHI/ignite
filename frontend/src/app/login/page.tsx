@@ -69,7 +69,7 @@ export default function LoginPage() {
     <div className="flex-1 flex flex-col items-center justify-center min-h-screen px-6 relative overflow-hidden bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-15"
-          style={{ background: "radial-gradient(circle, #d4a017 0%, #7c3aed 50%, transparent 75%)" }}
+          style={{ background: "radial-gradient(circle, #d4a017 0%, #c2410c 50%, transparent 75%)" }}
         />
         <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.04] text-foreground" fill="none" stroke="currentColor" strokeWidth="8">
           <line x1="150" y1="30" x2="150" y2="270" />

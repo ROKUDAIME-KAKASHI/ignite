@@ -132,11 +132,11 @@ function FloatingParticles() {
    3D FEATURE CARDS (floating)
 ───────────────────────────────────────────────────────────────────────────── */
 const featureCards = [
-  { icon: "📖", title: "Sacred Scripture", sub: "All 66 Books", gradient: "gradient-royal",   delay: 0    },
-  { icon: "⚔️", title: "Daily Missions",   sub: "Works of Mercy", gradient: "gradient-crimson", delay: 0.1  },
-  { icon: "🕊️", title: "Parish Events",   sub: "Gather & Pray",  gradient: "gradient-life",    delay: 0.2  },
-  { icon: "🕯️", title: "Prayer Reminders",sub: "Never Forget",   gradient: "gradient-spirit",  delay: 0.3  },
-  { icon: "🙏", title: "Prayer Wall",      sub: "Community Faith",gradient: "gradient-lent",    delay: 0.4  },
+  { icon: "📖", title: "Sacred Scripture", sub: "All 66 Books", gradient: "gradient-gold",   delay: 0    },
+  { icon: "⚔️", title: "Daily Missions",   sub: "Works of Mercy", gradient: "gradient-gold", delay: 0.1  },
+  { icon: "🕊️", title: "Parish Events",   sub: "Gather & Pray",  gradient: "gradient-gold",    delay: 0.2  },
+  { icon: "🕯️", title: "Prayer Reminders",sub: "Never Forget",   gradient: "gradient-gold",  delay: 0.3  },
+  { icon: "🙏", title: "Prayer Wall",      sub: "Community Faith",gradient: "gradient-gold",    delay: 0.4  },
   { icon: "👑", title: "Grace Points",     sub: "Grow in Faith",  gradient: "gradient-gold",    delay: 0.5  },
 ];
 
@@ -197,9 +197,9 @@ export default function HeroPage() {
       >
         {/* ── Layer 1: Deep background orbs (slowest parallax) ── */}
         <motion.div style={{ y: layer1Y }} className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-purple-500/20 blur-[100px]" />
+          <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-amber-500/20 blur-[100px]" />
           <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-amber-400/20 blur-[100px]" />
-          <div className="absolute top-1/2 left-1/4 w-64 h-64 rounded-full bg-blue-400/15 blur-[60px]" />
+          <div className="absolute top-1/2 left-1/4 w-64 h-64 rounded-full bg-yellow-400/15 blur-[60px]" />
         </motion.div>
 
         {/* ── Layer 2: Floating particle crosses ── */}
@@ -385,7 +385,7 @@ export default function HeroPage() {
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl"
             >
-              <div className="w-8 h-8 rounded-xl gradient-royal flex items-center justify-center text-lg mb-2 shadow-md">📖</div>
+              <div className="w-8 h-8 rounded-xl gradient-gold flex items-center justify-center text-lg mb-2 shadow-md">📖</div>
               <p className="text-white text-xs font-bold font-serif">Sacred Scripture</p>
               <p className="text-white/50 text-[10px]">66 Books</p>
             </motion.div>
@@ -404,7 +404,7 @@ export default function HeroPage() {
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
               className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl"
             >
-              <div className="w-8 h-8 rounded-xl gradient-crimson flex items-center justify-center text-lg mb-2 shadow-md">⚔️</div>
+              <div className="w-8 h-8 rounded-xl gradient-gold flex items-center justify-center text-lg mb-2 shadow-md">⚔️</div>
               <p className="text-white text-xs font-bold font-serif">Daily Missions</p>
               <p className="text-white/50 text-[10px]">Works of Mercy</p>
             </motion.div>
@@ -423,7 +423,7 @@ export default function HeroPage() {
               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
               className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl"
             >
-              <div className="w-8 h-8 rounded-xl gradient-life flex items-center justify-center text-lg mb-2 shadow-md">🕊️</div>
+              <div className="w-8 h-8 rounded-xl gradient-gold flex items-center justify-center text-lg mb-2 shadow-md">🕊️</div>
               <p className="text-white text-xs font-bold font-serif">Prayer Wall</p>
               <p className="text-white/50 text-[10px]">Community Faith</p>
               <div className="flex items-center gap-1 mt-2">
@@ -687,7 +687,7 @@ export default function HeroPage() {
             <line x1="400" y1="0" x2="400" y2="400" /><line x1="0" y1="150" x2="800" y2="150" />
           </svg>
           <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-amber-400/20 blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-purple-400/20 blur-3xl" />
+          <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-amber-500/20 blur-3xl" />
         </div>
         <FadeUp className="relative z-10 text-center max-w-2xl mx-auto">
           <motion.div

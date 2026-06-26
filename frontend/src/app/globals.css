@@ -162,41 +162,14 @@
   /* Fonts */
   .font-serif { font-family: 'Playfair Display', Georgia, serif; }
 
-  /* === CHRISTIAN GRADIENTS === */
-
-  /* Royal Crimson — Blood of Christ / Sacrifice */
-  .gradient-crimson {
-    background: linear-gradient(135deg, #9b1c1c 0%, #c0392b 50%, #e74c3c 100%);
-  }
-
   /* Sacred Gold — Divine Glory / Heaven */
   .gradient-gold {
     background: linear-gradient(135deg, #b7791f 0%, #d4a017 50%, #f6c90e 100%);
   }
 
-  /* Royal Blue — Mary / Heaven / Royalty */
-  .gradient-royal {
-    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
-  }
-
-  /* Holy Spirit — Pentecost Fire */
-  .gradient-spirit {
-    background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #f97316 100%);
-  }
-
-  /* Resurrection Green — New Life */
-  .gradient-life {
-    background: linear-gradient(135deg, #14532d 0%, #16a34a 60%, #4ade80 100%);
-  }
-
-  /* Purple — Lent / Advent / Penance */
-  .gradient-lent {
-    background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 60%, #a78bfa 100%);
-  }
-
-  /* Dawn — Morning prayer / Resurrection */
+  /* Dawn — Morning prayer / Warmth */
   .gradient-dawn {
-    background: linear-gradient(160deg, #312e81 0%, #7c3aed 35%, #c2410c 65%, #d97706 100%);
+    background: linear-gradient(160deg, #592500 0%, #c2410c 45%, #d4a017 100%);
   }
 
   /* Parchment (light section bg) */
@@ -221,18 +194,6 @@
   /* === TEXT GRADIENTS === */
   .text-gradient-gold {
     background: linear-gradient(135deg, #b7791f, #d4a017, #f6c90e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-royal {
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-crimson {
-    background: linear-gradient(135deg, #9b1c1c, #dc2626);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
