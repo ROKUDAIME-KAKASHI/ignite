@@ -1,9 +1,11 @@
-"use client";
-
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle, Send, CalendarPlus, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createAnnouncement, createEvent } from "./actions";
 
 const STATS = [
   { label: "Total Users", value: "1,248", change: "+12%", icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
@@ -32,8 +34,43 @@ export default function AdminDashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  const [activeTab, setActiveTab] = useState<"overview" | "notices" | "events">("overview");
+
+  // Forms state
+  const [noticeTitle, setNoticeTitle] = useState("");
+  const [noticeContent, setNoticeContent] = useState("");
+  const [noticeStatus, setNoticeStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const [evTitle, setEvTitle] = useState("");
+  const [evDesc, setEvDesc] = useState("");
+  const [evDate, setEvDate] = useState("");
+  const [evLoc, setEvLoc] = useState("");
+  const [evStatus, setEvStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const handlePostNotice = async () => {
+    if (!noticeTitle || !noticeContent) return;
+    setNoticeStatus("loading");
+    const res = await createAnnouncement(noticeTitle, noticeContent);
+    if (res.success) {
+      setNoticeStatus("success");
+      setNoticeTitle(""); setNoticeContent("");
+      setTimeout(() => setNoticeStatus("idle"), 2000);
+    } else setNoticeStatus("error");
+  };
+
+  const handleCreateEvent = async () => {
+    if (!evTitle || !evDate) return;
+    setEvStatus("loading");
+    const res = await createEvent(evTitle, evDesc, evDate, evLoc);
+    if (res.success) {
+      setEvStatus("success");
+      setEvTitle(""); setEvDesc(""); setEvDate(""); setEvLoc("");
+      setTimeout(() => setEvStatus("idle"), 2000);
+    } else setEvStatus("error");
+  };
+
   // Define your admin email(s) here
-  const ADMIN_EMAILS = ["admin@ignite.com", "your.email@gmail.com"]; // Change this to your actual email
+  const ADMIN_EMAILS = ["admin@ignite.com"]; // Register with this email to be admin
 
   if (loading) {
     return <div className="flex-1 flex items-center justify-center">Loading...</div>;
@@ -83,103 +120,191 @@ export default function AdminDashboardPage() {
 
       <div className="px-4 py-6 space-y-6">
         
-        {/* ── System Alerts ── */}
-        {SYSTEM_ALERTS.length > 0 && (
-          <div className="space-y-2">
-            {SYSTEM_ALERTS.map(alert => (
-              <div key={alert.id} className={cn(
-                "px-4 py-3 rounded-xl border flex items-start gap-3 text-sm",
-                alert.type === "warning" ? "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-900/50 dark:text-amber-300" :
-                "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/30 dark:border-blue-900/50 dark:text-blue-300"
-              )}>
-                {alert.type === "warning" ? <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /> : <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />}
-                <p>{alert.message}</p>
+        {/* ── Navigation Tabs ── */}
+        <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm">
+          {(["overview", "notices", "events"] as const).map(t => (
+            <button key={t} onClick={() => setActiveTab(t)} className={cn(
+              "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors",
+              activeTab === t ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            )}>
+              {t}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "overview" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            {/* ── System Alerts ── */}
+            {SYSTEM_ALERTS.length > 0 && (
+              <div className="space-y-2">
+                {SYSTEM_ALERTS.map(alert => (
+                  <div key={alert.id} className={cn(
+                    "px-4 py-3 rounded-xl border flex items-start gap-3 text-sm",
+                    alert.type === "warning" ? "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-900/50 dark:text-amber-300" :
+                    "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/30 dark:border-blue-900/50 dark:text-blue-300"
+                  )}>
+                    {alert.type === "warning" ? <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /> : <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />}
+                    <p>{alert.message}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+
+            {/* ── Key Metrics ── */}
+            <div>
+              <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Key Metrics (24h)</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {STATS.map((stat, i) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={stat.label} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between h-28">
+                      <div className="flex items-center justify-between">
+                        <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", stat.bg)}>
+                          <Icon className={cn("w-4 h-4", stat.color)} />
+                        </div>
+                        <Badge variant="secondary" className="text-[10px] bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border-0 flex items-center gap-0.5">
+                          <TrendingUp className="w-3 h-3" /> {stat.change}
+                        </Badge>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-foreground leading-none">{stat.value}</p>
+                        <p className="text-[11px] text-muted-foreground font-medium mt-1">{stat.label}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* ── Recent Users ── */}
+            <div>
+              <div className="flex items-center justify-between mb-3 px-1">
+                <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Recent Signups</h2>
+                <button className="text-xs font-bold text-primary">View All</button>
+              </div>
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-border/50 shadow-sm overflow-hidden">
+                <div className="divide-y divide-border/50">
+                  {RECENT_USERS.map((user) => (
+                    <div key={user.id} className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold text-xs">
+                          {user.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground leading-none">{user.name}</p>
+                          <p className="text-[11px] text-muted-foreground mt-1">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge className={cn("text-[10px] border-0 mb-1", user.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400")}>
+                          {user.status}
+                        </Badge>
+                        <p className="text-[10px] text-muted-foreground block">{user.joined}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
         )}
 
-        {/* ── Key Metrics ── */}
-        <div>
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Key Metrics (24h)</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {STATS.map((stat, i) => {
-              const Icon = stat.icon;
-              return (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  key={stat.label} 
-                  className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between h-28"
+        {activeTab === "notices" && (
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl gradient-royal text-white flex items-center justify-center shadow-md">
+                  <Send className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="font-bold font-serif text-lg">Post Notice</h2>
+                  <p className="text-xs text-muted-foreground">Broadcast an announcement to all youth.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Title</label>
+                  <Input value={noticeTitle} onChange={e => setNoticeTitle(e.target.value)} placeholder="e.g. Sunday Youth Meeting Update" className="bg-slate-50 dark:bg-slate-950" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Message Content</label>
+                  <Textarea value={noticeContent} onChange={e => setNoticeContent(e.target.value)} placeholder="Type your announcement here..." className="bg-slate-50 dark:bg-slate-950 min-h-[120px]" />
+                </div>
+                <button 
+                  onClick={handlePostNotice}
+                  disabled={noticeStatus === "loading" || !noticeTitle || !noticeContent}
+                  className="w-full h-12 rounded-xl gradient-royal text-white font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", stat.bg)}>
-                      <Icon className={cn("w-4 h-4", stat.color)} />
-                    </div>
-                    <Badge variant="secondary" className="text-[10px] bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border-0 flex items-center gap-0.5">
-                      <TrendingUp className="w-3 h-3" /> {stat.change}
-                    </Badge>
+                  {noticeStatus === "loading" ? <Loader2 className="w-5 h-5 animate-spin" /> : 
+                   noticeStatus === "success" ? <CheckCircle2 className="w-5 h-5" /> :
+                   <Send className="w-4 h-4" />}
+                  {noticeStatus === "success" ? "Posted Successfully!" : "Broadcast Notice"}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === "events" && (
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl gradient-crimson text-white flex items-center justify-center shadow-md">
+                  <CalendarPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="font-bold font-serif text-lg">Create Event</h2>
+                  <p className="text-xs text-muted-foreground">Schedule a youth gathering or service project.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Event Title</label>
+                  <Input value={evTitle} onChange={e => setEvTitle(e.target.value)} placeholder="e.g. Lenten Retreat 2026" className="bg-slate-50 dark:bg-slate-950" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Date & Time</label>
+                    <Input type="datetime-local" value={evDate} onChange={e => setEvDate(e.target.value)} className="bg-slate-50 dark:bg-slate-950" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground leading-none">{stat.value}</p>
-                    <p className="text-[11px] text-muted-foreground font-medium mt-1">{stat.label}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── Recent Users ── */}
-        <div>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Recent Signups</h2>
-            <button className="text-xs font-bold text-primary">View All</button>
-          </div>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-border/50 shadow-sm overflow-hidden">
-            <div className="divide-y divide-border/50">
-              {RECENT_USERS.map((user) => (
-                <div key={user.id} className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold text-xs">
-                      {user.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-foreground leading-none">{user.name}</p>
-                      <p className="text-[11px] text-muted-foreground mt-1">{user.email}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Badge className={cn("text-[10px] border-0 mb-1", user.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400")}>
-                      {user.status}
-                    </Badge>
-                    <p className="text-[10px] text-muted-foreground block">{user.joined}</p>
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Location</label>
+                    <Input value={evLoc} onChange={e => setEvLoc(e.target.value)} placeholder="e.g. Main Parish Hall" className="bg-slate-50 dark:bg-slate-950" />
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Description</label>
+                  <Textarea value={evDesc} onChange={e => setEvDesc(e.target.value)} placeholder="Event details..." className="bg-slate-50 dark:bg-slate-950 min-h-[80px]" />
+                </div>
+                
+                {evStatus === "success" && (
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-medium text-sm">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Event Created
+                    </div>
+                    <Badge className="bg-white dark:bg-slate-800 border-border text-foreground cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
+                      View QR Code
+                    </Badge>
+                  </div>
+                )}
 
-        {/* ── Quick Actions ── */}
-        <div>
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <button className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-border/50 shadow-sm text-sm font-bold text-foreground hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              Manage Content
-            </button>
-            <button className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-border/50 shadow-sm text-sm font-bold text-foreground hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              Send Broadcast
-            </button>
-            <button className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-border/50 shadow-sm text-sm font-bold text-foreground hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              Export Logs
-            </button>
-            <button className="p-3 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-200 dark:border-red-900/50 shadow-sm text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
-              System Restart
-            </button>
-          </div>
-        </div>
+                <button 
+                  onClick={handleCreateEvent}
+                  disabled={evStatus === "loading" || !evTitle || !evDate}
+                  className="w-full h-12 rounded-xl gradient-crimson text-white font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {evStatus === "loading" ? <Loader2 className="w-5 h-5 animate-spin" /> : 
+                   evStatus === "success" ? <CheckCircle2 className="w-5 h-5" /> :
+                   <CalendarPlus className="w-4 h-4" />}
+                  {evStatus === "success" ? "Created Successfully!" : "Create Event & Generate QR"}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
         
       </div>
     </div>
