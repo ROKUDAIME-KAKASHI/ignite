@@ -204,6 +204,27 @@ export default async function DashboardPage() {
           </div>
         </a>
 
+        {/* Spiritual Guides */}
+        <a href="/guides" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
+          <div className="bg-gradient-to-r from-teal-700/10 to-emerald-600/8 dark:from-teal-700/20 dark:to-emerald-600/15 px-4 pt-4 pb-3 border-b border-teal-200/30 dark:border-teal-800/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-600 text-white flex items-center justify-center shadow-md text-lg">📿</div>
+                <div>
+                  <p className="font-bold text-sm text-foreground">Spiritual Guides</p>
+                  <p className="text-xs text-teal-600 dark:text-teal-400 font-semibold">Confession & Prayers</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </div>
+          <div className="px-5 py-4 bg-card">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Examination of conscience, Orthodox prayers, and spiritual preparation for the Holy Mysteries.
+            </p>
+          </div>
+        </a>
+
         {/* Spiritual Stats */}
         <div>
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Spiritual Progress</h2>
