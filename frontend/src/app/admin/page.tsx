@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle, Send, CalendarPlus, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createAnnouncement, createEvent } from "./actions";
+import QRCode from "react-qr-code";
 
 const STATS = [
   { label: "Total Users", value: "1,248", change: "+12%", icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
@@ -46,6 +47,12 @@ export default function AdminDashboardPage() {
   const [evDate, setEvDate] = useState("");
   const [evLoc, setEvLoc] = useState("");
   const [evStatus, setEvStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [createdEventId, setCreatedEventId] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
+
+  useEffect(() => {
+    setBaseUrl(window.location.origin);
+  }, []);
 
   const handlePostNotice = async () => {
     if (!noticeTitle || !noticeContent) return;
@@ -62,10 +69,10 @@ export default function AdminDashboardPage() {
     if (!evTitle || !evDate) return;
     setEvStatus("loading");
     const res = await createEvent(evTitle, evDesc, evDate, evLoc);
-    if (res.success) {
+    if (res.success && res.event) {
+      setCreatedEventId(res.event.id);
       setEvStatus("success");
       setEvTitle(""); setEvDesc(""); setEvDate(""); setEvLoc("");
-      setTimeout(() => setEvStatus("idle"), 2000);
     } else setEvStatus("error");
   };
 
@@ -280,27 +287,45 @@ export default function AdminDashboardPage() {
                 </div>
                 
                 {evStatus === "success" && (
-                  <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-medium text-sm">
-                      <CheckCircle2 className="w-4 h-4" />
-                      Event Created
+                  <div className="p-5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex flex-col items-center">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-bold text-lg mb-4">
+                      <CheckCircle2 className="w-5 h-5" />
+                      Event Created Successfully!
                     </div>
-                    <Badge className="bg-white dark:bg-slate-800 border-border text-foreground cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
-                      View QR Code
-                    </Badge>
+                    
+                    <div className="bg-white p-4 rounded-xl shadow-sm mb-3">
+                      <QRCode 
+                        value={`${baseUrl}/scan?eventId=${createdEventId}`} 
+                        size={180}
+                        level="H"
+                      />
+                    </div>
+                    
+                    <p className="text-xs text-center text-green-800 dark:text-green-300 max-w-xs font-medium">
+                      Display this QR code at the event. Youth can scan it with the app to check in and earn 100 Grace Points.
+                    </p>
+                    
+                    <button 
+                      onClick={() => setEvStatus("idle")}
+                      className="mt-4 px-4 py-2 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-lg text-sm font-bold hover:bg-green-200 transition-colors"
+                    >
+                      Create Another Event
+                    </button>
                   </div>
                 )}
 
-                <button 
-                  onClick={handleCreateEvent}
-                  disabled={evStatus === "loading" || !evTitle || !evDate}
-                  className="w-full h-12 rounded-xl gradient-crimson text-white font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-opacity disabled:opacity-50"
-                >
-                  {evStatus === "loading" ? <Loader2 className="w-5 h-5 animate-spin" /> : 
-                   evStatus === "success" ? <CheckCircle2 className="w-5 h-5" /> :
-                   <CalendarPlus className="w-4 h-4" />}
-                  {evStatus === "success" ? "Created Successfully!" : "Create Event & Generate QR"}
-                </button>
+                {evStatus !== "success" && (
+                  <button 
+                    onClick={handleCreateEvent}
+                    disabled={evStatus === "loading" || !evTitle || !evDate}
+                    className="w-full h-12 rounded-xl gradient-crimson text-white font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-opacity disabled:opacity-50"
+                  >
+                    {evStatus === "loading" ? <Loader2 className="w-5 h-5 animate-spin" /> : 
+                     evStatus === "error" ? <AlertTriangle className="w-4 h-4" /> :
+                     <CalendarPlus className="w-4 h-4" />}
+                    {evStatus === "error" ? "Failed to Create" : "Create Event & Generate QR"}
+                  </button>
+                )}
               </div>
             </div>
           </motion.div>
