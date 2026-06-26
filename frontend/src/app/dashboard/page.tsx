@@ -150,7 +150,7 @@ export default async function DashboardPage() {
           </div>
           <div className="px-5 py-4 bg-card">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Test your knowledge of Scripture and Catholic teaching. New quiz available every day.
+              Test your knowledge of Scripture and Orthodox teaching. New quiz available every day.
             </p>
           </div>
         </a>

@@ -37,10 +37,10 @@ const DAILY_QUIZ: Question[] = [
   },
   {
     id: 3, type: "mcq",
-    question: "How many Books are in the Catholic Old Testament?",
+    question: "How many Books are in the Orthodox Old Testament?",
     options: ["39", "45", "46", "50"],
     answer: "46",
-    explanation: "The Catholic Old Testament includes 46 books, including the deuterocanonical books not found in the Protestant Bible.",
+    explanation: "The Orthodox Old Testament includes up to 51 books depending on the tradition, including books not found in the Protestant Bible.",
   },
   {
     id: 4, type: "truefalse",
@@ -61,7 +61,7 @@ const DAILY_QUIZ: Question[] = [
 const CATECHISM_QUIZ: Question[] = [
   {
     id: 1, type: "mcq",
-    question: "How many Sacraments are there in the Catholic Church?",
+    question: "How many Sacraments (Holy Mysteries) are there in the Orthodox Church?",
     options: ["5", "6", "7", "10"],
     answer: "7",
     explanation: "The seven sacraments are: Baptism, Eucharist, Confirmation, Reconciliation, Anointing of the Sick, Holy Orders, and Matrimony.",
@@ -76,7 +76,7 @@ const CATECHISM_QUIZ: Question[] = [
 
 const quizSets = [
   { id: "daily",      label: "Daily Quiz",       emoji: "⭐", questions: DAILY_QUIZ,      xp: 100, color: "gradient-gold",    badge: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",   desc: "5 questions · Scripture & Faith" },
-  { id: "catechism",  label: "Catechism",        emoji: "📜", questions: CATECHISM_QUIZ,  xp: 80,  color: "gradient-royal",   badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",     desc: "2 questions · Catholic Teaching" },
+  { id: "catechism",  label: "Faith",        emoji: "📜", questions: CATECHISM_QUIZ,  xp: 80,  color: "gradient-royal",   badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",     desc: "2 questions · Orthodox Teaching" },
 ];
 
 type Phase = "select" | "quiz" | "result";

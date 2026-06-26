@@ -307,7 +307,7 @@ export default function HeroPage() {
             transition={{ duration: 0.7, delay: 0.45 }}
             className="text-white/75 text-lg md:text-xl font-medium leading-relaxed mb-3 max-w-xl mx-auto"
           >
-            Your daily spiritual companion for scripture, prayer, missions and community — built for Catholic youth navigating the fast-paced world.
+            Your daily spiritual companion for scripture, prayer, missions and community — built for Jacobite Orthodox youth navigating the fast-paced world.
           </motion.p>
 
           <motion.p
@@ -701,7 +701,7 @@ export default function HeroPage() {
           <h2 className="text-4xl md:text-5xl font-extrabold font-serif text-white leading-tight mb-4">
             Your faith journey<br />begins with one step.
           </h2>
-          <p className="text-white/70 text-lg mb-3">Join thousands of Catholic youth who are reclaiming five minutes a day for God.</p>
+          <p className="text-white/70 text-lg mb-3">Join thousands of Jacobite Orthodox youth who are reclaiming five minutes a day for God.</p>
           <p className="text-amber-300/80 italic font-serif text-sm mb-10">
             &quot;I am the way, the truth, and the life.&quot; — John 14:6
           </p>

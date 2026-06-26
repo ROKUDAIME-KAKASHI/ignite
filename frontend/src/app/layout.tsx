@@ -9,8 +9,8 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Ignite — Catholic Youth Ministry Platform",
-  description: "Your daily spiritual companion. Scripture, prayer, missions and community for Catholic youth navigating the fast-paced world.",
+  title: "Ignite — Jacobite Orthodox Youth Movement Platform",
+  description: "Your daily spiritual companion. Scripture, prayer, missions and community for Jacobite Orthodox youth navigating the fast-paced world.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: "Ignite",
   },
   openGraph: {
-    title: "Ignite — Catholic Youth Ministry",
+    title: "Ignite — Jacobite Orthodox Youth Movement",
     description: "In a world that never stops, your faith never should.",
     type: "website",
   },
