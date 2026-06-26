@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
@@ -76,15 +78,12 @@ export default function AdminDashboardPage() {
     } else setEvStatus("error");
   };
 
-  // Define your admin email(s) here
-  const ADMIN_EMAILS = ["admin@ignite.com"]; // Register with this email to be admin
-
   if (loading) {
     return <div className="flex-1 flex items-center justify-center">Loading...</div>;
   }
 
-  // If the user isn't logged in, or their email isn't in the admin list, block access
-  if (!user || !user.email || !ADMIN_EMAILS.includes(user.email)) {
+  // If the user isn't logged in, or their role isn't ADMIN, block access
+  if (!user || user.role !== "ADMIN") {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
         <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mb-2">

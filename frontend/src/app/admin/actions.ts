@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth";
 
 export async function createAnnouncement(title: string, content: string) {
   const session = await getSession();
-  if (!session || session.role !== "ADMIN" && session.email !== "admin@ignite.com") {
+  if (!session || session.role !== "ADMIN") {
     return { error: "Unauthorized" };
   }
 
@@ -17,7 +17,7 @@ export async function createAnnouncement(title: string, content: string) {
 
 export async function createEvent(title: string, description: string, dateStr: string, location: string) {
   const session = await getSession();
-  if (!session || session.role !== "ADMIN" && session.email !== "admin@ignite.com") {
+  if (!session || session.role !== "ADMIN") {
     return { error: "Unauthorized" };
   }
 
