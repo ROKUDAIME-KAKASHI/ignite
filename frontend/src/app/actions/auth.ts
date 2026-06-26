@@ -52,6 +52,7 @@ export async function signup(data: FormData) {
       passwordHash,
       firstName,
       lastName,
+      role: email === "admin@ignite.com" ? "ADMIN" : "MEMBER",
     },
   });
 
