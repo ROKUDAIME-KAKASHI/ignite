@@ -57,7 +57,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Grace Points Card ── */}
-      <div className="px-4 -mt-6 mb-5">
+      <div className="relative z-20 px-4 -mt-6 mb-5">
         <a href="/leaderboard" className="block glass dark:glass-dark rounded-2xl p-4 card-holy shadow-xl group hover:shadow-2xl transition-all">
           <div className="flex justify-between items-center mb-3">
             <div>

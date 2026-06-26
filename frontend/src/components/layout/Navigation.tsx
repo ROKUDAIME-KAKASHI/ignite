@@ -2,17 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Target, Calendar, User as UserIcon } from "lucide-react";
+import { Home, BookOpen, Target, Calendar, User as UserIcon, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
 
 const navItems = [
-  { name: "Home",      href: "/dashboard", icon: Home     },
-  { name: "Scripture", href: "/bible",     icon: BookOpen },
-  { name: "Missions",  href: "/missions",  icon: Target   },
-  { name: "Events",    href: "/events",    icon: Calendar },
-  { name: "Profile",   href: "/profile",   icon: UserIcon },
+  { name: "Home",      href: "/dashboard", icon: Home       },
+  { name: "Scripture", href: "/bible",     icon: BookOpen   },
+  { name: "Missions",  href: "/missions",  icon: Target     },
+  { name: "Quizzes",   href: "/quizzes",   icon: HelpCircle },
+  { name: "Events",    href: "/events",    icon: Calendar   },
+  { name: "Profile",   href: "/profile",   icon: UserIcon   },
 ];
 
 // Public routes — no nav

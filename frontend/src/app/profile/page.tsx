@@ -169,7 +169,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Grace Points Card (floats over hero) ── */}
-      <div className="px-4 -mt-8 mb-5">
+      <div className="relative z-20 px-4 -mt-8 mb-5">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
