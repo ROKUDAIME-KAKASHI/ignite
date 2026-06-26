@@ -1,11 +1,26 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { cookies } from "next/headers";
+
+export async function adminLogin(email: string, pass: string) {
+  if (email === "adminofignite@gmail.com" && pass === "adminofignite123") {
+    const cookieStore = await cookies();
+    cookieStore.set("admin_session", "super_admin_verified", {
+      httpOnly: true,
+      secure: true,
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30 // 30 days
+    });
+    return { success: true };
+  }
+  return { error: "Invalid admin credentials" };
+}
 
 export async function createAnnouncement(title: string, content: string) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("admin_session")?.value;
+  if (token !== "super_admin_verified") {
     return { error: "Unauthorized" };
   }
 
@@ -16,8 +31,9 @@ export async function createAnnouncement(title: string, content: string) {
 }
 
 export async function createEvent(title: string, description: string, dateStr: string, location: string) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("admin_session")?.value;
+  if (token !== "super_admin_verified") {
     return { error: "Unauthorized" };
   }
 

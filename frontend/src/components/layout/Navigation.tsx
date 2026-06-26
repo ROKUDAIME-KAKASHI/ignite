@@ -31,8 +31,8 @@ function CrossIcon({ className }: { className?: string }) {
 export function Navigation() {
   const pathname = usePathname();
 
-  // Hide on public / hero pages
-  if (PUBLIC_ROUTES.some((r) => pathname === r)) return null;
+  // Hide on public / hero pages / admin
+  if (PUBLIC_ROUTES.some((r) => pathname === r) || pathname.startsWith("/admin")) return null;
 
   return (
     <>
