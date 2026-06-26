@@ -1,0 +1,313 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+}
+
+/* ── Light Mode: Parchment & Gold ── */
+:root {
+  /* Warm cream / parchment background */
+  --background: oklch(0.97 0.012 80);
+  --foreground: oklch(0.18 0.02 50);
+
+  /* Cards: soft warm white */
+  --card: oklch(0.995 0.006 80);
+  --card-foreground: oklch(0.18 0.02 50);
+  --popover: oklch(0.995 0.006 80);
+  --popover-foreground: oklch(0.18 0.02 50);
+
+  /* Primary: Royal Gold */
+  --primary: oklch(0.62 0.14 68);
+  --primary-foreground: oklch(0.99 0 0);
+
+  /* Secondary */
+  --secondary: oklch(0.94 0.02 80);
+  --secondary-foreground: oklch(0.3 0.04 60);
+
+  /* Muted */
+  --muted: oklch(0.94 0.015 80);
+  --muted-foreground: oklch(0.52 0.04 65);
+
+  /* Accent */
+  --accent: oklch(0.92 0.04 75);
+  --accent-foreground: oklch(0.35 0.08 60);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.88 0.02 75);
+  --input: oklch(0.91 0.018 78);
+  --ring: oklch(0.62 0.14 68);
+
+  --chart-1: oklch(0.62 0.14 68);
+  --chart-2: oklch(0.45 0.15 260);
+  --chart-3: oklch(0.55 0.18 30);
+  --chart-4: oklch(0.60 0.12 150);
+  --chart-5: oklch(0.50 0.20 320);
+
+  --radius: 0.875rem;
+
+  --sidebar: oklch(0.985 0.01 78);
+  --sidebar-foreground: oklch(0.18 0.02 50);
+  --sidebar-primary: oklch(0.62 0.14 68);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.92 0.04 75);
+  --sidebar-accent-foreground: oklch(0.35 0.08 60);
+  --sidebar-border: oklch(0.88 0.02 75);
+  --sidebar-ring: oklch(0.62 0.14 68);
+}
+
+/* ── Dark Mode: Cathedral Night ── */
+.dark {
+  /* Deep navy/midnight */
+  --background: oklch(0.10 0.025 255);
+  --foreground: oklch(0.95 0.012 75);
+
+  --card: oklch(0.145 0.03 255);
+  --card-foreground: oklch(0.95 0.012 75);
+  --popover: oklch(0.145 0.03 255);
+  --popover-foreground: oklch(0.95 0.012 75);
+
+  /* Primary: Warm Gold in dark */
+  --primary: oklch(0.76 0.14 68);
+  --primary-foreground: oklch(0.12 0.03 60);
+
+  --secondary: oklch(0.2 0.035 255);
+  --secondary-foreground: oklch(0.88 0.015 75);
+
+  --muted: oklch(0.18 0.03 255);
+  --muted-foreground: oklch(0.60 0.03 75);
+
+  --accent: oklch(0.22 0.05 260);
+  --accent-foreground: oklch(0.88 0.02 75);
+
+  --destructive: oklch(0.65 0.22 25);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.76 0.14 68);
+
+  --chart-1: oklch(0.76 0.14 68);
+  --chart-2: oklch(0.55 0.18 260);
+  --chart-3: oklch(0.65 0.18 30);
+  --chart-4: oklch(0.62 0.12 150);
+  --chart-5: oklch(0.58 0.2 320);
+
+  --sidebar: oklch(0.12 0.028 255);
+  --sidebar-foreground: oklch(0.95 0.012 75);
+  --sidebar-primary: oklch(0.76 0.14 68);
+  --sidebar-primary-foreground: oklch(0.12 0.03 60);
+  --sidebar-accent: oklch(0.22 0.05 260);
+  --sidebar-accent-foreground: oklch(0.88 0.02 75);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.76 0.14 68);
+}
+
+/* ── Base ── */
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  html { @apply font-sans scroll-smooth; }
+  h1, h2, h3 { letter-spacing: -0.01em; }
+}
+
+/* ── Utility Classes ── */
+@layer utilities {
+
+  /* Fonts */
+  .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+
+  /* === CHRISTIAN GRADIENTS === */
+
+  /* Royal Crimson — Blood of Christ / Sacrifice */
+  .gradient-crimson {
+    background: linear-gradient(135deg, #9b1c1c 0%, #c0392b 50%, #e74c3c 100%);
+  }
+
+  /* Sacred Gold — Divine Glory / Heaven */
+  .gradient-gold {
+    background: linear-gradient(135deg, #b7791f 0%, #d4a017 50%, #f6c90e 100%);
+  }
+
+  /* Royal Blue — Mary / Heaven / Royalty */
+  .gradient-royal {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
+  }
+
+  /* Holy Spirit — Pentecost Fire */
+  .gradient-spirit {
+    background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #f97316 100%);
+  }
+
+  /* Resurrection Green — New Life */
+  .gradient-life {
+    background: linear-gradient(135deg, #14532d 0%, #16a34a 60%, #4ade80 100%);
+  }
+
+  /* Purple — Lent / Advent / Penance */
+  .gradient-lent {
+    background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 60%, #a78bfa 100%);
+  }
+
+  /* Dawn — Morning prayer / Resurrection */
+  .gradient-dawn {
+    background: linear-gradient(160deg, #312e81 0%, #7c3aed 35%, #c2410c 65%, #d97706 100%);
+  }
+
+  /* Parchment (light section bg) */
+  .bg-parchment {
+    background: linear-gradient(145deg, #fdf8f0 0%, #fef3e2 100%);
+  }
+
+  /* === GLASSMORPHISM === */
+  .glass {
+    background: rgba(255, 252, 245, 0.75);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  .glass-dark {
+    background: rgba(12, 14, 35, 0.75);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  /* === TEXT GRADIENTS === */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #b7791f, #d4a017, #f6c90e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-royal {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-crimson {
+    background: linear-gradient(135deg, #9b1c1c, #dc2626);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* === CARD EFFECTS === */
+  .card-holy {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06),
+                0 4px 24px rgba(183, 121, 31, 0.08),
+                inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(183, 121, 31, 0.15);
+  }
+  .dark .card-holy {
+    box-shadow: 0 4px 24px rgba(183, 121, 31, 0.1);
+    border: 1px solid rgba(183, 121, 31, 0.12);
+  }
+  .card-holy-hover {
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .card-holy-hover:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08),
+                0 10px 40px rgba(183, 121, 31, 0.16),
+                inset 0 1px 0 rgba(255,255,255,0.7);
+    transform: translateY(-2px);
+  }
+
+  /* Ornamental divider */
+  .divider-cross::before {
+    content: '✦ ✝ ✦';
+    display: block;
+    text-align: center;
+    color: oklch(0.62 0.14 68);
+    font-size: 0.7rem;
+    letter-spacing: 0.5em;
+    opacity: 0.5;
+    margin: 0.5rem 0;
+  }
+
+  /* === ANIMATIONS === */
+  @keyframes halo {
+    0%, 100% { box-shadow: 0 0 12px rgba(212, 160, 23, 0.4); }
+    50%       { box-shadow: 0 0 28px rgba(212, 160, 23, 0.75); }
+  }
+  .halo-glow { animation: halo 3s ease-in-out infinite; }
+
+  @keyframes dove-float {
+    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+    50%       { transform: translateY(-6px) rotate(1deg); }
+  }
+  .dove-float { animation: dove-float 4s ease-in-out infinite; }
+
+  @keyframes candle-flicker {
+    0%,100% { transform: scaleY(1) rotate(-1deg); opacity: 1; }
+    25%     { transform: scaleY(1.05) rotate(1.5deg); opacity: 0.92; }
+    50%     { transform: scaleY(0.97) rotate(-0.5deg); opacity: 0.97; }
+    75%     { transform: scaleY(1.03) rotate(1deg); opacity: 0.94; }
+  }
+  .candle-flicker {
+    display: inline-block;
+    animation: candle-flicker 1.8s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+
+  @keyframes shimmer-scroll {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+  }
+  .shimmer {
+    background: linear-gradient(90deg, #fdf8f0 25%, #fef3e2 50%, #fdf8f0 75%);
+    background-size: 1200px 100%;
+    animation: shimmer-scroll 1.5s infinite;
+  }
+  .dark .shimmer {
+    background: linear-gradient(90deg, #0f1229 25%, #161a3a 50%, #0f1229 75%);
+    background-size: 1200px 100%;
+    animation: shimmer-scroll 1.5s infinite;
+  }
+}
