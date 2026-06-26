@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchChapter, TRANSLATIONS, type Translation, type BibleVerse } from "@/lib/bible-api";
 import { getBookBySlug, getAdjacentBook } from "@/lib/bible-books";
-import { ChevronLeft, ChevronRight, BookOpen, Bookmark, BookmarkCheck, Settings2, Share2, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -314,52 +314,42 @@ export default function BibleReaderPage() {
               <div className="flex gap-3">
                 {/* Previous */}
                 {prevChapter ? (
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="flex-1 h-12 rounded-xl font-semibold border-border/60 hover:border-primary/40"
+                  <Link
+                    href={`/bible/${bookSlug}/${prevChapter}`}
+                    className={cn(buttonVariants({ variant: "outline" }), "flex-1 h-12 rounded-xl font-semibold border-border/60 hover:bg-muted")}
                   >
-                    <Link href={`/bible/${bookSlug}/${prevChapter}`}>
-                      <ChevronLeft className="w-4 h-4 mr-1" />
-                      Chapter {prevChapter}
-                    </Link>
-                  </Button>
+                    <ChevronLeft className="w-5 h-5 mr-1" />
+                    Previous
+                  </Link>
                 ) : prevBook ? (
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="flex-1 h-12 rounded-xl font-semibold border-border/60 hover:border-primary/40"
+                  <Link
+                    href={`/bible/${prevBook.slug}/${prevBook.chapters}`}
+                    className={cn(buttonVariants({ variant: "outline" }), "flex-1 h-12 rounded-xl font-semibold border-border/60 hover:bg-muted")}
                   >
-                    <Link href={`/bible/${prevBook.slug}/${prevBook.chapters}`}>
-                      <ChevronLeft className="w-4 h-4 mr-1" />
-                      {prevBook.name}
-                    </Link>
-                  </Button>
+                    <ChevronLeft className="w-5 h-5 mr-1" />
+                    {prevBook.name}
+                  </Link>
                 ) : (
                   <div className="flex-1" />
                 )}
 
                 {/* Next */}
                 {nextChapter ? (
-                  <Button
-                    asChild
-                    className="flex-1 h-12 rounded-xl font-bold gradient-gold text-white shadow-md"
+                  <Link
+                    href={`/bible/${bookSlug}/${nextChapter}`}
+                    className={cn(buttonVariants({ variant: "outline" }), "flex-1 h-12 rounded-xl font-semibold border-border/60 hover:bg-muted")}
                   >
-                    <Link href={`/bible/${bookSlug}/${nextChapter}`}>
-                      Chapter {nextChapter}
-                      <ChevronRight className="w-4 h-4 ml-1" />
-                    </Link>
-                  </Button>
+                    Next
+                    <ChevronRight className="w-5 h-5 ml-1" />
+                  </Link>
                 ) : nextBook ? (
-                  <Button
-                    asChild
-                    className="flex-1 h-12 rounded-xl font-bold gradient-gold text-white shadow-md"
+                  <Link
+                    href={`/bible/${nextBook.slug}/1`}
+                    className={cn(buttonVariants({ variant: "default" }), "flex-1 h-12 rounded-xl font-bold gradient-gold text-white shadow-md")}
                   >
-                    <Link href={`/bible/${nextBook.slug}/1`}>
-                      {nextBook.name}
-                      <ChevronRight className="w-4 h-4 ml-1" />
-                    </Link>
-                  </Button>
+                    {nextBook.name}
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Link>
                 ) : (
                   <div className="flex-1 rounded-xl bg-muted flex items-center justify-center h-12 text-xs text-muted-foreground font-semibold">
                     End of Bible

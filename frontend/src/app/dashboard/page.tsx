@@ -8,7 +8,10 @@ async function getJourney() {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const journey = await prisma.dailyJourney.findUnique({ where: { date: today } });
+    const journey = await prisma.dailyJourney.findUnique({ 
+      where: { date: today },
+      include: { mission: true, quiz: true } 
+    });
     return journey;
   } catch { 
     return null; 
