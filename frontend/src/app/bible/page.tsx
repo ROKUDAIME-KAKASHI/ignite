@@ -29,9 +29,9 @@ const plans = [
 ];
 
 const seasonColor: Record<string, string> = {
-  Easter:   &quot;bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300&quot;,
-  Lent:     &quot;bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300&quot;,
-  Ordinary: &quot;bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300&quot;,
+  Easter:   "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+  Lent:     "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  Ordinary: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
 };
 
 const otGroups = groupBooksByCategory("OT");
@@ -40,7 +40,7 @@ const ntGroups = groupBooksByCategory("NT");
 export default function BiblePage() {
   const [activeTab, setActiveTab] = useState("Browse");
   const [search, setSearch] = useState("");
-  const [testament, setTestament] = useState<"OT" | "NT">(&quot;NT&quot;);
+  const [testament, setTestament] = useState<"OT" | "NT">("NT");
 
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
@@ -48,7 +48,7 @@ export default function BiblePage() {
     return BIBLE_BOOKS.filter((b) => b.name.toLowerCase().includes(q));
   }, [search]);
 
-  const groups = testament === &quot;OT&quot; ? otGroups : ntGroups;
+  const groups = testament === "OT" ? otGroups : ntGroups;
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -67,7 +67,7 @@ export default function BiblePage() {
             </div>
           </div>
           <p className="text-blue-100/80 text-sm mt-2 italic font-serif">
-            &quot;Thy word is a lamp unto my feet, and a light unto my path.&quot; — Psalm 119:105
+            "Thy word is a lamp unto my feet, and a light unto my path." — Psalm 119:105
           </p>
         </div>
       </div>
@@ -80,8 +80,8 @@ export default function BiblePage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder=&quot;Search books of the Bible…&quot;
-            className=&quot;pl-10 rounded-xl border-border/60 bg-card h-11&quot;
+            placeholder="Search books of the Bible…"
+            className="pl-10 rounded-xl border-border/60 bg-card h-11"
           />
         </div>
 
@@ -89,7 +89,7 @@ export default function BiblePage() {
         {search.trim() && (
           <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
             {searchResults.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4 italic font-serif">No books found for &quot;{search}&quot;</p>
+              <p className="text-sm text-muted-foreground text-center py-4 italic font-serif">No books found for "{search}"</p>
             ) : (
               searchResults.map((book) => (
                 <Link
@@ -99,7 +99,7 @@ export default function BiblePage() {
                 >
                   <div>
                     <p className="font-bold text-sm text-foreground font-serif">{book.name}</p>
-                    <p className="text-xs text-muted-foreground">{book.testament === &quot;OT&quot; ? &quot;Old Testament&quot; : &quot;New Testament&quot;} · {book.category} · {book.chapters} chapters</p>
+                    <p className="text-xs text-muted-foreground">{book.testament === "OT" ? "Old Testament" : "New Testament"} · {book.category} · {book.chapters} chapters</p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </Link>
@@ -117,8 +117,8 @@ export default function BiblePage() {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={cn(
-                    &quot;flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200&quot;,
-                    activeTab === tab ? &quot;bg-card text-primary shadow-sm&quot; : &quot;text-muted-foreground hover:text-foreground&quot;
+                    "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+                    activeTab === tab ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {tab}
@@ -127,7 +127,7 @@ export default function BiblePage() {
             </div>
 
             {/* ── BROWSE ── */}
-            {activeTab === &quot;Browse&quot; && (
+            {activeTab === "Browse" && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
 
                 {/* Quick access */}
@@ -163,14 +163,14 @@ export default function BiblePage() {
 
                 {/* OT / NT toggle */}
                 <div className="flex gap-2">
-                  {([&quot;NT&quot;, &quot;OT&quot;] as const).map((t) => (
+                  {(["NT", "OT"] as const).map((t) => (
                     <button
                       key={t}
                       onClick={() => setTestament(t)}
                       className={cn(
-                        &quot;flex-1 py-2.5 rounded-xl text-sm font-bold transition-all&quot;,
+                        "flex-1 py-2.5 rounded-xl text-sm font-bold transition-all",
                         testament === t
-                          ? t === &quot;NT&quot; ? &quot;gradient-royal text-white shadow-md&quot; : "gradient-gold text-white shadow-md"
+                          ? t === "NT" ? "gradient-royal text-white shadow-md" : "gradient-gold text-white shadow-md"
                           : "bg-muted text-muted-foreground hover:text-foreground"
                       )}
                     >
@@ -207,10 +207,10 @@ export default function BiblePage() {
             )}
 
             {/* ── PLANS ── */}
-            {activeTab === &quot;Plans&quot; && (
+            {activeTab === "Plans" && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
                 <p className="text-xs text-muted-foreground italic font-serif">
-                  &quot;Blessed is the one who meditates on the law of the Lord day and night.&quot; — Psalm 1:2
+                  "Blessed is the one who meditates on the law of the Lord day and night." — Psalm 1:2
                 </p>
                 {plans.map((plan) => (
                   <Link
@@ -241,10 +241,10 @@ export default function BiblePage() {
             )}
 
             {/* ── BOOKMARKS ── */}
-            {activeTab === &quot;Bookmarks&quot; && (
+            {activeTab === "Bookmarks" && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
                 <p className="text-xs text-muted-foreground italic font-serif mb-3">
-                  &quot;I have hidden your word in my heart.&quot; — Psalm 119:11
+                  "I have hidden your word in my heart." — Psalm 119:11
                 </p>
                 <div className="text-center py-12 text-muted-foreground">
                   <Bookmark className="w-10 h-10 mx-auto mb-3 opacity-30" />

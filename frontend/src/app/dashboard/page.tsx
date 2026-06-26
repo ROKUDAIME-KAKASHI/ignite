@@ -81,14 +81,14 @@ export default async function DashboardPage() {
                 <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center shadow-md text-lg">📖</div>
                 <div>
                   <p className="font-bold text-sm text-foreground">Sacred Scripture</p>
-                  <p className="text-xs text-primary font-semibold">{journey?.verseRef || &quot;Philippians 4:13&quot;}</p>
+                  <p className="text-xs text-primary font-semibold">{journey?.verseRef || "Philippians 4:13"}</p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
           <div className="px-5 py-4 bg-card">
-            <p className="text-sm font-serif italic text-foreground/80 leading-relaxed">&quot;{journey?.verse || &quot;I can do all things through Christ who strengthens me.&quot;}&quot;</p>
+            <p className="text-sm font-serif italic text-foreground/80 leading-relaxed">"{journey?.verse || "I can do all things through Christ who strengthens me."}"</p>
           </div>
         </div>
 
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
           </div>
           <div className="px-5 py-4 bg-card">
             <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-              {journey?.reflection || &quot;Reflect on the strength that comes not from within, but from your faith in Christ. When facing challenges, remember that you are never walking alone.&quot;}
+              {journey?.reflection || "Reflect on the strength that comes not from within, but from your faith in Christ. When facing challenges, remember that you are never walking alone."}
             </p>
           </div>
         </div>
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl gradient-crimson flex items-center justify-center shadow-md text-lg">⚔️</div>
                 <div>
-                  <p className="font-bold text-sm text-foreground">{journey?.mission?.title || &quot;Act of Charity&quot;}</p>
+                  <p className="font-bold text-sm text-foreground">{journey?.mission?.title || "Act of Charity"}</p>
                   <p className="text-xs text-red-600 dark:text-red-400 font-semibold">+{journey?.mission?.xpReward || 50} Grace Points</p>
                 </div>
               </div>
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
           </div>
           <div className="px-5 py-4 bg-card">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {journey?.mission?.description || &quot;Reach out to a friend you haven't spoken to in a while and offer a prayer for them.&quot;}
+              {journey?.mission?.description || "Reach out to a friend you haven't spoken to in a while and offer a prayer for them."}
             </p>
           </div>
         </div>
@@ -182,7 +182,7 @@ export default async function DashboardPage() {
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Spiritual Progress</h2>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { emoji: &quot;📖&quot;, label: &quot;Chapters Read&quot;, value: "47", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/30" },
+              { emoji: "📖", label: "Chapters Read", value: "47", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/30" },
               { emoji: "🙏", label: "Prayers Said", value: "38", color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/30" },
               { emoji: "✝️", label: "Masses", value: "12", color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200/50 dark:border-purple-800/30" },
             ].map((s) => (
@@ -199,7 +199,7 @@ export default async function DashboardPage() {
         <div className="rounded-2xl p-4 gradient-lent card-holy">
           <p className="text-[10px] text-purple-200 font-bold uppercase tracking-widest">Saint of the Day</p>
           <p className="text-base font-bold text-white font-serif mt-1">St. Thomas the Apostle</p>
-          <p className="text-purple-200 text-xs mt-1 italic leading-relaxed">&quot;My Lord and my God!&quot; — John 20:28</p>
+          <p className="text-purple-200 text-xs mt-1 italic leading-relaxed">"My Lord and my God!" — John 20:28</p>
         </div>
       </div>
     </div>

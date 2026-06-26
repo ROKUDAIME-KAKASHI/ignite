@@ -51,7 +51,7 @@ export default function LeaderboardPage() {
             </div>
           </div>
           <p className="text-amber-50 text-sm mt-2 italic font-serif">
-            &quot;Let us run with endurance the race that is set before us.&quot; &mdash; Hebrews 12:1
+            "Let us run with endurance the race that is set before us." &mdash; Hebrews 12:1
           </p>
         </div>
       </div>

@@ -39,7 +39,7 @@ export function Navigation() {
         <div className="glass dark:glass-dark border-t border-amber-200/50 dark:border-amber-900/20 shadow-2xl">
           <ul className="flex justify-around items-center h-16 px-1">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || (item.href === &quot;/dashboard&quot; && pathname === "/dashboard");
+              const isActive = pathname === item.href || (item.href === "/dashboard" && pathname === "/dashboard");
               const Icon = item.icon;
               return (
                 <li key={item.name} className="flex-1 flex justify-center">
@@ -117,7 +117,7 @@ export function Navigation() {
           <div className="divider-cross mb-3" />
           <div className="rounded-xl p-3 bg-amber-50/80 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/20">
             <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Verse of the Day</p>
-            <p className="text-xs text-muted-foreground italic leading-relaxed font-serif">&quot;The Lord is my shepherd; I shall not want.&quot;</p>
+            <p className="text-xs text-muted-foreground italic leading-relaxed font-serif">"The Lord is my shepherd; I shall not want."</p>
             <p className="text-[10px] text-primary font-semibold mt-1.5">— Psalm 23:1</p>
           </div>
           <p className="text-center text-[10px] text-muted-foreground mt-3 tracking-widest uppercase font-medium">✝ Soli Deo Gloria ✝</p>

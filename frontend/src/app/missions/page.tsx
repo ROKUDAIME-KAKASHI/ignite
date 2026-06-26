@@ -79,8 +79,8 @@ const missions = [
 ];
 
 const typeLabel: Record<string, string> = {
-  daily: &quot;Daily&quot;,
-  weekly: &quot;Weekly&quot;,
+  daily: "Daily",
+  weekly: "Weekly",
   seasonal: "Seasonal",
 };
 
@@ -109,7 +109,7 @@ export default function MissionsPage() {
             </div>
           </div>
           <p className="text-red-100/80 text-sm italic font-serif mt-2">
-            &quot;Put on the full armor of God.&quot; — Ephesians 6:11
+            "Put on the full armor of God." — Ephesians 6:11
           </p>
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
@@ -132,8 +132,8 @@ export default function MissionsPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                &quot;flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200&quot;,
-                activeTab === tab ? &quot;bg-card text-primary shadow-sm&quot; : "text-muted-foreground hover:text-foreground"
+                "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+                activeTab === tab ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {tab}
@@ -193,21 +193,21 @@ export default function MissionsPage() {
                         <span className="text-muted-foreground">Journey Progress</span>
                         <span className="text-primary">{m.progress}%</span>
                       </div>
-                      <Progress value={m.progress} className="h-2 rounded-full bg-muted [&>div]:rounded-full [&>div]:bg-green-500&quot; />
+                      <Progress value={m.progress} className="h-2 rounded-full bg-muted [&>div]:rounded-full [&>div]:bg-green-500" />
                     </div>
                   )}
                   <Button
                     onClick={() => toggle(m.id)}
                     className={cn(
-                      &quot;w-full h-10 rounded-xl font-bold transition-all&quot;,
+                      "w-full h-10 rounded-xl font-bold transition-all",
                       done
-                        ? &quot;bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800&quot;
+                        ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
                         : `${m.gradient} text-white shadow-md`
                     )}
                     variant={done ? "outline" : "default"}
                   >
                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                    {done ? &quot;✓ Mission Complete — Deo Gratias!&quot; : &quot;Mark as Complete&quot;}
+                    {done ? "✓ Mission Complete — Deo Gratias!" : "Mark as Complete"}
                   </Button>
                 </div>
               </motion.div>

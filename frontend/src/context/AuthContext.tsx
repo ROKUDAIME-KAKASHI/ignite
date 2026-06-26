@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /** Update the Firebase display name and refresh local state */
   const updateDisplayName = useCallback(async (name: string) => {
-    if (!auth.currentUser) throw new Error(&quot;Not authenticated");
+    if (!auth.currentUser) throw new Error("Not authenticated");
     await updateProfile(auth.currentUser, { displayName: name.trim() });
     // Force re-render by cloning the user object
     setUser({ ...auth.currentUser } as User);

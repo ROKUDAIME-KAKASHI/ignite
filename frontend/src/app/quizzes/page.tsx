@@ -83,7 +83,7 @@ type Phase = "select" | "quiz" | "result";
 
 /* ─── Main Page ──────────────────────────────────────────────────────────── */
 export default function QuizzesPage() {
-  const [phase, setPhase] = useState<Phase>(&quot;select&quot;);
+  const [phase, setPhase] = useState<Phase>("select");
   const [activeSet, setActiveSet] = useState(quizSets[0]);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<(string | boolean | null)[]>([]);
@@ -103,7 +103,7 @@ export default function QuizzesPage() {
     setSelected(null);
     setRevealed(false);
     setScore(0);
-    setPhase(&quot;quiz&quot;);
+    setPhase("quiz");
   };
 
   /* Submit answer */
@@ -118,7 +118,7 @@ export default function QuizzesPage() {
   /* Next question */
   const nextQuestion = () => {
     if (currentQ + 1 >= totalQ) {
-      setPhase(&quot;result&quot;);
+      setPhase("result");
     } else {
       setCurrentQ((n) => n + 1);
       setSelected(null);
@@ -145,7 +145,7 @@ export default function QuizzesPage() {
             </div>
           </div>
           <p className="text-orange-100/80 text-sm mt-2 italic font-serif">
-            &quot;Study to show yourself approved unto God.&quot; — 2 Timothy 2:15
+            "Study to show yourself approved unto God." — 2 Timothy 2:15
           </p>
         </div>
       </div>
@@ -154,9 +154,9 @@ export default function QuizzesPage() {
         <AnimatePresence mode="wait">
 
           {/* ── SELECT ── */}
-          {phase === &quot;select&quot; && (
+          {phase === "select" && (
             <motion.div key="select" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-4">
-              <p className="text-xs text-muted-foreground italic font-serif">&quot;Knowledge of God is the beginning of wisdom.&quot; — Proverbs 9:10</p>
+              <p className="text-xs text-muted-foreground italic font-serif">"Knowledge of God is the beginning of wisdom." — Proverbs 9:10</p>
               {quizSets.map((set) => (
                 <div key={set.id} className="bg-card rounded-2xl border border-border/60 card-holy card-holy-hover overflow-hidden">
                   <div className="p-5 flex items-start gap-4">
@@ -183,7 +183,7 @@ export default function QuizzesPage() {
           )}
 
           {/* ── QUIZ ── */}
-          {phase === &quot;quiz&quot; && (
+          {phase === "quiz" && (
             <motion.div key={`quiz-${currentQ}`} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.3 }} className="space-y-4">
               {/* Progress */}
               <div className="space-y-1.5">
@@ -191,13 +191,13 @@ export default function QuizzesPage() {
                   <span>Question {currentQ + 1} of {totalQ}</span>
                   <span>{Math.round(progress)}%</span>
                 </div>
-                <Progress value={progress} className="h-2 rounded-full bg-muted [&>div]:gradient-spirit [&>div]:rounded-full&quot; />
+                <Progress value={progress} className="h-2 rounded-full bg-muted [&>div]:gradient-spirit [&>div]:rounded-full" />
               </div>
 
               {/* Question card */}
               <div className="bg-card rounded-2xl border border-border/60 card-holy p-5">
                 <Badge className={cn("mb-3 text-[10px] border-0 px-2", q.type === "mcq" ? "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300")}>
-                  {q.type === &quot;mcq&quot; ? &quot;Multiple Choice&quot; : &quot;True or False&quot;}
+                  {q.type === "mcq" ? "Multiple Choice" : "True or False"}
                 </Badge>
                 <p className="text-base font-bold text-foreground font-serif leading-snug">{q.question}</p>
                 {q.verse && <p className="text-xs text-primary font-semibold mt-1.5">See: {q.verse}</p>}
@@ -205,7 +205,7 @@ export default function QuizzesPage() {
 
               {/* Options */}
               <div className="space-y-2.5">
-                {(q.type === &quot;mcq&quot; ? q.options! : [&quot;True&quot;, &quot;False&quot;]).map((opt) => {
+                {(q.type === "mcq" ? q.options! : ["True", "False"]).map((opt) => {
                   const val = q.type === "truefalse" ? opt === "True" : opt;
                   const isSelected = selected === val;
                   const isCorrect  = q.answer === val;
@@ -219,9 +219,9 @@ export default function QuizzesPage() {
                       onClick={() => { if (!revealed) setSelected(val); }}
                       disabled={revealed}
                       className={cn(
-                        &quot;w-full text-left px-4 py-3.5 rounded-xl border-2 text-sm font-semibold transition-all duration-200 flex items-center justify-between&quot;,
-                        !revealed && isSelected ? &quot;border-primary bg-primary/8 text-primary&quot; :
-                        !revealed ? &quot;border-border/60 bg-card text-foreground hover:border-primary/50 hover:bg-primary/4&quot; :
+                        "w-full text-left px-4 py-3.5 rounded-xl border-2 text-sm font-semibold transition-all duration-200 flex items-center justify-between",
+                        !revealed && isSelected ? "border-primary bg-primary/8 text-primary" :
+                        !revealed ? "border-border/60 bg-card text-foreground hover:border-primary/50 hover:bg-primary/4" :
                         showCorrect ? "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300" :
                         showWrong   ? "border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400" :
                         "border-border/30 bg-muted/40 text-muted-foreground"
@@ -244,7 +244,7 @@ export default function QuizzesPage() {
                       ? "bg-green-50 dark:bg-green-900/15 border-green-200 dark:border-green-800"
                       : "bg-red-50 dark:bg-red-900/15 border-red-200 dark:border-red-800"
                   )}>
-                    <p className="text-sm font-bold mb-1">{selected === q.answer ? &quot;✅ Correct!&quot; : &quot;❌ Incorrect&quot;}</p>
+                    <p className="text-sm font-bold mb-1">{selected === q.answer ? "✅ Correct!" : "❌ Incorrect"}</p>
                     <p className="text-xs text-muted-foreground leading-relaxed font-serif italic">{q.explanation}</p>
                   </motion.div>
                 )}
@@ -257,26 +257,26 @@ export default function QuizzesPage() {
                 </Button>
               ) : (
                 <Button onClick={nextQuestion} className="w-full h-11 rounded-xl gradient-gold text-white font-bold shadow-md halo-glow">
-                  {currentQ + 1 >= totalQ ? &quot;See Results&quot; : &quot;Next Question →&quot;}
+                  {currentQ + 1 >= totalQ ? "See Results" : "Next Question →"}
                 </Button>
               )}
             </motion.div>
           )}
 
           {/* ── RESULT ── */}
-          {phase === &quot;result&quot; && (
+          {phase === "result" && (
             <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-5 text-center">
               <motion.div animate={{ rotateY: [0, 360] }} transition={{ duration: 1.5, ease: "easeOut" }}
                 className="w-20 h-20 rounded-3xl gradient-gold flex items-center justify-center mx-auto shadow-2xl halo-glow text-4xl">
-                {score === totalQ ? &quot;🏆&quot; : score >= totalQ / 2 ? &quot;⭐&quot; : &quot;🌿&quot;}
+                {score === totalQ ? "🏆" : score >= totalQ / 2 ? "⭐" : "🌿"}
               </motion.div>
               <div>
                 <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Quiz Complete</p>
                 <h2 className="text-3xl font-extrabold text-foreground font-serif">{score} / {totalQ} Correct</h2>
                 <p className="text-muted-foreground text-sm mt-1">
-                  {score === totalQ ? &quot;Perfect score! Deo Gratias! 🎉&quot; :
-                   score >= totalQ / 2 ? &quot;Great effort! Keep studying God's Word.&quot; :
-                   &quot;Keep going! Every reading builds wisdom.&quot;}
+                  {score === totalQ ? "Perfect score! Deo Gratias! 🎉" :
+                   score >= totalQ / 2 ? "Great effort! Keep studying God's Word." :
+                   "Keep going! Every reading builds wisdom."}
                 </p>
               </div>
               <div className="bg-card rounded-2xl border border-border/60 card-holy p-5 text-left space-y-2">
@@ -298,10 +298,10 @@ export default function QuizzesPage() {
                 <p className="text-3xl font-extrabold font-serif">+{Math.round((score / totalQ) * activeSet.xp)} XP</p>
               </div>
               <div className="flex gap-3">
-                <Button onClick={() => startQuiz(activeSet)} variant=&quot;outline&quot; className=&quot;flex-1 h-11 rounded-xl font-bold border-border/60&quot;>
+                <Button onClick={() => startQuiz(activeSet)} variant="outline" className="flex-1 h-11 rounded-xl font-bold border-border/60">
                   <RotateCcw className="w-4 h-4 mr-2" /> Retry
                 </Button>
-                <Button onClick={() => setPhase(&quot;select&quot;)} className=&quot;flex-1 h-11 rounded-xl gradient-royal text-white font-bold shadow-md&quot;>
+                <Button onClick={() => setPhase("select")} className="flex-1 h-11 rounded-xl gradient-royal text-white font-bold shadow-md">
                   More Quizzes <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>

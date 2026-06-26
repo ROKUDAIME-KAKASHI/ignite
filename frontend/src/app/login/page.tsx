@@ -21,11 +21,11 @@ function Cross({ className }: { className?: string }) {
 }
 
 export default function LoginPage() {
-  const [email, setEmail] = useState(&quot;&quot;);
-  const [password, setPassword] = useState(&quot;&quot;);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState(&quot;");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -86,19 +86,19 @@ export default function LoginPage() {
           <h1 className="text-3xl font-extrabold text-gradient-gold font-serif">Ignite</h1>
           <p className="text-muted-foreground text-sm mt-1 font-medium uppercase tracking-widest text-center">Youth Ministry Platform</p>
           <p className="text-xs text-muted-foreground italic font-serif mt-2 text-center px-4">
-            &quot;Come, follow me.&quot; — Matthew 4:19
+            "Come, follow me." — Matthew 4:19
           </p>
         </div>
 
         {/* ── Auth Card ── */}
         <div className="glass dark:glass-dark rounded-3xl p-7 border border-white/50 dark:border-white/10 shadow-2xl card-holy">
           <h2 className="text-xl font-bold text-foreground font-serif mb-1">
-            {isRegistering ? &quot;Begin Your Journey&quot; : &quot;Welcome Back&quot;}
+            {isRegistering ? "Begin Your Journey" : "Welcome Back"}
           </h2>
           <p className="text-muted-foreground text-sm mb-6 italic font-serif">
             {isRegistering
-              ? &quot;Join the community of faith.&quot;
-              : &quot;Continue your walk with Christ.&quot;}
+              ? "Join the community of faith."
+              : "Continue your walk with Christ."}
           </p>
 
           <form onSubmit={handleAuth} className="space-y-4">
@@ -112,8 +112,8 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder=&quot;you@example.com&quot;
-                  className=&quot;pl-10 h-11 rounded-xl border-border/60 bg-background/70&quot;
+                  placeholder="you@example.com"
+                  className="pl-10 h-11 rounded-xl border-border/60 bg-background/70"
                 />
               </div>
             </div>
@@ -128,13 +128,13 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder=&quot;••••••••&quot;
-                  className=&quot;pl-10 pr-10 h-11 rounded-xl border-border/60 bg-background/70&quot;
+                  placeholder="••••••••"
+                  className="pl-10 pr-10 h-11 rounded-xl border-border/60 bg-background/70"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className=&quot;absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors&quot;
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -162,10 +162,10 @@ export default function LoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  {isRegistering ? &quot;Creating account…&quot; : &quot;Signing in…&quot;}
+                  {isRegistering ? "Creating account…" : "Signing in…"}
                 </span>
               ) : (
-                isRegistering ? &quot;Create Account ✝&quot; : &quot;Sign In →&quot;
+                isRegistering ? "Create Account ✝" : "Sign In →"
               )}
             </Button>
           </form>
@@ -174,11 +174,11 @@ export default function LoginPage() {
 
           <div className="text-center">
             <button
-              onClick={() => { setIsRegistering(!isRegistering); setError(&quot;&quot;); }}
-              className=&quot;text-sm text-muted-foreground hover:text-primary font-medium transition-colors&quot;
+              onClick={() => { setIsRegistering(!isRegistering); setError(""); }}
+              className="text-sm text-muted-foreground hover:text-primary font-medium transition-colors"
             >
               {isRegistering
-                ? &quot;Already have an account? Sign in"
+                ? "Already have an account? Sign in"
                 : "New to Ignite? Join the community →"}
             </button>
           </div>

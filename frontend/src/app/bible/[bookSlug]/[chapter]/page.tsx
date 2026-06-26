@@ -52,14 +52,14 @@ export default function BibleReaderPage() {
   const chapter = Number(params.chapter);
   const book = getBookBySlug(bookSlug);
 
-  const [translation, setTranslation] = useState<Translation>(&quot;kjv&quot;);
+  const [translation, setTranslation] = useState<Translation>("kjv");
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(&quot;&quot;);
+  const [error, setError] = useState("");
   const [highlighted, setHighlighted] = useState<number | null>(null);
   const [bookmarks, setBookmarks] = useState<Set<number>>(new Set());
   const [showTranslationPicker, setShowTranslationPicker] = useState(false);
-  const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">(&quot;base&quot;);
+  const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
 
   // Load bookmarks from localStorage
   useEffect(() => {
@@ -75,13 +75,13 @@ export default function BibleReaderPage() {
   const load = useCallback(async () => {
     if (!book) return;
     setLoading(true);
-    setError(&quot;&quot;);
+    setError("");
     setVerses([]);
     try {
       const data = await fetchChapter(book.apiName, chapter, translation);
       setVerses(data.verses);
     } catch {
-      setError(&quot;Could not load scripture. Please check your connection and try again.&quot;);
+      setError("Could not load scripture. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -120,9 +120,9 @@ export default function BibleReaderPage() {
   };
 
   const fontSizeClass = {
-    sm: &quot;text-sm leading-7&quot;,
-    base: &quot;text-[15px] leading-8&quot;,
-    lg: &quot;text-base leading-9&quot;,
+    sm: "text-sm leading-7",
+    base: "text-[15px] leading-8",
+    lg: "text-base leading-9",
     xl: "text-lg leading-10",
   }[fontSize];
 
@@ -147,7 +147,7 @@ export default function BibleReaderPage() {
           <div className="relative">
             <button
               onClick={() => setShowTranslationPicker(!showTranslationPicker)}
-              className=&quot;flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors&quot;
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
             >
               <span className="text-xs font-bold text-primary uppercase">{translation}</span>
               <Settings2 className="w-3.5 h-3.5 text-primary" />
@@ -165,8 +165,8 @@ export default function BibleReaderPage() {
                       key={t.id}
                       onClick={() => { setTranslation(t.id); setShowTranslationPicker(false); }}
                       className={cn(
-                        &quot;w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors&quot;,
-                        translation === t.id ? &quot;bg-primary/15 text-primary&quot; : &quot;hover:bg-muted text-foreground&quot;
+                        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        translation === t.id ? "bg-primary/15 text-primary" : "hover:bg-muted text-foreground"
                       )}
                     >
                       <span className="font-bold">{t.name}</span>
@@ -181,13 +181,13 @@ export default function BibleReaderPage() {
 
         {/* Font size controls */}
         <div className="flex items-center justify-center gap-1 pb-2 px-4">
-          {([&quot;sm&quot;, &quot;base&quot;, &quot;lg&quot;, "xl"] as const).map((s, i) => (
+          {(["sm", "base", "lg", "xl"] as const).map((s, i) => (
             <button
               key={s}
               onClick={() => setFontSize(s)}
               className={cn(
-                &quot;flex items-center justify-center w-8 h-7 rounded-lg text-xs font-bold transition-all&quot;,
-                fontSize === s ? &quot;gradient-gold text-white shadow-sm&quot; : &quot;text-muted-foreground hover:bg-muted&quot;
+                "flex items-center justify-center w-8 h-7 rounded-lg text-xs font-bold transition-all",
+                fontSize === s ? "gradient-gold text-white shadow-sm" : "text-muted-foreground hover:bg-muted"
               )}
               style={{ fontSize: `${10 + i * 2}px` }}
             >
@@ -197,7 +197,7 @@ export default function BibleReaderPage() {
           <div className="w-px h-4 bg-border mx-1" />
           <button
             onClick={() => { if (navigator.share) navigator.share({ title: `${book.name} ${chapter}`, url: window.location.href }); }}
-            className=&quot;w-8 h-7 rounded-lg flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors&quot;
+            className="w-8 h-7 rounded-lg flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors"
           >
             <Share2 className="w-3.5 h-3.5" />
           </button>
@@ -227,7 +227,7 @@ export default function BibleReaderPage() {
           >
             {/* Chapter heading */}
             <div className="text-center mb-8">
-              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">{book.testament === &quot;OT&quot; ? &quot;Old Testament&quot; : &quot;New Testament&quot;} · {book.category}</p>
+              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">{book.testament === "OT" ? "Old Testament" : "New Testament"} · {book.category}</p>
               <h1 className="font-serif text-3xl font-bold text-foreground">{book.name}</h1>
               <p className="text-muted-foreground text-sm mt-1">Chapter {chapter}</p>
               <div className="divider-cross mt-4" />
@@ -244,10 +244,10 @@ export default function BibleReaderPage() {
                     layout
                     onClick={() => handleVersePress(v.verse)}
                     className={cn(
-                      &quot;group relative px-3 py-2 rounded-xl cursor-pointer transition-all duration-200&quot;,
+                      "group relative px-3 py-2 rounded-xl cursor-pointer transition-all duration-200",
                       isHighlighted
-                        ? &quot;bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40&quot;
-                        : &quot;hover:bg-muted/60&quot;
+                        ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40"
+                        : "hover:bg-muted/60"
                     )}
                   >
                     {/* Verse number */}
@@ -277,10 +277,10 @@ export default function BibleReaderPage() {
                           <button
                             onClick={(e) => { e.stopPropagation(); handleBookmark(v.verse); }}
                             className={cn(
-                              &quot;flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all&quot;,
+                              "flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all",
                               isBookmarkedVerse
-                                ? &quot;bg-primary/15 text-primary&quot;
-                                : &quot;bg-muted text-muted-foreground hover:text-primary&quot;
+                                ? "bg-primary/15 text-primary"
+                                : "bg-muted text-muted-foreground hover:text-primary"
                             )}
                           >
                             {isBookmarkedVerse
@@ -292,11 +292,11 @@ export default function BibleReaderPage() {
                             onClick={(e) => {
                               e.stopPropagation();
                               const ref = `${book.name} ${chapter}:${v.verse} (${translation.toUpperCase()})`;
-                              const text = `&quot;${v.text.trim()}&quot; — ${ref}`;
+                              const text = `"${v.text.trim()}" — ${ref}`;
                               if (navigator.share) navigator.share({ text });
                               else navigator.clipboard?.writeText(text);
                             }}
-                            className=&quot;flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-all&quot;
+                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-all"
                           >
                             <Share2 className="w-3.5 h-3.5" /> Share
                           </button>

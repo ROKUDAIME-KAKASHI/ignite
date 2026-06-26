@@ -31,26 +31,26 @@ function NameEditor({ currentName, onSave }: { currentName: string; onSave: (n: 
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(currentName);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(&quot;&quot;);
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const handleSave = async () => {
     if (!value.trim() || value.trim() === currentName) { setEditing(false); return; }
     setSaving(true);
-    setError(&quot;&quot;);
+    setError("");
     try {
       await onSave(value.trim());
       setSuccess(true);
       setEditing(false);
       setTimeout(() => setSuccess(false), 2000);
     } catch {
-      setError(&quot;Could not update name. Try again.&quot;);
+      setError("Could not update name. Try again.");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleCancel = () => { setValue(currentName); setEditing(false); setError(&quot;"); };
+  const handleCancel = () => { setValue(currentName); setEditing(false); setError(""); };
 
   if (!editing) {
     return (
@@ -65,8 +65,8 @@ function NameEditor({ currentName, onSave }: { currentName: string; onSave: (n: 
         ) : (
           <button
             onClick={() => setEditing(true)}
-            className=&quot;w-7 h-7 rounded-lg bg-white/20 hover:bg-white/35 flex items-center justify-center transition-colors border border-white/20&quot;
-            title=&quot;Edit name&quot;
+            className="w-7 h-7 rounded-lg bg-white/20 hover:bg-white/35 flex items-center justify-center transition-colors border border-white/20"
+            title="Edit name"
           >
             <Edit3 className="w-3.5 h-3.5 text-white" />
           </button>
@@ -85,11 +85,11 @@ function NameEditor({ currentName, onSave }: { currentName: string; onSave: (n: 
         <Input
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => { if (e.key === &quot;Enter&quot;) handleSave(); if (e.key === &quot;Escape&quot;) handleCancel(); }}
+          onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
           maxLength={40}
           autoFocus
-          className=&quot;flex-1 h-9 rounded-xl border-white/30 bg-white/15 text-white placeholder:text-white/40 text-sm font-semibold text-center focus:border-amber-300/60 focus:ring-amber-300/30&quot;
-          placeholder=&quot;Enter your name…"
+          className="flex-1 h-9 rounded-xl border-white/30 bg-white/15 text-white placeholder:text-white/40 text-sm font-semibold text-center focus:border-amber-300/60 focus:ring-amber-300/30"
+          placeholder="Enter your name…"
         />
         <button
           onClick={handleSave}
@@ -117,10 +117,10 @@ export default function ProfilePage() {
   const [loggingOut, setLoggingOut] = useState(false);
 
   const initials = user?.displayName
-    ? user.displayName.split(&quot; &quot;).map((n) => n[0]).join(&quot;&quot;).slice(0, 2).toUpperCase()
-    : user?.email?.charAt(0).toUpperCase() ?? &quot;A&quot;;
+    ? user.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : user?.email?.charAt(0).toUpperCase() ?? "A";
 
-  const displayName = user?.displayName || user?.email?.split(&quot;@")[0] || "Beloved";
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "Beloved";
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -182,7 +182,7 @@ export default function ProfilePage() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground">50 until <span className="text-primary font-bold">Apostle</span></p>
           </div>
-          <Progress value={98} className="h-2 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full&quot; />
+          <Progress value={98} className="h-2 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full" />
         </motion.div>
       </div>
 
@@ -190,8 +190,8 @@ export default function ProfilePage() {
       <div className="px-4 mb-5">
         <div className="grid grid-cols-4 gap-2">
           {[
-            { emoji: &quot;⚡&quot;, value: &quot;2,450&quot;, label: &quot;Grace Pts&quot; },
-            { emoji: &quot;🕯️", value: "12",    label: "Day Streak" },
+            { emoji: "⚡", value: "2,450", label: "Grace Pts" },
+            { emoji: "🕯️", value: "12",    label: "Day Streak" },
             { emoji: "🏅", value: "14",    label: "Badges" },
             { emoji: "📖", value: "47",    label: "Chapters" },
           ].map((s, i) => (
@@ -219,7 +219,7 @@ export default function ProfilePage() {
                 <span className="candle-flicker text-xl">🕯️</span>
                 12 Day Streak
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5 italic font-serif">&quot;Persevere in prayer.&quot; — Romans 12:12</p>
+              <p className="text-xs text-muted-foreground mt-0.5 italic font-serif">"Persevere in prayer." — Romans 12:12</p>
             </div>
           </div>
           <div className="flex justify-between gap-1">
@@ -229,7 +229,7 @@ export default function ProfilePage() {
                   "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
                   streakDone[i] ? "gradient-gold text-white shadow-sm" : "bg-muted text-muted-foreground"
                 )}>
-                  {streakDone[i] ? &quot;✓&quot; : d}
+                  {streakDone[i] ? "✓" : d}
                 </div>
                 <span className="text-[9px] text-muted-foreground">{d}</span>
               </div>
@@ -267,7 +267,7 @@ export default function ProfilePage() {
       <div className="px-4 mb-5">
         <div className="rounded-2xl p-4 gradient-lent card-holy">
           <p className="text-[10px] text-purple-200 font-bold uppercase tracking-widest">Quote of the Day</p>
-          <p className="text-sm font-serif italic text-white mt-2 leading-relaxed">&quot;{saintQuote.quote}&quot;</p>
+          <p className="text-sm font-serif italic text-white mt-2 leading-relaxed">"{saintQuote.quote}"</p>
           <p className="text-purple-300 text-xs font-semibold mt-2">— {saintQuote.author}</p>
         </div>
       </div>
@@ -280,7 +280,7 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between px-4 py-3">
             <div>
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Email</p>
-              <p className="text-sm font-medium text-foreground mt-0.5">{user?.email || &quot;—&quot;}</p>
+              <p className="text-sm font-medium text-foreground mt-0.5">{user?.email || "—"}</p>
             </div>
             <Badge className="text-[10px] bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">Verified</Badge>
           </div>
@@ -289,8 +289,8 @@ export default function ProfilePage() {
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Member Since</p>
             <p className="text-sm font-medium text-foreground mt-0.5">
               {user?.metadata?.creationTime
-                ? new Date(user.metadata.creationTime).toLocaleDateString(&quot;en-US&quot;, { month: &quot;long&quot;, year: &quot;numeric&quot; })
-                : &quot;—"}
+                ? new Date(user.metadata.creationTime).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+                : "—"}
             </p>
           </div>
           {/* Last sign-in */}
@@ -298,7 +298,7 @@ export default function ProfilePage() {
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Last Sign In</p>
             <p className="text-sm font-medium text-foreground mt-0.5">
               {user?.metadata?.lastSignInTime
-                ? new Date(user.metadata.lastSignInTime).toLocaleDateString(&quot;en-US&quot;, { weekday: &quot;long&quot;, month: &quot;long&quot;, day: &quot;numeric" })
+                ? new Date(user.metadata.lastSignInTime).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
                 : "—"}
             </p>
           </div>

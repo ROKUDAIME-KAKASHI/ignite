@@ -17,7 +17,7 @@ export function HeroNav() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const unsub = scrollY.on(&quot;change", (v) => setScrolled(v > 60));
+    const unsub = scrollY.on("change", (v) => setScrolled(v > 60));
     return unsub;
   }, [scrollY]);
 

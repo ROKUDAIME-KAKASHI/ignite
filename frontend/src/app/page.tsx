@@ -23,9 +23,9 @@ function Cross({ className = "" }: { className?: string }) {
   );
 }
 
-function FadeUp({ children, delay = 0, className = &quot;&quot; }: { children: React.ReactNode; delay?: number; className?: string }) {
+function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: &quot;-80px&quot; });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
   return (
     <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }} className={className}>
@@ -34,7 +34,7 @@ function FadeUp({ children, delay = 0, className = &quot;&quot; }: { children: R
   );
 }
 
-function Counter({ to, suffix = &quot;&quot; }: { to: number; suffix?: string }) {
+function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
   const [count, setCount] = useState(0);
@@ -51,7 +51,7 @@ function Counter({ to, suffix = &quot;&quot; }: { to: number; suffix?: string })
 /* ─────────────────────────────────────────────────────────────────────────────
    3D TILT CARD — mouse tracking per-card
 ───────────────────────────────────────────────────────────────────────────── */
-function TiltCard({ children, className = &quot;&quot;, intensity = 10 }: {
+function TiltCard({ children, className = "", intensity = 10 }: {
   children: React.ReactNode; className?: string; intensity?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -96,8 +96,8 @@ function TiltCard({ children, className = &quot;&quot;, intensity = 10 }: {
 ───────────────────────────────────────────────────────────────────────────── */
 function FloatingParticles() {
   const particles = [
-    { x: &quot;10%&quot;,  y: &quot;15%&quot;, size: 12, delay: 0,   duration: 6,  opacity: 0.12 },
-    { x: &quot;85%&quot;,  y: &quot;20%&quot;, size: 20, delay: 1.2, duration: 8,  opacity: 0.08 },
+    { x: "10%",  y: "15%", size: 12, delay: 0,   duration: 6,  opacity: 0.12 },
+    { x: "85%",  y: "20%", size: 20, delay: 1.2, duration: 8,  opacity: 0.08 },
     { x: "20%",  y: "70%", size: 8,  delay: 0.4, duration: 7,  opacity: 0.10 },
     { x: "75%",  y: "65%", size: 16, delay: 2,   duration: 9,  opacity: 0.07 },
     { x: "50%",  y: "85%", size: 10, delay: 0.8, duration: 6.5,opacity: 0.09 },
@@ -132,7 +132,7 @@ function FloatingParticles() {
    3D FEATURE CARDS (floating)
 ───────────────────────────────────────────────────────────────────────────── */
 const featureCards = [
-  { icon: &quot;📖&quot;, title: &quot;Sacred Scripture&quot;, sub: &quot;All 66 Books&quot;, gradient: &quot;gradient-royal&quot;,   delay: 0    },
+  { icon: "📖", title: "Sacred Scripture", sub: "All 66 Books", gradient: "gradient-royal",   delay: 0    },
   { icon: "⚔️", title: "Daily Missions",   sub: "Works of Mercy", gradient: "gradient-crimson", delay: 0.1  },
   { icon: "🕊️", title: "Parish Events",   sub: "Gather & Pray",  gradient: "gradient-life",    delay: 0.2  },
   { icon: "🕯️", title: "Prayer Reminders",sub: "Never Forget",   gradient: "gradient-spirit",  delay: 0.3  },
@@ -157,10 +157,10 @@ const testimonials = [
 ───────────────────────────────────────────────────────────────────────────── */
 export default function HeroPage() {
   const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: [&quot;start start&quot;, &quot;end start&quot;] });
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
 
   // Parallax layers
-  const layer1Y  = useTransform(scrollYProgress, [0, 1], [&quot;0%&quot;,   &quot;30%&quot;]);
+  const layer1Y  = useTransform(scrollYProgress, [0, 1], ["0%",   "30%"]);
   const layer2Y  = useTransform(scrollYProgress, [0, 1], ["0%",   "15%"]);
   const layer3Y  = useTransform(scrollYProgress, [0, 1], ["0%",   "8%"]);
   const heroFade = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
@@ -268,7 +268,7 @@ export default function HeroPage() {
             className="text-5xl md:text-7xl font-extrabold text-white font-serif leading-[1.07] mb-6"
             style={{ transform: "translateZ(20px)", textShadow: "0 4px 40px rgba(0,0,0,0.4)" }}
           >
-            In a world that{&quot; &quot;}
+            In a world that{" "}
             <motion.span
               className="inline-block"
               animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
@@ -283,7 +283,7 @@ export default function HeroPage() {
             >
               never stops
             </motion.span>
-            ,<br />your faith{&quot; &quot;}
+            ,<br />your faith{" "}
             <motion.span
               className="inline-block"
               animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
@@ -316,7 +316,7 @@ export default function HeroPage() {
             transition={{ delay: 0.6 }}
             className="text-amber-300/80 text-sm italic font-serif mb-10"
           >
-            &quot;Come, follow me.&quot; — Matthew 4:19
+            "Come, follow me." — Matthew 4:19
           </motion.p>
 
           {/* CTAs */}
@@ -358,8 +358,8 @@ export default function HeroPage() {
             className="flex justify-center gap-8 mt-14 flex-wrap"
           >
             {[
-              { value: &quot;2,400+&quot;, label: &quot;Youth Members&quot; },
-              { value: &quot;66&quot;,     label: &quot;Books of Bible&quot; },
+              { value: "2,400+", label: "Youth Members" },
+              { value: "66",     label: "Books of Bible" },
               { value: "∞",      label: "God's Grace" },
             ].map((s) => (
               <div key={s.label} className="text-center">
@@ -480,21 +480,21 @@ export default function HeroPage() {
             <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-4">The Challenge We Face</p>
             <h2 className="text-4xl md:text-5xl font-extrabold font-serif text-foreground leading-tight mb-6">
               Notifications pull us<br />
-              everywhere —{&quot; &quot;}
+              everywhere —{" "}
               <span style={{ background: "linear-gradient(135deg,#b7791f,#d4a017,#f6c90e)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 except toward God.
               </span>
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
               The average young person checks their phone <strong className="text-foreground">96 times a day</strong> — yet finds no time for a moment of prayer.
-              Social media, streaming, endless noise — all fighting for attention, none pointing toward the eternal.{&quot; &quot;}
+              Social media, streaming, endless noise — all fighting for attention, none pointing toward the eternal.{" "}
               <strong className="text-foreground">Ignite changes that.</strong>
             </p>
           </FadeUp>
 
           <div className="grid grid-cols-3 gap-5 mt-14">
             {[
-              { icon: &quot;📱&quot;, stat: &quot;96×&quot;,   label: &quot;Phone checks per day&quot;,       color: &quot;border-red-200/60 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10&quot; },
+              { icon: "📱", stat: "96×",   label: "Phone checks per day",       color: "border-red-200/60 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10" },
               { icon: "🙏", stat: "3 min", label: "Avg daily prayer for youth", color: "border-amber-200/60 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-900/10" },
               { icon: "✝️", stat: "5 min", label: "All it takes to transform",  color: "border-green-200/60 dark:border-green-900/30 bg-green-50/50 dark:bg-green-900/10" },
             ].map((s, i) => (
@@ -520,7 +520,7 @@ export default function HeroPage() {
           <FadeUp className="text-center mb-16">
             <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-3">Everything You Need</p>
             <h2 className="text-4xl md:text-5xl font-extrabold font-serif text-foreground leading-tight mb-4">
-              Your complete{&quot; &quot;}
+              Your complete{" "}
               <span style={{ background: "linear-gradient(135deg,#b7791f,#f6c90e)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 spiritual companion.
               </span>
@@ -575,8 +575,8 @@ export default function HeroPage() {
           </FadeUp>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {[
-              { to: 2400,  suffix: &quot;+&quot;, label: &quot;Youth Members&quot;,        emoji: &quot;👥&quot; },
-              { to: 66,    suffix: &quot;&quot;,  label: "Books of the Bible",   emoji: "📖" },
+              { to: 2400,  suffix: "+", label: "Youth Members",        emoji: "👥" },
+              { to: 66,    suffix: "",  label: "Books of the Bible",   emoji: "📖" },
               { to: 14700, suffix: "+", label: "Prayers Offered",      emoji: "🙏" },
               { to: 48000, suffix: "+", label: "Scripture Verses Read", emoji: "✝️" },
             ].map((s, i) => (
@@ -640,7 +640,7 @@ export default function HeroPage() {
           <FadeUp className="text-center mb-14">
             <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-3">Voices of the Community</p>
             <h2 className="text-4xl font-extrabold font-serif text-foreground">
-              Real youth.{&quot; &quot;}
+              Real youth.{" "}
               <span style={{ background: "linear-gradient(135deg,#b7791f,#f6c90e)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 Real transformation.
               </span>
@@ -664,7 +664,7 @@ export default function HeroPage() {
                         <p className="text-xs text-muted-foreground">{t.role} · Age {t.age}</p>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground italic leading-relaxed font-serif flex-1">&quot;{t.quote}&quot;</p>
+                    <p className="text-sm text-muted-foreground italic leading-relaxed font-serif flex-1">"{t.quote}"</p>
                     <div className="mt-4 flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 rounded-xl px-3 py-2 border border-amber-200/50 dark:border-amber-800/30">
                       <span className="candle-flicker text-sm">🕯️</span>
                       <span className="text-xs font-bold text-primary">{t.streak} day streak</span>
@@ -703,7 +703,7 @@ export default function HeroPage() {
           </h2>
           <p className="text-white/70 text-lg mb-3">Join thousands of Jacobite Orthodox youth who are reclaiming five minutes a day for God.</p>
           <p className="text-amber-300/80 italic font-serif text-sm mb-10">
-            &quot;I am the way, the truth, and the life.&quot; — John 14:6
+            "I am the way, the truth, and the life." — John 14:6
           </p>
           <Link
             href="/login"

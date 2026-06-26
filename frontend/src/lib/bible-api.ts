@@ -36,7 +36,7 @@ export async function fetchChapter(
 
 /**
  * Fetch a single verse
- * e.g. fetchVerse(&quot;john", 3, 16, "kjv")
+ * e.g. fetchVerse("john", 3, 16, "kjv")
  */
 export async function fetchVerse(
   apiName: string,

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 // Per-route animation styles
 const routeVariants: Record<string, { initial: object; animate: object }> = {
-  &quot;/":         { initial: { opacity: 0 },           animate: { opacity: 1 } },
+  "/":         { initial: { opacity: 0 },           animate: { opacity: 1 } },
   "/login":    { initial: { opacity: 0, scale: 0.98 }, animate: { opacity: 1, scale: 1 } },
   "/dashboard":{ initial: { opacity: 0, y: 12 },    animate: { opacity: 1, y: 0 } },
   "/bible":    { initial: { opacity: 0, x: -16 },   animate: { opacity: 1, x: 0 } },

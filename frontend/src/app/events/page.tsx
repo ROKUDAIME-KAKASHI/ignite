@@ -83,8 +83,8 @@ const events = [
 ];
 
 const categoryColors: Record<string, string> = {
-  Adoration: &quot;bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300&quot;,
-  Charity: &quot;bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300&quot;,
+  Adoration: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+  Charity: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
   Scripture: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   Retreat: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   Prayer: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
@@ -98,8 +98,8 @@ export default function EventsPage() {
     setRegistered((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
   const shown =
-    activeTab === &quot;Registered&quot; ? events.filter((e) => registered.includes(e.id))
-    : activeTab === &quot;Past&quot; ? []
+    activeTab === "Registered" ? events.filter((e) => registered.includes(e.id))
+    : activeTab === "Past" ? []
     : events;
 
   return (
@@ -119,7 +119,7 @@ export default function EventsPage() {
             </div>
           </div>
           <p className="text-green-100/80 text-sm italic font-serif mt-2">
-            &quot;Where two or three gather in my name, I am with them.&quot; — Matthew 18:20
+            "Where two or three gather in my name, I am with them." — Matthew 18:20
           </p>
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
@@ -142,8 +142,8 @@ export default function EventsPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                &quot;flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200&quot;,
-                activeTab === tab ? &quot;bg-card text-primary shadow-sm&quot; : "text-muted-foreground hover:text-foreground"
+                "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+                activeTab === tab ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {tab}
@@ -155,7 +155,7 @@ export default function EventsPage() {
           <div className="text-center py-14 text-muted-foreground">
             <p className="text-4xl mb-3">🕊️</p>
             <p className="font-serif font-semibold text-lg">No events here</p>
-            <p className="text-sm italic mt-1">&quot;Be still and know that I am God.&quot; — Ps 46:10</p>
+            <p className="text-sm italic mt-1">"Be still and know that I am God." — Ps 46:10</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -200,9 +200,9 @@ export default function EventsPage() {
                       <Button
                         onClick={() => toggleReg(event.id)}
                         className={cn(
-                          &quot;flex-1 h-9 rounded-xl font-bold text-sm transition-all&quot;,
+                          "flex-1 h-9 rounded-xl font-bold text-sm transition-all",
                           isReg
-                            ? &quot;bg-muted text-muted-foreground border border-border&quot;
+                            ? "bg-muted text-muted-foreground border border-border"
                             : `${event.gradient} text-white shadow-md`
                         )}
                         variant={isReg ? "outline" : "default"}

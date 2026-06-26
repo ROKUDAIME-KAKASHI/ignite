@@ -33,9 +33,9 @@ const INITIAL_REQUESTS: PrayerRequest[] = [
 const CATEGORIES = ["All", "Healing", "Strength", "Thanksgiving", "Comfort", "Family", "Community"];
 
 const categoryColor: Record<string, string> = {
-  Healing:      &quot;bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300&quot;,
-  Strength:     &quot;bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300&quot;,
-  Thanksgiving: &quot;bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300&quot;,
+  Healing:      "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  Strength:     "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+  Thanksgiving: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
   Comfort:      "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   Family:       "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   Community:    "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",
@@ -80,7 +80,7 @@ function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: number) 
         </div>
 
         {/* Request text */}
-        <p className="text-sm text-foreground/85 leading-relaxed font-serif italic">&quot;{req.text}&quot;</p>
+        <p className="text-sm text-foreground/85 leading-relaxed font-serif italic">"{req.text}"</p>
       </div>
 
       {/* Pray button */}
@@ -102,7 +102,7 @@ function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: number) 
           <motion.span animate={animating ? { scale: [1, 1.5, 1] } : {}}>
             🙏
           </motion.span>
-          {req.prayed ? &quot;Prayed ✓&quot; : &quot;Pray for this&quot;}
+          {req.prayed ? "Prayed ✓" : "Pray for this"}
         </motion.button>
       </div>
     </motion.div>
@@ -112,10 +112,10 @@ function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: number) 
 /* ─── Main Page ── */
 export default function PrayerWallPage() {
   const [requests, setRequests] = useState<PrayerRequest[]>(INITIAL_REQUESTS);
-  const [activeCategory, setActiveCategory] = useState(&quot;All&quot;);
-  const [text, setText] = useState(&quot;&quot;);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [text, setText] = useState("");
   const [anonymous, setAnonymous] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(&quot;Healing&quot;);
+  const [selectedCategory, setSelectedCategory] = useState("Healing");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -166,7 +166,7 @@ export default function PrayerWallPage() {
             </div>
           </div>
           <p className="text-purple-100/80 text-sm mt-2 italic font-serif">
-            &quot;Pray for one another, that you may be healed.&quot; — James 5:16
+            "Pray for one another, that you may be healed." — James 5:16
           </p>
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
@@ -187,16 +187,16 @@ export default function PrayerWallPage() {
         <div className="rounded-2xl bg-card border border-border/60 card-holy overflow-hidden">
           <div className="px-4 pt-4 pb-3 border-b border-border/40 bg-gradient-to-r from-purple-600/8 to-violet-500/6 dark:from-purple-600/15 dark:to-violet-500/12">
             <p className="font-bold text-foreground font-serif text-sm">Submit a Prayer Request</p>
-            <p className="text-xs text-muted-foreground mt-0.5">&quot;Cast your burden on the Lord and He will sustain you.&quot; — Psalm 55:22</p>
+            <p className="text-xs text-muted-foreground mt-0.5">"Cast your burden on the Lord and He will sustain you." — Psalm 55:22</p>
           </div>
           <div className="px-4 py-3 space-y-3">
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder=&quot;Share your prayer request…&quot;
+              placeholder="Share your prayer request…"
               maxLength={300}
               rows={3}
-              className=&quot;rounded-xl resize-none text-sm border-border/60 bg-background/50 font-serif&quot;
+              className="rounded-xl resize-none text-sm border-border/60 bg-background/50 font-serif"
             />
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2 flex-wrap">
@@ -204,9 +204,9 @@ export default function PrayerWallPage() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className=&quot;text-xs font-semibold px-3 py-1.5 rounded-lg border border-border/60 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20&quot;
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border/60 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
-                  {CATEGORIES.filter(c => c !== &quot;All&quot;).map(c => (
+                  {CATEGORIES.filter(c => c !== "All").map(c => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
@@ -214,14 +214,14 @@ export default function PrayerWallPage() {
                 <button
                   onClick={() => setAnonymous(!anonymous)}
                   className={cn(
-                    &quot;flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all&quot;,
+                    "flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all",
                     anonymous
-                      ? &quot;bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800&quot;
-                      : &quot;border-border/60 text-muted-foreground hover:text-foreground&quot;
+                      ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                      : "border-border/60 text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <Lock className="w-3 h-3" />
-                  {anonymous ? &quot;Anonymous ✓&quot; : &quot;Anonymous&quot;}
+                  {anonymous ? "Anonymous ✓" : "Anonymous"}
                 </button>
               </div>
               <Button
@@ -229,7 +229,7 @@ export default function PrayerWallPage() {
                 disabled={!text.trim() || submitting}
                 className="gradient-lent text-white font-bold rounded-xl h-9 px-5 text-sm shadow-md hover:opacity-90 disabled:opacity-50"
               >
-                {submitting ? &quot;Submitting…&quot; : <><Send className="w-3.5 h-3.5 mr-1.5" />Submit</>}
+                {submitting ? "Submitting…" : <><Send className="w-3.5 h-3.5 mr-1.5" />Submit</>}
               </Button>
             </div>
             <AnimatePresence>
@@ -254,10 +254,10 @@ export default function PrayerWallPage() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                &quot;shrink-0 text-xs font-bold px-4 py-2 rounded-full transition-all whitespace-nowrap border&quot;,
+                "shrink-0 text-xs font-bold px-4 py-2 rounded-full transition-all whitespace-nowrap border",
                 activeCategory === cat
-                  ? &quot;gradient-lent text-white border-transparent shadow-md&quot;
-                  : &quot;border-border/60 text-muted-foreground hover:text-foreground bg-card&quot;
+                  ? "gradient-lent text-white border-transparent shadow-md"
+                  : "border-border/60 text-muted-foreground hover:text-foreground bg-card"
               )}
             >
               {cat}
@@ -276,7 +276,7 @@ export default function PrayerWallPage() {
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-3xl mb-2">🕊️</p>
               <p className="font-serif font-semibold">No requests in this category</p>
-              <p className="text-sm italic mt-1">&quot;Be still before the Lord.&quot; — Psalm 37:7</p>
+              <p className="text-sm italic mt-1">"Be still before the Lord." — Psalm 37:7</p>
             </div>
           )}
         </div>
