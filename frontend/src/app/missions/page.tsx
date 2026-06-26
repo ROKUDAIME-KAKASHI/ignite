@@ -84,12 +84,20 @@ const typeLabel: Record<string, string> = {
   seasonal: "Seasonal",
 };
 
+import { completeMission } from "./actions";
+
 export default function MissionsPage() {
   const [activeTab, setActiveTab] = useState("Active");
   const [completed, setCompleted] = useState<number[]>([]);
+  const [loading, setLoading] = useState<Record<number, boolean>>({});
 
-  const toggle = (id: number) =>
-    setCompleted((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const toggle = async (id: number, xpReward: number, title: string) => {
+    if (completed.includes(id)) return; // Don't allow un-completing for now since it gives XP
+    setLoading(prev => ({ ...prev, [id]: true }));
+    await completeMission(id, xpReward, title);
+    setCompleted((p) => [...p, id]);
+    setLoading(prev => ({ ...prev, [id]: false }));
+  };
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -197,7 +205,8 @@ export default function MissionsPage() {
                     </div>
                   )}
                   <Button
-                    onClick={() => toggle(m.id)}
+                    onClick={() => toggle(m.id, m.xp, m.title)}
+                    disabled={loading[m.id] || done}
                     className={cn(
                       "w-full h-10 rounded-xl font-bold transition-all",
                       done
@@ -207,7 +216,7 @@ export default function MissionsPage() {
                     variant={done ? "outline" : "default"}
                   >
                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                    {done ? "✓ Mission Complete — Deo Gratias!" : "Mark as Complete"}
+                    {loading[m.id] ? "Completing..." : done ? "✓ Mission Complete — Deo Gratias!" : "Mark as Complete"}
                   </Button>
                 </div>
               </motion.div>

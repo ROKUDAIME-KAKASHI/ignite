@@ -9,7 +9,26 @@ import { cn } from "@/lib/utils";
 
 const tabs = ["Upcoming", "Registered", "Past"];
 
-const events = [
+import { getEvents, rsvpEvent } from "./actions";
+import { useEffect } from "react";
+
+// fallback type
+type EventType = {
+  id: string | number;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  attendees: number;
+  category: string;
+  gradient?: string;
+  headerGradient?: string;
+  border?: string;
+  emoji?: string;
+  description: string;
+};
+
+const STATIC_EVENTS: EventType[] = [
   {
     id: 1,
     title: "Adoration & Worship Night",
@@ -92,10 +111,29 @@ const categoryColors: Record<string, string> = {
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("Upcoming");
-  const [registered, setRegistered] = useState<number[]>([1]);
+  const [registered, setRegistered] = useState<(string | number)[]>([]);
+  const [events, setEvents] = useState<EventType[]>(STATIC_EVENTS);
 
-  const toggleReg = (id: number) =>
+  useEffect(() => {
+    getEvents().then((dbEvents) => {
+      // Merge DB events with static for display purposes, mapping visual styles
+      const mappedDbEvents = dbEvents.map((db, i) => ({
+        ...db,
+        gradient: "gradient-gold",
+        headerGradient: "from-amber-600/10 to-yellow-500/8 dark:from-amber-600/20 dark:to-yellow-500/15",
+        border: "border-amber-200/50 dark:border-amber-800/30",
+        emoji: "📅",
+      }));
+      setEvents([...mappedDbEvents, ...STATIC_EVENTS]);
+    });
+  }, []);
+
+  const toggleReg = async (id: string | number) => {
     setRegistered((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+    if (typeof id === 'string') {
+      await rsvpEvent(id);
+    }
+  };
 
   const shown =
     activeTab === "Registered" ? events.filter((e) => registered.includes(e.id))
@@ -203,7 +241,7 @@ export default function EventsPage() {
                           "flex-1 h-9 rounded-xl font-bold text-sm transition-all",
                           isReg
                             ? "bg-muted text-muted-foreground border border-border"
-                            : `${event.gradient} text-white shadow-md`
+                            : `${event.gradient || "gradient-gold"} text-white shadow-md`
                         )}
                         variant={isReg ? "outline" : "default"}
                       >

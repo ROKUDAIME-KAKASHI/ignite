@@ -290,6 +290,14 @@ export default function ProfilePage() {
             </div>
             <Badge className="text-[10px] bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">Verified</Badge>
           </div>
+          {/* Notifications Link */}
+          <a href="/notifications" className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors">
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Notifications</p>
+              <p className="text-sm font-medium text-foreground mt-0.5">Manage alerts & preferences</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </a>
         </div>
       </div>
 
