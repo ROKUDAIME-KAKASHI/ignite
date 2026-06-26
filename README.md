@@ -26,7 +26,7 @@
 - **Global Leaderboard**: An animated 3D podium showcasing the top 3 users, alongside a live global feed of all members ranked by their Grace Points.
 
 ### 4. 🛡️ Admin Dashboard
-- **Secure Access**: Locked strictly to authorized administrators (e.g., `admin@ignite.com`).
+- **Secure Access**: Locked strictly to authorized administrators 
 - **Live Analytics**: A 2x2 grid displaying 24h trends for Total Users, Prayers Offered, Quizzes Taken, and Chapters Read.
 - **System Monitoring**: Live status alerts and a feed of the most recent user registrations.
 
