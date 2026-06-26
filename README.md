@@ -1,120 +1,109 @@
-# Church Youth Movement Platform (PWA)
+# 🔥 Ignite — Jacobite Orthodox Youth Movement Platform
 
-Welcome to the **Church Youth Movement Platform**, a comprehensive, scalable, and modern Progressive Web Application (PWA) designed to encourage spiritual growth, participation, and community building through daily activities, events, learning, and gamification.
+![Ignite Banner](https://img.shields.io/badge/Status-Active-success.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15.0-black?logo=next.js)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-blue?logo=prisma)
+![Firebase](https://img.shields.io/badge/Firebase-Auth-yellow?logo=firebase)
+![Neon](https://img.shields.io/badge/Neon-PostgreSQL-00E599?logo=postgresql)
 
----
-
-## 🎯 Core Principles
-*   **Spiritual Formation First:** Gamification and features are designed to encourage daily habits and spiritual growth, not unhealthy competition.
-*   **Modern & Accessible:** A clean, responsive interface tailored for all devices (Mobile-first PWA).
-*   **Robust Architecture:** Built using modern software engineering best practices with a clean separation of concerns.
-
----
-
-## 🛠 Technology Stack
-
-**Frontend**
-*   **Framework:** Next.js 16 (App Router)
-*   **Language:** TypeScript
-*   **Styling:** Tailwind CSS, shadcn/ui, Framer Motion (Page Transitions)
-*   **State & Auth:** React Context, Firebase Authentication
-*   **PWA:** `@ducanh2912/next-pwa` (Offline support, caching, manifest)
-
-**Backend**
-*   **Framework:** NestJS (Node.js)
-*   **Language:** TypeScript
-*   **Database:** SQLite (Local Dev) / PostgreSQL (Production ready)
-*   **ORM:** Prisma ORM
-*   **Security:** Firebase Admin SDK (JWT Validation)
+**Ignite** is a premium, full-stack web application built specifically for the **Jacobite Orthodox Youth Movement**. Designed to combat the fast-paced distractions of the modern world, Ignite serves as a daily spiritual companion—helping youth reclaim their time for God through scripture, prayer, gamified learning, and community engagement.
 
 ---
 
-## 👥 User Roles
+## 🌟 Key Features
 
-1.  **Member**
-    *   Read daily Bible verses, reflections, and prayers.
-    *   Complete daily/weekly/seasonal missions and quizzes.
-    *   Join events and submit prayer requests.
-    *   Earn XP, badges, and track spiritual streaks.
-2.  **Leader**
-    *   All Member features.
-    *   Create reflections, quizzes, and events.
-    *   Publish announcements and track group attendance.
-3.  **Administrator**
-    *   All Leader features.
-    *   Manage churches, ministries, and user roles.
-    *   Platform-wide analytics and content moderation.
+### 1. 📖 Daily Spiritual Journey
+- **Daily Bible Verses & Reflections**: A curated daily verse, reflection, and prayer seamlessly loaded onto the user's dashboard.
+- **Full Bible Reader**: A beautifully formatted, distraction-free interface to read chapters from the Bible.
 
----
+### 2. 🙏 Interactive Prayer Wall
+- **Community Intercession**: Users can post prayer requests (publicly or anonymously).
+- **"Pray For This" Animation**: A real-time counter that visually acknowledges when community members offer prayers for a specific request.
 
-## 📱 Core Modules & Ideas
+### 3. 🎮 Gamification & Learning (Quizzes)
+- **Grace Points (XP)**: Users earn XP by interacting with the app (e.g., taking quizzes, reading chapters).
+- **Orthodox Faith Quizzes**: Multiple-choice and true/false quizzes designed to test and educate youth on Scripture and Orthodox Holy Mysteries (Sacraments).
+- **Global Leaderboard**: An animated 3D podium showcasing the top 3 users, alongside a live global feed of all members ranked by their Grace Points.
 
-### 1. Dashboard & Daily Journey
-Every day at 10:00 AM, users receive a push notification that "Today's journey is ready." The journey consists of a Verse, Reflection, Prayer, Mission, and Quiz. Completing these awards daily XP.
+### 4. 🛡️ Admin Dashboard
+- **Secure Access**: Locked strictly to authorized administrators (e.g., `admin@ignite.com`).
+- **Live Analytics**: A 2x2 grid displaying 24h trends for Total Users, Prayers Offered, Quizzes Taken, and Chapters Read.
+- **System Monitoring**: Live status alerts and a feed of the most recent user registrations.
 
-### 2. Bible Module
-A built-in scripture reader supporting Old/New Testaments, reading plans, bookmarks, highlights, and history tracking.
-
-### 3. Quizzes & Missions
-*   **Quizzes:** Daily, weekly, or topic-based quizzes with various question types (MCQ, True/False) to test theological and historical knowledge.
-*   **Missions:** Actionable tasks (e.g., "Attend Mass", "Acts of Charity", "Volunteer") that reward XP upon completion.
-
-### 4. Events & Community
-*   **Events:** View upcoming gatherings, register for events, and use QR codes for check-ins.
-*   **Community:** Small groups, polls, volunteer boards, and mentorship programs to keep the youth connected.
-
-### 5. Prayer Wall
-A dedicated space where users can submit prayer requests (anonymously if preferred). Other users can "pray" for these requests, showing solidarity through prayer counters.
-
-### 6. Gamification System
-Users earn XP for their daily spiritual habits. As they progress, they unlock:
-*   **Levels & Titles** (e.g., "Disciple")
-*   **Badges & Achievements** (e.g., "Gospel Reader")
-*   **Streaks** to encourage daily app usage.
-
-### 7. Future AI Integrations
-*   Bible Study Assistant
-*   Reflection & Quiz Generators
-*   Personalized Journey Recommendations
+### 5. 🔔 Push Notifications (FCM)
+- Built-in Firebase Cloud Messaging Service Worker infrastructure.
+- A polished UI for users to toggle notification preferences (e.g., "Daily Verse", "Prayer Wall Alerts").
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## 🏗️ Architecture & Tech Stack
 
-### Prerequisites
-*   Node.js (v20+)
-*   npm
-*   A Firebase Project (for Auth & Push Notifications)
+Ignite has been streamlined into a **Unified Serverless Architecture** (Option B) for effortless deployment on platforms like Vercel.
 
-### 1. Start the Backend (NestJS + Prisma)
-```bash
-cd backend
-npm install
+* **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS, Framer Motion (for premium 3D and micro-animations).
+* **Database**: Neon (Serverless Cloud PostgreSQL).
+* **ORM**: Prisma (Integrated directly into Next.js Server Components and API Routes).
+* **Authentication**: Google Firebase Auth (Email/Password).
 
-# The database is configured for SQLite locally.
-# Run migrations and seed the database:
-npx prisma migrate dev --name init
-npx ts-node prisma/seed.ts
+---
 
-# Start the development server (runs on http://localhost:3001)
-npm run start:dev
+## 🚀 Deployment (Vercel)
+
+Deploying Ignite to the world is incredibly simple.
+
+1. **Import to Vercel**: Connect this GitHub repository to your Vercel account.
+2. **Set Root Directory**: Ensure the Root Directory is set to `frontend`.
+3. **Set Environment Variables**: Paste the following variables into your Vercel project settings:
+
+```env
+# Database (Neon)
+DATABASE_URL="postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-fragrant-heart-adhfyuuq-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+# Firebase Auth Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSy..."
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="ignite-72c8b.firebaseapp.com"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="ignite-72c8b"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="ignite-72c8b.firebasestorage.app"
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="1071264021784"
+NEXT_PUBLIC_FIREBASE_APP_ID="1:1071264021784:web:..."
 ```
 
-### 2. Start the Frontend (Next.js PWA)
-```bash
-cd frontend
-npm install
-
-# Start the Next.js development server with Webpack enabled (runs on http://localhost:3000)
-npm run dev
-```
-
-### 3. Configure Firebase (Mandatory for Auth)
-1. Go to the [Firebase Console](https://console.firebase.google.com/) and create a project.
-2. Enable **Email/Password** Authentication.
-3. Update `frontend/.env.local` with your public Firebase keys.
-4. Generate a Service Account JSON for your backend and set it to the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+4. **Deploy**: Vercel will automatically run `npm run build`, which triggers `prisma generate` and compiles the Next.js application.
 
 ---
 
-*Built with intention and purpose to foster a connected, active, and faithful community.*
+## 💻 Local Development
+
+To run Ignite locally on your machine:
+
+1. Clone the repository and navigate to the frontend folder:
+   ```bash
+   git clone https://github.com/ROKUDAIME-KAKASHI/ignite.git
+   cd ignite/frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up your `.env.local` file with the variables listed above.
+4. Sync your database schema (if making changes):
+   ```bash
+   npx prisma db push
+   ```
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+6. Open `http://localhost:3000` in your browser.
+
+---
+
+## 🔐 Setting up the Admin
+
+Because authentication is handled securely by Firebase, setting up the admin account takes 10 seconds:
+1. Go to your deployed application (or localhost) and navigate to the Login page.
+2. Click **Register**.
+3. Register an account using the email: **`admin@ignite.com`** (and your chosen password).
+4. The system is hardcoded to instantly recognize this email and unlock the `/admin` dashboard.
+
+*(To change the authorized admin email, edit `frontend/src/app/admin/page.tsx` before pushing to GitHub).*
