@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +10,7 @@ import { Heart, Lock, Send} from "lucide-react";
 
 /* ─── Types ── */
 interface PrayerRequest {
-  id: number;
+  id: string;
   text: string;
   author: string;
   anonymous: boolean;
@@ -20,15 +20,9 @@ interface PrayerRequest {
   time: string;
 }
 
-/* ─── Seed data ── */
-const INITIAL_REQUESTS: PrayerRequest[] = [
-  { id: 1, text: "Please pray for my grandmother who is in the hospital. She has been fighting illness for weeks.", author: "Maria S.", anonymous: false, prayers: 34, prayed: false, category: "Healing",    time: "2h ago" },
-  { id: 2, text: "Pray for my upcoming university entrance exams. I'm anxious and need God's peace.", author: "Anonymous", anonymous: true, prayers: 21, prayed: false, category: "Strength",   time: "4h ago" },
-  { id: 3, text: "Thanksgiving — I got the job I've been praying for! God is faithful!", author: "James O.", anonymous: false, prayers: 58, prayed: false, category: "Thanksgiving", time: "Yesterday" },
-  { id: 4, text: "I'm struggling with loneliness. Please lift me up in prayer this week.", author: "Anonymous", anonymous: true, prayers: 47, prayed: false, category: "Comfort",    time: "Yesterday" },
-  { id: 5, text: "Pray for our youth group retreat next weekend. May it transform lives.", author: "Clara R.", anonymous: false, prayers: 29, prayed: false, category: "Community",  time: "2d ago" },
-  { id: 6, text: "For my parents going through a difficult time in their marriage. God restore them.", author: "Anonymous", anonymous: true, prayers: 63, prayed: false, category: "Family",     time: "3d ago" },
-];
+import { submitPrayer, getApprovedPrayers, incrementPrayerCount } from "./actions";
+
+/* ─── Categories ── */
 
 const CATEGORIES = ["All", "Healing", "Strength", "Thanksgiving", "Comfort", "Family", "Community"];
 
@@ -42,7 +36,7 @@ const categoryColor: Record<string, string> = {
 };
 
 /* ─── Prayer Card ── */
-function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: number) => void }) {
+function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: string) => void }) {
   const [animating, setAnimating] = useState(false);
 
   const handlePray = () => {
@@ -71,7 +65,7 @@ function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: number) 
             </div>
             <div>
               <p className="text-xs font-bold text-foreground">{req.author}</p>
-              <p className="text-[10px] text-muted-foreground">{req.time}</p>
+              <p className="text-[10px] text-muted-foreground">{new Date(req.time).toLocaleDateString()}</p>
             </div>
           </div>
           <Badge className={cn("text-[10px] border-0 px-2 shrink-0", categoryColor[req.category] || "bg-muted text-muted-foreground")}>
@@ -111,42 +105,36 @@ function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: number) 
 
 /* ─── Main Page ── */
 export default function PrayerWallPage() {
-  const [requests, setRequests] = useState<PrayerRequest[]>(INITIAL_REQUESTS);
+  const [requests, setRequests] = useState<PrayerRequest[]>([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [text, setText] = useState("");
   const [anonymous, setAnonymous] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("Healing");
+  const [selectedCategory, setSelectedCategory] = useState("General");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const onPray = (id: number) => {
+  useEffect(() => {
+    getApprovedPrayers().then(setRequests);
+  }, []);
+
+  const onPray = async (id: string) => {
     setRequests((prev) =>
       prev.map((r) => r.id === id ? { ...r, prayers: r.prayed ? r.prayers - 1 : r.prayers + 1, prayed: !r.prayed } : r)
     );
+    await incrementPrayerCount(id);
   };
 
   const handleSubmit = async () => {
     if (!text.trim()) return;
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 800)); // simulate network
-    const newReq: PrayerRequest = {
-      id: Date.now(),
-      text: text.trim(),
-      author: anonymous ? "Anonymous" : "You",
-      anonymous,
-      prayers: 0,
-      prayed: false,
-      category: selectedCategory,
-      time: "Just now",
-    };
-    setRequests((prev) => [newReq, ...prev]);
+    await submitPrayer(text.trim(), anonymous, selectedCategory);
     setText("");
     setSubmitting(false);
     setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    setTimeout(() => setSubmitted(false), 5000);
   };
 
-  const filtered = activeCategory === "All" ? requests : requests.filter((r) => r.category === activeCategory);
+  const filtered = requests; // Disable category filtering for now since db doesn't store categories
   const totalPrayers = requests.reduce((acc, r) => acc + r.prayers, 0);
 
   return (
@@ -238,9 +226,9 @@ export default function PrayerWallPage() {
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="text-xs text-green-600 dark:text-green-400 font-semibold text-center"
+                  className="text-xs text-green-600 dark:text-green-400 font-semibold text-center mt-3"
                 >
-                  ✓ Your request has been shared. The community is praying for you. 🙏
+                  ✓ Your request has been shared and is pending review by the admin. 🙏
                 </motion.p>
               )}
             </AnimatePresence>
