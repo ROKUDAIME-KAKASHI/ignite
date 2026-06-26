@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 // Per-route animation styles
-const routeVariants: Record<string, { initial: object; animate: object }> = {
+const routeVariants: Record<string, any> = {
   "/":         { initial: { opacity: 0 },           animate: { opacity: 1 } },
   "/login":    { initial: { opacity: 0, scale: 0.98 }, animate: { opacity: 1, scale: 1 } },
   "/dashboard":{ initial: { opacity: 0, y: 12 },    animate: { opacity: 1, y: 0 } },
@@ -19,7 +19,7 @@ const routeVariants: Record<string, { initial: object; animate: object }> = {
   "/profile":  { initial: { opacity: 0, scale: 0.97 }, animate: { opacity: 1, scale: 1 } },
 };
 
-const DEFAULT_TRANSITION = { duration: 0.35, ease: [0.22, 1, 0.36, 1] };
+const DEFAULT_TRANSITION = { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const };
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
