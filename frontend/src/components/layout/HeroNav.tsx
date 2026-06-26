@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, useScroll } from "framer-motion";
 
 function Cross({ className = "" }: { className?: string }) {
   return (
@@ -13,56 +12,49 @@ function Cross({ className = "" }: { className?: string }) {
 }
 
 export function HeroNav() {
-  const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const unsub = scrollY.on("change", (v) => setScrolled(v > 60));
-    return unsub;
-  }, [scrollY]);
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/90 backdrop-blur-xl border-b border-amber-200/40 dark:border-amber-900/20 shadow-sm"
-          : ""
+          ? "bg-[#fdfbf7]/90 backdrop-blur-md border-b border-gray-200 shadow-sm"
+          : "bg-[#fdfbf7]"
       }`}
     >
       <div className="max-w-5xl mx-auto flex items-center justify-between px-6 h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
-          <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${scrolled ? "gradient-gold halo-glow" : "bg-white/20 border border-white/30"}`}>
+          <div className="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shadow-sm">
             <Cross className="w-4.5 h-4.5 text-white" />
           </div>
-          <span className={`font-extrabold text-lg font-serif transition-colors ${scrolled ? "text-gradient-gold" : "text-white"}`}>
+          <span className="font-extrabold text-lg font-serif text-gray-900">
             Ignite
           </span>
         </Link>
 
-        {/* CTA only — no scroll links */}
-        <div className="flex items-center gap-2">
+        {/* CTA */}
+        <div className="flex items-center gap-3">
           <Link
             href="/login"
-            className={`text-sm font-semibold px-4 py-2 rounded-xl transition-all ${
-              scrolled
-                ? "text-primary hover:bg-primary/10"
-                : "text-white/80 hover:text-white hover:bg-white/10"
-            }`}
+            className="text-sm font-semibold px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             Sign In
           </Link>
           <Link
             href="/login"
-            className="text-sm font-bold px-5 py-2.5 rounded-xl gradient-gold text-white shadow-lg halo-glow hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="text-sm font-bold px-5 py-2.5 rounded-xl bg-amber-700 text-white hover:bg-amber-800 transition-colors shadow-sm"
           >
-            Get Started ✝
+            Get Started
           </Link>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 }
