@@ -8,12 +8,28 @@ export async function submitPrayer(content: string, isAnonymous: boolean, catego
   
   await prisma.prayerRequest.create({
     data: {
-      userId: session?.id || undefined, // Allow null if not fully logged in? Better to attach if possible
+      userId: session?.id || undefined,
       content,
       isAnonymous,
-      isApproved: false, // Must be approved by admin
+      isApproved: false,
     }
   });
+
+  if (session?.id) {
+    // Award 10 XP for submitting a prayer request
+    await prisma.user.update({
+      where: { id: session.id },
+      data: { xp: { increment: 10 } }
+    });
+
+    await prisma.xPLog.create({
+      data: {
+        userId: session.id,
+        amount: 10,
+        reason: "Submitted a prayer request"
+      }
+    });
+  }
 
   return { success: true };
 }
