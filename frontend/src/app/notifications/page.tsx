@@ -6,22 +6,17 @@ import { Bell, BellRing, BellOff, CheckCircle2, ChevronRight, Info } from "lucid
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Firebase messaging import
-import { getMessaging, getToken, isSupported } from "firebase/messaging";
-import app from "@/lib/firebase";
-
 export default function NotificationsPage() {
   const [permission, setPermission] = useState<NotificationPermission>("default");
-  const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
   const [supported, setSupported] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setPermission(Notification.permission);
-      isSupported().then((isSupp) => {
-        setSupported(isSupp);
-      });
+      if (!("Notification" in window)) {
+        setSupported(false);
+      }
     }
   }, []);
 
@@ -32,11 +27,7 @@ export default function NotificationsPage() {
       setPermission(perm);
       
       if (perm === "granted" && supported) {
-        const messaging = getMessaging(app);
-        // Normally you'd pass a VAPID key here from Firebase Console:
-        // const token = await getToken(messaging, { vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' });
-        // For demonstration, we simulate success if the browser grants permission:
-        setFcmToken("fcm-token-generated-successfully");
+        // Register standard PWA service worker subscription here later
       }
     } catch (error) {
       console.error("Failed to request permission", error);
@@ -145,7 +136,7 @@ export default function NotificationsPage() {
         {!supported && (
           <div className="flex items-start gap-2 p-3 bg-amber-50 text-amber-800 rounded-xl text-xs">
             <Info className="w-4 h-4 mt-0.5 shrink-0" />
-            <p>Your browser does not support Firebase Cloud Messaging. Try using Chrome, Firefox, or Safari on a compatible device.</p>
+            <p>Your browser does not support Web Push API notifications.</p>
           </div>
         )}
 

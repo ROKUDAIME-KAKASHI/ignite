@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { login, signup } from "@/app/actions/auth";
+import { useAuth } from "@/context/AuthContext";
 
-// Inline Cross SVG
 function Cross({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" className={className} fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
@@ -23,29 +22,44 @@ function Cross({ className }: { className?: string }) {
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { setUser } = useAuth();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+      
+      let res;
       if (isRegistering) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        formData.append("firstName", firstName);
+        formData.append("lastName", lastName);
+        res = await signup(formData);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        res = await login(formData);
       }
-      router.push("/dashboard");
+
+      if (res.error) {
+        setError(res.error);
+      } else if (res.success && res.user) {
+        setUser({
+          ...res.user,
+          displayName: `${res.user.firstName} ${res.user.lastName}`
+        });
+        router.push("/dashboard");
+      }
     } catch (err: any) {
-      const msg = err.code
-        ?.replace("auth/", "")
-        ?.replace(/-/g, " ")
-        ?.replace(/\b\w/g, (c: string) => c.toUpperCase());
-      setError(msg || "Authentication failed. Please try again.");
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -53,14 +67,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center min-h-screen px-6 relative overflow-hidden bg-background">
-
-      {/* ── Decorative background ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Dawn gradient top */}
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-15"
           style={{ background: "radial-gradient(circle, #d4a017 0%, #7c3aed 50%, transparent 75%)" }}
         />
-        {/* Cross watermark center */}
         <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.04] text-foreground" fill="none" stroke="currentColor" strokeWidth="8">
           <line x1="150" y1="30" x2="150" y2="270" />
           <line x1="40" y1="110" x2="260" y2="110" />
@@ -73,7 +83,6 @@ export default function LoginPage() {
         transition={{ duration: 0.4 }}
         className="relative z-10 w-full max-w-sm"
       >
-        {/* ── Logo ── */}
         <div className="flex flex-col items-center mb-8">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -90,18 +99,27 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* ── Auth Card ── */}
         <div className="glass dark:glass-dark rounded-3xl p-7 border border-white/50 dark:border-white/10 shadow-2xl card-holy">
           <h2 className="text-xl font-bold text-foreground font-serif mb-1">
             {isRegistering ? "Begin Your Journey" : "Welcome Back"}
           </h2>
           <p className="text-muted-foreground text-sm mb-6 italic font-serif">
-            {isRegistering
-              ? "Join the community of faith."
-              : "Continue your walk with Christ."}
+            {isRegistering ? "Join the community of faith." : "Continue your walk with Christ."}
           </p>
 
           <form onSubmit={handleAuth} className="space-y-4">
+            {isRegistering && (
+              <div className="flex gap-2">
+                <div className="space-y-2 flex-1">
+                  <Label htmlFor="firstName" className="text-sm font-semibold">First Name</Label>
+                  <Input id="firstName" required value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="John" className="h-11 rounded-xl bg-background/70" />
+                </div>
+                <div className="space-y-2 flex-1">
+                  <Label htmlFor="lastName" className="text-sm font-semibold">Last Name</Label>
+                  <Input id="lastName" required value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Doe" className="h-11 rounded-xl bg-background/70" />
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-semibold">Email Address</Label>
               <div className="relative">

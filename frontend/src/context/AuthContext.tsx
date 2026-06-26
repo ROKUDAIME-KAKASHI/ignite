@@ -1,15 +1,24 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { onAuthStateChanged, User, updateProfile, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { logout as logoutAction, updateProfile as updateProfileAction } from "@/app/actions/auth";
+
+interface AuthUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  displayName?: string;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   loading: boolean;
   updateDisplayName: (name: string) => Promise<void>;
   logout: () => Promise<void>;
+  setUser: (user: AuthUser | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,39 +26,46 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   updateDisplayName: async () => {},
   logout: async () => {},
+  setUser: () => {}
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    fetch("/api/auth/me")
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setUser({ ...data.user, displayName: `${data.user.firstName} ${data.user.lastName}` });
+        }
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  /** Update the Firebase display name and refresh local state */
   const updateDisplayName = useCallback(async (name: string) => {
-    if (!auth.currentUser) throw new Error("Not authenticated");
-    await updateProfile(auth.currentUser, { displayName: name.trim() });
-    // Force re-render by cloning the user object
-    setUser({ ...auth.currentUser } as User);
-  }, []);
+    if (!user) throw new Error("Not authenticated");
+    const parts = name.trim().split(" ");
+    const firstName = parts[0];
+    const lastName = parts.slice(1).join(" ");
+    const res = await updateProfileAction(firstName, lastName);
+    if (res.user) {
+      setUser({ ...res.user, displayName: `${res.user.firstName} ${res.user.lastName}` });
+    }
+  }, [user]);
 
-  /** Sign out and redirect to home */
   const logout = useCallback(async () => {
-    await signOut(auth);
+    await logoutAction();
+    setUser(null);
     router.push("/");
   }, [router]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, updateDisplayName, logout }}>
+    <AuthContext.Provider value={{ user, loading, updateDisplayName, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
