@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ScanLine } from "lucide-react";
 
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -78,6 +78,22 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-3">
             <Progress value={progress} className="h-2 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full flex-1" />
             <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">{nextLevelXp - xp} to rank up</span>
+          </div>
+        </a>
+      </div>
+
+      {/* ── QR Check-in Card ── */}
+      <div className="px-4 mb-5 relative z-20">
+        <a href="/scan" className="block rounded-2xl overflow-hidden card-holy card-holy-hover bg-gradient-to-r from-emerald-600 to-green-500 shadow-lg shadow-emerald-500/20 p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+              <ScanLine className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-white text-lg leading-tight">Event Check-In</p>
+              <p className="text-emerald-100 text-sm">Scan QR code to earn XP</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-white/70 ml-auto" />
           </div>
         </a>
       </div>
