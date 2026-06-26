@@ -9,6 +9,9 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { awardXP } from "@/app/actions/gamification";
+import { useAuth } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
 
 // ── Bookmark helpers (localStorage) ──────────────────────────────────────────
 function bmKey(bookSlug: string, ch: number, v: number) {
@@ -60,6 +63,10 @@ export default function BibleReaderPage() {
   const [bookmarks, setBookmarks] = useState<Set<number>>(new Set());
   const [showTranslationPicker, setShowTranslationPicker] = useState(false);
   const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
+  const [markingRead, setMarkingRead] = useState(false);
+  const [markedRead, setMarkedRead] = useState(false);
+
+  const { user, setUser } = useAuth();
 
   // Load bookmarks from localStorage
   useEffect(() => {
@@ -87,7 +94,10 @@ export default function BibleReaderPage() {
     }
   }, [book, chapter, translation]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { 
+    setMarkedRead(false);
+    void load(); 
+  }, [load]);
 
   if (!book) {
     return (
@@ -117,6 +127,17 @@ export default function BibleReaderPage() {
       now ? next.add(verse) : next.delete(verse);
       return next;
     });
+  };
+
+  const handleMarkAsRead = async () => {
+    if (!user || markedRead) return;
+    setMarkingRead(true);
+    const res = await awardXP(10, `Read Scripture: ${book.name} ${chapter}`);
+    if (res.success && res.xp) {
+      setUser({ ...user, xp: res.xp, level: res.level });
+      setMarkedRead(true);
+    }
+    setMarkingRead(false);
   };
 
   const fontSizeClass = {
@@ -310,6 +331,19 @@ export default function BibleReaderPage() {
 
             {/* ── Chapter Navigation ── */}
             <div className="mt-10">
+              <div className="flex justify-center mb-8">
+                <Button 
+                  onClick={handleMarkAsRead} 
+                  disabled={markedRead || markingRead}
+                  className={cn(
+                    "rounded-xl h-12 px-8 font-bold shadow-md transition-all",
+                    markedRead ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30" : "gradient-gold text-white halo-glow"
+                  )}
+                >
+                  {markingRead ? <Loader2 className="w-4 h-4 animate-spin" /> : 
+                   markedRead ? "Chapter Read (+10 XP) ✅" : "Mark Chapter as Read (+10 XP)"}
+                </Button>
+              </div>
               <div className="divider-cross mb-6" />
               <div className="flex gap-3">
                 {/* Previous */}
