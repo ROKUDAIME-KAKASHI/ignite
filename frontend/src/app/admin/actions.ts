@@ -47,7 +47,6 @@ export async function createEvent(title: string, description: string, dateStr: s
   });
   return { success: true, event };
 }
-}
 
 export async function getAdminDashboardData() {
   const cookieStore = await cookies();
