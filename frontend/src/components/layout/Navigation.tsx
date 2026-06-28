@@ -6,6 +6,35 @@ import { Home, BookOpen, Target, Calendar, User as UserIcon, HelpCircle } from "
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+
+const DAILY_VERSES = [
+  { text: "The Lord is my shepherd; I shall not want.", ref: "Psalm 23:1" },
+  { text: "I can do all things through Christ who strengthens me.", ref: "Philippians 4:13" },
+  { text: "Be strong and courageous. Do not be afraid.", ref: "Joshua 1:9" },
+  { text: "For God gave us a spirit not of fear but of power and love and self-control.", ref: "2 Timothy 1:7" },
+  { text: "Cast all your anxiety on him because he cares for you.", ref: "1 Peter 5:7" },
+  { text: "The steadfast love of the Lord never ceases; his mercies never come to an end.", ref: "Lamentations 3:22" },
+  { text: "Let all that you do be done in love.", ref: "1 Corinthians 16:14" },
+  { text: "Rejoice always, pray without ceasing, give thanks in all circumstances.", ref: "1 Thessalonians 5:16-18" },
+  { text: "Trust in the Lord with all your heart, and do not lean on your own understanding.", ref: "Proverbs 3:5" },
+  { text: "And we know that for those who love God all things work together for good.", ref: "Romans 8:28" },
+  { text: "Thy word is a lamp unto my feet, and a light unto my path.", ref: "Psalm 119:105" },
+  { text: "For we walk by faith, not by sight.", ref: "2 Corinthians 5:7" },
+];
+
+function getDailyVerse(userId?: string) {
+  if (!userId) return DAILY_VERSES[0];
+  const today = new Date();
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+  
+  let userNum = 0;
+  for (let i = 0; i < userId.length; i++) {
+    userNum += userId.charCodeAt(i);
+  }
+  
+  return DAILY_VERSES[(userNum + dayOfYear) % DAILY_VERSES.length];
+}
 
 const navItems = [
   { name: "Home",      href: "/dashboard", icon: Home       },
@@ -30,9 +59,12 @@ function CrossIcon({ className }: { className?: string }) {
 
 export function Navigation() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   // Hide on public / hero pages / admin
   if (PUBLIC_ROUTES.some((r) => pathname === r) || pathname.startsWith("/admin")) return null;
+
+  const dailyVerse = getDailyVerse(user?.id);
 
   return (
     <>
@@ -117,8 +149,8 @@ export function Navigation() {
           <div className="border-t border-gray-100 dark:border-gray-800 my-4" />
           <div className="rounded-xl p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
             <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1">Verse of the Day</p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed font-serif">"The Lord is my shepherd; I shall not want."</p>
-            <p className="text-[10px] text-amber-700 font-semibold mt-1.5">— Psalm 23:1</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed font-serif">"{dailyVerse.text}"</p>
+            <p className="text-[10px] text-amber-700 font-semibold mt-1.5">— {dailyVerse.ref}</p>
           </div>
           <p className="text-center text-[10px] text-gray-400 mt-3 tracking-widest uppercase font-medium">✝ Soli Deo Gloria ✝</p>
         </div>

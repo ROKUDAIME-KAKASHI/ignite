@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { encrypt } from "@/lib/auth";
+import { encrypt, decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 
@@ -52,7 +52,7 @@ export async function signup(data: FormData) {
       passwordHash,
       firstName,
       lastName,
-      role: email === "admin@ignite.com" ? "ADMIN" : "MEMBER",
+      role: email === process.env.ADMIN_EMAIL ? "ADMIN" : "MEMBER",
     },
   });
 
@@ -84,7 +84,7 @@ export async function updateProfile(firstName: string, lastName: string) {
   const sessionToken = cookieStore.get("session")?.value;
   if (!sessionToken) return { error: "Not logged in" };
 
-  const sessionData = await import("@/lib/auth").then(m => m.decrypt(sessionToken)).catch(() => null);
+  const sessionData = await decrypt(sessionToken).catch(() => null);
   if (!sessionData) return { error: "Invalid session" };
 
   await prisma.user.update({
@@ -94,7 +94,7 @@ export async function updateProfile(firstName: string, lastName: string) {
 
   const updatedSession = { ...sessionData, firstName, lastName };
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const newSessionToken = await import("@/lib/auth").then(m => m.encrypt(updatedSession));
+  const newSessionToken = await encrypt(updatedSession);
   
   cookieStore.set("session", newSessionToken, { expires, httpOnly: true, secure: true });
   return { success: true, user: updatedSession };

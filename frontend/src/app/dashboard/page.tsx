@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ChevronRight, ScanLine } from "lucide-react";
+import { ChevronRight, ScanLine, Megaphone, Calendar, MapPin, Clock } from "lucide-react";
 
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -9,13 +9,95 @@ async function getJourney() {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const journey = await prisma.dailyJourney.findUnique({ 
+    let journey = await prisma.dailyJourney.findUnique({ 
       where: { date: today },
       include: { mission: true, quiz: true } 
     });
+
+    if (!journey) {
+      const verses = [
+        { verse: "I can do all things through Christ who strengthens me.", ref: "Philippians 4:13" },
+        { verse: "For God gave us a spirit not of fear but of power and love and self-control.", ref: "2 Timothy 1:7" },
+        { verse: "The Lord is my shepherd; I shall not want.", ref: "Psalm 23:1" },
+        { verse: "Cast all your anxieties on him, because he cares for you.", ref: "1 Peter 5:7" },
+        { verse: "Rejoice always, pray without ceasing, give thanks in all circumstances.", ref: "1 Thessalonians 5:16-18" },
+      ];
+      
+      const v = verses[Math.floor(Math.random() * verses.length)];
+
+      journey = await prisma.dailyJourney.create({
+        data: {
+          date: today,
+          verse: v.verse,
+          verseRef: v.ref,
+          reflection: "Reflect on this scripture today. Allow God's word to guide your actions, thoughts, and words as you go about your daily life.",
+          prayer: "Lord, grant me the strength to overcome today's obstacles, knowing You are always with me.",
+        },
+        include: { mission: true, quiz: true }
+      });
+    }
+
     return journey;
-  } catch { 
+  } catch (e) {
+    console.error(e);
     return null; 
+  }
+}
+
+async function getLatestAnnouncements() {
+  try {
+    return await prisma.announcement.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function getSaintOfTheDay() {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let saint = await prisma.saintOfTheDay.findUnique({
+      where: { date: today }
+    });
+
+    if (!saint) {
+      // For demo MVP, randomly select one if missing
+      const saints = [
+        { name: "St. Thomas the Apostle", title: "My Lord and my God! — John 20:28", bio: "The apostle who doubted." },
+        { name: "St. Peter", title: "Upon this rock... — Matt 16:18", bio: "The first Pope." },
+        { name: "St. Mary Magdalene", title: "Apostle to the Apostles", bio: "First witness of the Resurrection." },
+        { name: "St. John Chrysostom", title: "Golden-mouthed", bio: "Archbishop of Constantinople and important Early Church Father." },
+      ];
+      const s = saints[Math.floor(Math.random() * saints.length)];
+      saint = await prisma.saintOfTheDay.create({
+        data: {
+          date: today,
+          name: s.name,
+          title: s.title,
+          bio: s.bio
+        }
+      });
+    }
+    return saint;
+  } catch (e) {
+    return { name: "St. Thomas the Apostle", title: "My Lord and my God! — John 20:28" };
+  }
+}
+
+async function getNextEvents() {
+  try {
+    return await prisma.event.findMany({
+      where: { date: { gte: new Date() } },
+      orderBy: { date: "asc" },
+      take: 2,
+      include: { attendances: true },
+    });
+  } catch {
+    return [];
   }
 }
 
@@ -29,15 +111,27 @@ function getLiturgicalGreeting() {
 
 export default async function DashboardPage() {
   const journey = await getJourney();
+  const saint = await getSaintOfTheDay();
   const { greeting, sub } = getLiturgicalGreeting();
   
   const session = await getSession();
-  const dbUser = session?.id ? await prisma.user.findUnique({ where: { id: session.id }, select: { xp: true, streak: true, level: true } }) : null;
+  const userId = session?.id;
+
+  const [dbUser, chaptersRead, prayersSaid, eventsAttended] = userId ? await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { xp: true, streak: true, level: true } }),
+    prisma.xPLog.count({ where: { userId, reason: { contains: "Chapter" } } }),
+    prisma.xPLog.count({ where: { userId, reason: { contains: "prayer" } } }), // Covers both submitting and praying for others
+    prisma.attendance.count({ where: { userId } }),
+  ]) : [null, 0, 0, 0];
+
   const xp = dbUser?.xp || 0;
   const streak = dbUser?.streak || 0;
   const level = dbUser?.level || 1;
   const nextLevelXp = level * 500;
   const progress = Math.min(100, Math.round((xp / nextLevelXp) * 100));
+
+  const announcements = await getLatestAnnouncements();
+  const upcomingEvents = await getNextEvents();
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -81,6 +175,86 @@ export default async function DashboardPage() {
           </div>
         </a>
       </div>
+
+      {/* ── Admin Announcements ── */}
+      {announcements.length > 0 && (
+        <div className="px-4 mb-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Megaphone className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Parish Notices</h2>
+            </div>
+            <Badge className="text-[10px] bg-primary/10 text-primary border-0">{announcements.length} new</Badge>
+          </div>
+          <div className="space-y-2">
+            {announcements.map((ann) => (
+              <div
+                key={ann.id}
+                className="rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 border border-amber-200/60 dark:border-amber-800/30 px-4 py-3 card-holy"
+              >
+                <div className="flex items-start gap-2.5">
+                  <span className="text-lg mt-0.5">📢</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground font-serif leading-snug">{ann.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">{ann.content}</p>
+                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-1">
+                      {new Date(ann.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Upcoming Events ── */}
+      {upcomingEvents.length > 0 && (
+        <div className="px-4 mb-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Upcoming Events</h2>
+            </div>
+            <a href="/events" className="text-xs font-bold text-primary flex items-center gap-0.5 hover:opacity-80 transition-opacity">
+              See all <ChevronRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+          <div className="space-y-2">
+            {upcomingEvents.map((ev) => (
+              <a
+                key={ev.id}
+                href="/events"
+                className="block rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/20 border border-green-200/60 dark:border-green-800/30 px-4 py-3 card-holy card-holy-hover"
+              >
+                <div className="flex items-start gap-2.5">
+                  <span className="text-lg mt-0.5">📅</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground font-serif leading-snug">{ev.title}</p>
+                    {ev.description && (
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</p>
+                    )}
+                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                      <span className="flex items-center gap-1 text-[10px] text-green-700 dark:text-green-400 font-semibold">
+                        <Clock className="w-3 h-3" />
+                        {new Date(ev.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                      </span>
+                      {ev.location && (
+                        <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          <MapPin className="w-3 h-3" />
+                          {ev.location}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-muted-foreground">{ev.attendances.length} going</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── QR Check-in Card ── */}
       <div className="px-4 mb-5 relative z-20">
@@ -200,7 +374,7 @@ export default async function DashboardPage() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               Share your intentions or pray for others in the community.
             </p>
-            <Badge className="text-[10px] bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 shrink-0 ml-2">6 Active</Badge>
+            <Badge className="text-[10px] bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 shrink-0 ml-2">Active</Badge>
           </div>
         </a>
 
@@ -230,9 +404,9 @@ export default async function DashboardPage() {
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Spiritual Progress</h2>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { emoji: "📖", label: "Chapters Read", value: "47", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/30" },
-              { emoji: "🙏", label: "Prayers Said", value: "38", color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/30" },
-              { emoji: "✝️", label: "Masses", value: "12", color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200/50 dark:border-purple-800/30" },
+              { emoji: "📖", label: "Chapters Read", value: chaptersRead, color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/30" },
+              { emoji: "🙏", label: "Prayers Said", value: prayersSaid, color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/30" },
+              { emoji: "✝️", label: "Masses/Events", value: eventsAttended, color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200/50 dark:border-purple-800/30" },
             ].map((s) => (
               <div key={s.label} className={`rounded-2xl p-3 text-center border card-holy ${s.color}`}>
                 <p className="text-2xl mb-1">{s.emoji}</p>
@@ -246,8 +420,8 @@ export default async function DashboardPage() {
         {/* Saint of the Day */}
         <div className="rounded-2xl p-4 gradient-lent card-holy">
           <p className="text-[10px] text-purple-200 font-bold uppercase tracking-widest">Saint of the Day</p>
-          <p className="text-base font-bold text-white font-serif mt-1">St. Thomas the Apostle</p>
-          <p className="text-purple-200 text-xs mt-1 italic leading-relaxed">"My Lord and my God!" — John 20:28</p>
+          <p className="text-base font-bold text-white font-serif mt-1">{saint?.name}</p>
+          <p className="text-purple-200 text-xs mt-1 italic leading-relaxed">{saint?.title}</p>
         </div>
       </div>
     </div>

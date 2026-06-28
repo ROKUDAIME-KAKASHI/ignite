@@ -10,73 +10,6 @@ import { cn } from "@/lib/utils";
 
 const tabs = ["Active", "Completed", "All"];
 
-const missions = [
-  {
-    id: 1,
-    type: "daily",
-    title: "Corporal Work of Mercy",
-    subtitle: "Feed the Hungry",
-    description: "Share a meal, donate food, or volunteer at a soup kitchen today. As Jesus said: 'Whatever you did for one of the least of these brothers and sisters of mine, you did for me.' — Matthew 25:40",
-    xp: 50,
-    verse: "Matthew 25:40",
-    timeLeft: "14h remaining",
-    emoji: "🍞",
-    gradient: "gradient-gold",
-    badgeColor: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-    headerBg: "from-amber-600/10 to-yellow-500/8 dark:from-amber-600/20 dark:to-yellow-500/15",
-    border: "border-amber-200/50 dark:border-amber-800/30",
-    xpColor: "text-amber-600 dark:text-amber-400",
-  },
-  {
-    id: 2,
-    type: "weekly",
-    title: "Holy Mass",
-    subtitle: "Attend Sunday Liturgy",
-    description: "Attend Holy Mass at your parish and participate fully in the Eucharist. The Mass is the source and summit of Christian life — CCC 1324.",
-    xp: 150,
-    verse: "CCC 1324",
-    timeLeft: "Resets Sunday",
-    emoji: "⛪",
-    gradient: "gradient-royal",
-    badgeColor: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    headerBg: "from-blue-700/10 to-indigo-600/8 dark:from-blue-700/20 dark:to-indigo-600/15",
-    border: "border-blue-200/50 dark:border-blue-800/30",
-    xpColor: "text-blue-600 dark:text-blue-400",
-  },
-  {
-    id: 3,
-    type: "daily",
-    title: "Lectio Divina",
-    subtitle: "Sacred Reading",
-    description: "Spend 10 minutes in Lectio Divina — Read, Meditate, Pray, and Contemplate a passage from today's Daily Mass readings. Let the Word dwell in you richly (Col 3:16).",
-    xp: 30,
-    verse: "Colossians 3:16",
-    timeLeft: "14h remaining",
-    emoji: "✍️",
-    gradient: "gradient-lent",
-    badgeColor: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-    headerBg: "from-purple-700/10 to-violet-600/8 dark:from-purple-700/20 dark:to-violet-600/15",
-    border: "border-purple-200/50 dark:border-purple-800/30",
-    xpColor: "text-purple-600 dark:text-purple-400",
-  },
-  {
-    id: 4,
-    type: "seasonal",
-    title: "Pilgrimage of the Gospels",
-    subtitle: "Lenten Reading Plan",
-    description: "Read all four Gospels — Matthew, Mark, Luke, and John — before Easter Sunday. Walk with Jesus from Bethlehem to Calvary and the empty tomb.",
-    xp: 500,
-    verse: "John 20:31",
-    timeLeft: "24 days left",
-    emoji: "🌿",
-    progress: 25,
-    gradient: "gradient-life",
-    badgeColor: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-    headerBg: "from-green-700/10 to-emerald-600/8 dark:from-green-700/20 dark:to-emerald-600/15",
-    border: "border-green-200/50 dark:border-green-800/30",
-    xpColor: "text-green-600 dark:text-green-400",
-  },
-];
 
 const typeLabel: Record<string, string> = {
   daily: "Daily",
@@ -84,15 +17,24 @@ const typeLabel: Record<string, string> = {
   seasonal: "Seasonal",
 };
 
-import { completeMission } from "./actions";
+import { completeMission, getMissions } from "./actions";
+import { useEffect } from "react";
 
 export default function MissionsPage() {
   const [activeTab, setActiveTab] = useState("Active");
-  const [completed, setCompleted] = useState<number[]>([]);
-  const [loading, setLoading] = useState<Record<number, boolean>>({});
+  const [missions, setMissions] = useState<{ id: string, title: string, description: string, xpReward: number }[]>([]);
+  const [completed, setCompleted] = useState<string[]>([]);
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
 
-  const toggle = async (id: number, xpReward: number, title: string) => {
-    if (completed.includes(id)) return; // Don't allow un-completing for now since it gives XP
+  useEffect(() => {
+    getMissions().then(data => {
+      setMissions(data.missions);
+      setCompleted(data.completedIds);
+    });
+  }, []);
+
+  const toggle = async (id: string, xpReward: number, title: string) => {
+    if (completed.includes(id)) return;
     setLoading(prev => ({ ...prev, [id]: true }));
     await completeMission(id, xpReward, title);
     setCompleted((p) => [...p, id]);
@@ -160,33 +102,32 @@ export default function MissionsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07 }}
                 className={cn(
-                  "rounded-2xl overflow-hidden border card-holy-hover transition-all",
-                  done ? "opacity-70 " + m.border : m.border,
-                  "card-holy"
+                  "rounded-2xl overflow-hidden border card-holy-hover transition-all card-holy",
+                  done ? "opacity-70 border-amber-200/50" : "border-amber-200/50"
                 )}
               >
                 {/* Card header */}
-                <div className={`bg-gradient-to-r ${m.headerBg} px-4 pt-4 pb-3 border-b ${m.border}`}>
+                <div className={`bg-gradient-to-r from-amber-600/10 to-yellow-500/8 dark:from-amber-600/20 dark:to-yellow-500/15 px-4 pt-4 pb-3 border-b border-amber-200/50 dark:border-amber-800/30`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-3">
-                      <span className="text-3xl leading-none mt-0.5">{m.emoji}</span>
+                      <span className="text-3xl leading-none mt-0.5">⚔️</span>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
                           <p className="font-bold text-foreground font-serif">{m.title}</p>
-                          <Badge className={cn("text-[10px] border-0 px-2 py-0.5", m.badgeColor)}>
-                            {typeLabel[m.type]}
+                          <Badge className="text-[10px] border-0 px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                            Daily
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground italic">{m.subtitle}</p>
+                        <p className="text-xs text-muted-foreground italic">Mission</p>
                         <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                           <Clock className="w-3 h-3" />
-                          <span>{m.timeLeft}</span>
+                          <span>14h remaining</span>
                         </div>
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-lg font-extrabold text-foreground">+{m.xp}</p>
-                      <p className={cn("text-[10px] font-bold", m.xpColor)}>Grace Pts</p>
+                      <p className="text-lg font-extrabold text-foreground">+{m.xpReward}</p>
+                      <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400">Grace Pts</p>
                     </div>
                   </div>
                 </div>
@@ -194,24 +135,14 @@ export default function MissionsPage() {
                 {/* Card body */}
                 <div className="px-5 py-4 bg-card space-y-3">
                   <p className="text-sm text-muted-foreground leading-relaxed">{m.description}</p>
-                  <p className="text-xs text-primary font-semibold italic">— {m.verse}</p>
-                  {m.progress !== undefined && (
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-muted-foreground">Journey Progress</span>
-                        <span className="text-primary">{m.progress}%</span>
-                      </div>
-                      <Progress value={m.progress} className="h-2 rounded-full bg-muted [&>div]:rounded-full [&>div]:bg-green-500" />
-                    </div>
-                  )}
                   <Button
-                    onClick={() => toggle(m.id, m.xp, m.title)}
+                    onClick={() => toggle(m.id, m.xpReward, m.title)}
                     disabled={loading[m.id] || done}
                     className={cn(
                       "w-full h-10 rounded-xl font-bold transition-all",
                       done
                         ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
-                        : `${m.gradient} text-white shadow-md`
+                        : "gradient-gold text-white shadow-md"
                     )}
                     variant={done ? "outline" : "default"}
                   >

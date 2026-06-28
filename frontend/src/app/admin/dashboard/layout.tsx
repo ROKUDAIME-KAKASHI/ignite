@@ -1,11 +1,20 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { decrypt } from "@/lib/auth";
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const adminToken = cookieStore.get("admin_session")?.value;
 
-  if (adminToken !== "super_admin_verified") {
+  let isValid = false;
+  if (adminToken) {
+    try {
+      const payload = await decrypt(adminToken);
+      isValid = payload?.role === "SUPER_ADMIN";
+    } catch {}
+  }
+
+  if (!isValid) {
     redirect("/admin");
   }
 

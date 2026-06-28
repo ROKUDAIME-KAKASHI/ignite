@@ -3,26 +3,42 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
-export async function completeMission(missionId: string | number, xpReward: number, title: string) {
-  const session = await getSession();
-  if (!session?.id) return { success: false, error: "Not logged in" };
+import { awardXP } from "@/app/actions/gamification";
 
-  // In a real app we'd verify the mission wasn't already completed today,
-  // and we'd probably use a DailyJourney or Mission model.
-  // For now, let's just log the XP.
+export async function getMissions() {
+  let missions = await prisma.mission.findMany();
   
-  await prisma.user.update({
-    where: { id: session.id },
-    data: { xp: { increment: xpReward } }
-  });
+  if (missions.length === 0) {
+    await prisma.mission.createMany({
+      data: [
+        { title: "Corporal Work of Mercy", description: "Feed the hungry today. Share a meal, donate food, or volunteer at a soup kitchen. (Matthew 25:40)", xpReward: 50 },
+        { title: "Holy Mass", description: "Attend Sunday Liturgy and participate fully in the Eucharist. (CCC 1324)", xpReward: 150 },
+        { title: "Lectio Divina", description: "Spend 10 minutes in Sacred Reading — Read, Meditate, Pray, and Contemplate a passage. (Col 3:16)", xpReward: 30 },
+        { title: "Pilgrimage of the Gospels", description: "Read chapters from all four Gospels — Matthew, Mark, Luke, and John.", xpReward: 500 },
+      ]
+    });
+    missions = await prisma.mission.findMany();
+  }
 
-  await prisma.xPLog.create({
-    data: {
-      userId: session.id,
-      amount: xpReward,
-      reason: `Completed Mission: ${title}`
-    }
-  });
+  const session = await getSession();
+  const completedIds: string[] = [];
+  if (session?.id) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const logs = await prisma.xPLog.findMany({
+      where: { userId: session.id, awardedAt: { gte: today }, reason: { startsWith: "Completed Mission:" } }
+    });
+    logs.forEach(log => {
+      const title = log.reason.replace("Completed Mission: ", "");
+      const m = missions.find(x => x.title === title);
+      if (m) completedIds.push(m.id);
+    });
+  }
 
-  return { success: true };
+  return { missions, completedIds };
+}
+
+export async function completeMission(missionId: string | number, xpReward: number, title: string) {
+  const res = await awardXP(xpReward, `Completed Mission: ${title}`);
+  return { success: res.success };
 }

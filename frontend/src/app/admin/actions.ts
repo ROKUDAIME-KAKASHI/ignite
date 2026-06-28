@@ -2,13 +2,28 @@
 
 import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { encrypt, decrypt } from "@/lib/auth";
+
+async function verifyAdmin() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("admin_session")?.value;
+  if (!token) return false;
+  try {
+    const payload = await decrypt(token);
+    return payload?.role === "SUPER_ADMIN";
+  } catch {
+    return false;
+  }
+}
 
 export async function adminLogin(email: string, pass: string) {
-  if (email === "adminofignite@gmail.com" && pass === "adminofignite123") {
+  if (email === process.env.ADMIN_EMAIL && pass === process.env.ADMIN_PASS) {
     const cookieStore = await cookies();
-    cookieStore.set("admin_session", "super_admin_verified", {
+    const token = await encrypt({ role: "SUPER_ADMIN" });
+    cookieStore.set("admin_session", token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: 60 * 60 * 24 * 30 // 30 days
     });
@@ -18,24 +33,18 @@ export async function adminLogin(email: string, pass: string) {
 }
 
 export async function createAnnouncement(title: string, content: string) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("admin_session")?.value;
-  if (token !== "super_admin_verified") {
-    return { error: "Unauthorized" };
-  }
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
   await prisma.announcement.create({
     data: { title, content }
   });
+  revalidatePath("/dashboard");
+  revalidatePath("/notifications");
   return { success: true };
 }
 
 export async function createEvent(title: string, description: string, dateStr: string, location: string) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("admin_session")?.value;
-  if (token !== "super_admin_verified") {
-    return { error: "Unauthorized" };
-  }
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
   const event = await prisma.event.create({
     data: {
@@ -45,15 +54,13 @@ export async function createEvent(title: string, description: string, dateStr: s
       location
     }
   });
+  revalidatePath("/dashboard");
+  revalidatePath("/events");
   return { success: true, event };
 }
 
 export async function getAdminDashboardData() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("admin_session")?.value;
-  if (token !== "super_admin_verified") {
-    return { error: "Unauthorized" };
-  }
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
   const [totalUsers, prayersOffered, quizzesTaken, chaptersRead] = await Promise.all([
     prisma.user.count(),
@@ -94,42 +101,74 @@ export async function getAdminDashboardData() {
   };
 }
 
-export async function getPendingPrayers() {
-  const cookieStore = await cookies();
-  if (cookieStore.get("admin_session")?.value !== "super_admin_verified") {
-    return { error: "Unauthorized" };
-  }
+export async function getAllPrayers() {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
   const prayers = await prisma.prayerRequest.findMany({
-    where: { isApproved: false },
     orderBy: { createdAt: "desc" },
-    include: { user: { select: { firstName: true, lastName: true } } }
+    include: { user: { select: { firstName: true, lastName: true, email: true } } }
   });
 
   return { success: true, prayers };
 }
 
-export async function approvePrayer(id: string) {
-  const cookieStore = await cookies();
-  if (cookieStore.get("admin_session")?.value !== "super_admin_verified") {
-    return { error: "Unauthorized" };
-  }
+export async function deletePrayer(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
-  await prisma.prayerRequest.update({
-    where: { id },
-    data: { isApproved: true }
-  });
+  await prisma.prayerRequest.delete({ where: { id } });
+  revalidatePath("/prayer");
   return { success: true };
 }
 
-export async function deletePrayer(id: string) {
-  const cookieStore = await cookies();
-  if (cookieStore.get("admin_session")?.value !== "super_admin_verified") {
-    return { error: "Unauthorized" };
-  }
+export async function deleteAnnouncement(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
-  await prisma.prayerRequest.delete({
-    where: { id }
-  });
+  await prisma.announcement.delete({ where: { id } });
+  revalidatePath("/dashboard");
+  revalidatePath("/notifications");
   return { success: true };
+}
+
+export async function deleteEvent(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+
+  // Remove attendances first (FK constraint)
+  await prisma.attendance.deleteMany({ where: { eventId: id } });
+  await prisma.event.delete({ where: { id } });
+  revalidatePath("/dashboard");
+  revalidatePath("/events");
+  return { success: true };
+}
+
+// ── Public (no admin auth required) ──────────────────────────────────────────
+
+export async function getAnnouncements() {
+  const announcements = await prisma.announcement.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+  return announcements.map(a => ({
+    id: a.id,
+    title: a.title,
+    content: a.content,
+    createdAt: a.createdAt.toISOString(),
+    targetRole: a.targetRole,
+  }));
+}
+
+export async function getUpcomingEvents() {
+  const events = await prisma.event.findMany({
+    where: { date: { gte: new Date() } },
+    orderBy: { date: "asc" },
+    include: { attendances: true },
+    take: 20,
+  });
+  return events.map(e => ({
+    id: e.id,
+    title: e.title,
+    description: e.description || "Join us for this parish event.",
+    date: e.date.toISOString(),
+    location: e.location || "TBA",
+    attendees: e.attendances.length,
+  }));
 }

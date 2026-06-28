@@ -12,7 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 
 /* ─── Quiz data ──────────────────────────────────────────────────────────── */
 interface Question {
-  id: number;
+  id: string | number;
   type: "mcq" | "truefalse";
   question: string;
   options?: string[];
@@ -21,72 +21,26 @@ interface Question {
   verse?: string;
 }
 
-const DAILY_QUIZ: Question[] = [
-  {
-    id: 1, type: "mcq",
-    question: "Which Gospel is the shortest in the New Testament?",
-    options: ["Matthew", "Mark", "Luke", "John"],
-    answer: "Mark",
-    explanation: "The Gospel of Mark is the shortest of the four Gospels, with 16 chapters.",
-    verse: "Mark 1:1",
-  },
-  {
-    id: 2, type: "truefalse",
-    question: "The Last Supper took place on a Thursday before the Jewish Passover.",
-    answer: true,
-    explanation: "Jesus celebrated the Last Supper with His apostles on Holy Thursday, the night before His crucifixion.",
-    verse: "Luke 22:14-20",
-  },
-  {
-    id: 3, type: "mcq",
-    question: "How many Books are in the Orthodox Old Testament?",
-    options: ["39", "45", "46", "50"],
-    answer: "46",
-    explanation: "The Orthodox Old Testament includes up to 51 books depending on the tradition, including books not found in the Protestant Bible.",
-  },
-  {
-    id: 4, type: "truefalse",
-    question: "St. Peter was crucified upside-down because he felt unworthy to die like Jesus.",
-    answer: true,
-    explanation: "Tradition holds that St. Peter requested to be crucified upside-down, as he did not consider himself worthy to die in the same manner as Jesus Christ.",
-  },
-  {
-    id: 5, type: "mcq",
-    question: "What does 'Agape' mean in Greek?",
-    options: ["Friendship", "Romantic love", "Unconditional / Divine love", "Brotherly love"],
-    answer: "Unconditional / Divine love",
-    explanation: "Agape refers to the highest form of love — unconditional, sacrificial, divine love. It is the love God has for humanity.",
-    verse: "John 3:16",
-  },
-];
+interface QuizSet {
+  id: string | number;
+  label: string;
+  emoji: string;
+  questions: Question[];
+  xp: number;
+  color: string;
+  badge: string;
+  desc: string;
+}
 
-const CATECHISM_QUIZ: Question[] = [
-  {
-    id: 1, type: "mcq",
-    question: "How many Sacraments (Holy Mysteries) are there in the Orthodox Church?",
-    options: ["5", "6", "7", "10"],
-    answer: "7",
-    explanation: "The seven sacraments are: Baptism, Eucharist, Confirmation, Reconciliation, Anointing of the Sick, Holy Orders, and Matrimony.",
-  },
-  {
-    id: 2, type: "truefalse",
-    question: "The Immaculate Conception refers to the sinless conception of Jesus Christ.",
-    answer: false,
-    explanation: "The Immaculate Conception refers to Mary being conceived without original sin — not to Jesus. Jesus's miraculous birth is called the Virgin Birth.",
-  },
-];
-
-const quizSets = [
-  { id: "daily",      label: "Daily Quiz",       emoji: "⭐", questions: DAILY_QUIZ,      xp: 100, color: "gradient-gold",    badge: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",   desc: "5 questions · Scripture & Faith" },
-  { id: "catechism",  label: "Faith",        emoji: "📜", questions: CATECHISM_QUIZ,  xp: 80,  color: "gradient-royal",   badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",     desc: "2 questions · Orthodox Teaching" },
-];
+import { getQuizzes, recordQuizAttempt } from "@/app/actions/quizzes";
+import { useEffect } from "react";
 
 type Phase = "select" | "quiz" | "result";
 
 /* ─── Main Page ──────────────────────────────────────────────────────────── */
 export default function QuizzesPage() {
   const [phase, setPhase] = useState<Phase>("select");
-  const [activeSet, setActiveSet] = useState(quizSets[0]);
+  const [activeSet, setActiveSet] = useState<QuizSet | null>(null);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<(string | boolean | null)[]>([]);
   const [selected, setSelected] = useState<string | boolean | null>(null);
@@ -95,13 +49,23 @@ export default function QuizzesPage() {
   const [submittingXP, setSubmittingXP] = useState(false);
 
   const { user, setUser } = useAuth();
+  const [quizSets, setQuizSets] = useState<QuizSet[]>([]);
+  
+  useEffect(() => {
+    getQuizzes().then((data: any) => {
+      setQuizSets(data);
+      if (data.length > 0) setActiveSet(data[0]);
+    });
+  }, []);
+
+  if (!quizSets.length || !activeSet) return null;
 
   const questions = activeSet.questions;
   const q = questions[currentQ];
   const totalQ = questions.length;
 
   /* Start quiz */
-  const startQuiz = (set: typeof quizSets[0]) => {
+  const startQuiz = (set: QuizSet) => {
     setActiveSet(set);
     setCurrentQ(0);
     setAnswers(new Array(set.questions.length).fill(null));
@@ -124,12 +88,15 @@ export default function QuizzesPage() {
   const nextQuestion = async () => {
     if (currentQ + 1 >= totalQ) {
       const earnedXP = Math.round((score / totalQ) * activeSet.xp);
-      if (earnedXP > 0 && user) {
+      if (user) {
         setSubmittingXP(true);
-        const res = await awardXP(earnedXP, `Completed Quiz: ${activeSet.label}`);
-        if (res.success && res.xp) {
-          setUser({ ...user, xp: res.xp, level: res.level });
+        if (earnedXP > 0) {
+          const res = await awardXP(earnedXP, `Completed Quiz: ${activeSet.label}`);
+          if (res.success && res.xp) {
+            setUser({ ...user, xp: res.xp, level: res.level });
+          }
         }
+        await recordQuizAttempt(activeSet.id, score);
         setSubmittingXP(false);
       }
       setPhase("result");

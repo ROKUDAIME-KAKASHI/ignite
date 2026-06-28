@@ -107,6 +107,8 @@ model Question {
   quiz          Quiz     @relation(fields: [quizId], references: [id])
   text          String
   type          String   // e.g., MCQ, TRUE_FALSE
+  explanation   String?
+  verse         String?
   answers       Answer[]
 }
 
@@ -149,10 +151,19 @@ model Attendance {
   checkedInAt DateTime @default(now())
 }
 
+model PrayerCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  color       String?
+  requests    PrayerRequest[]
+}
+
 model PrayerRequest {
   id          String   @id @default(uuid())
   userId      String?
   user        User?    @relation(fields: [userId], references: [id])
+  categoryId  String?
+  category    PrayerCategory? @relation(fields: [categoryId], references: [id])
   content     String
   isAnonymous Boolean  @default(false)
   isApproved  Boolean  @default(false)
@@ -193,4 +204,37 @@ model Announcement {
   content     String
   targetRole  String?    // null means everyone
   createdAt   DateTime @default(now())
+}
+
+model SaintOfTheDay {
+  id          String   @id @default(uuid())
+  date        DateTime @unique
+  name        String
+  title       String?
+  bio         String
+  imageUrl    String?
+}
+
+model ReadingPlan {
+  id          String   @id @default(uuid())
+  title       String
+  duration    String
+  progress    Int      @default(0)
+  icon        String
+  color       String
+}
+
+model FeaturedVerse {
+  id          String   @id @default(uuid())
+  text        String
+  reference   String
+  theme       String
+}
+
+model Guide {
+  id          String   @id @default(uuid())
+  title       String
+  type        String   // e.g. "PRAYER", "EXAMINATION"
+  content     String   // Can store JSON or text
+  icon        String?
 }

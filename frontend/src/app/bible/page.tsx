@@ -6,33 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Search, ChevronRight, BookOpen, Bookmark, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { BIBLE_BOOKS, groupBooksByCategory } from "@/lib/bible-books";
+import { BIBLE_BOOKS, groupBooksByCategory, getBookBySlug } from "@/lib/bible-books";
 import Link from "next/link";
+import { useEffect } from "react";
 
 const tabs = ["Browse", "Plans", "Bookmarks"];
 
-// Featured books (quick access)
-const FEATURED = [
-  { slug: "psalms",      chapter: 23, label: "Psalm 23",     emoji: "🌿" },
-  { slug: "john",        chapter: 1,  label: "John 1",       emoji: "✝️" },
-  { slug: "romans",      chapter: 8,  label: "Romans 8",     emoji: "⚡" },
-  { slug: "genesis",     chapter: 1,  label: "Genesis 1",    emoji: "🌅" },
-  { slug: "matthew",     chapter: 5,  label: "Matthew 5",    emoji: "⛰️" },
-  { slug: "revelation",  chapter: 21, label: "Revelation 21",emoji: "👑" },
-];
-
-const plans = [
-  { title: "Walk with Christ — Gospels",  desc: "Matthew · Mark · Luke · John", progress: 34, days: 40, emoji: "✝️", season: "Easter",   slug: "matthew", chapter: 1 },
-  { title: "Psalms & Proverbs: 30 Days",  desc: "Wisdom of the Old Testament",  progress: 67, days: 30, emoji: "📜", season: "Ordinary", slug: "psalms",  chapter: 1 },
-  { title: "Letters of St. Paul",          desc: "Romans through Philemon",      progress: 12, days: 21, emoji: "⚓", season: "Ordinary", slug: "romans",  chapter: 1 },
-  { title: "Lenten Journey: 40 Days",      desc: "Repentance, renewal, resurrection", progress: 0, days: 40, emoji: "🌿", season: "Lent", slug: "isaiah", chapter: 40 },
-];
-
-const seasonColor: Record<string, string> = {
-  Easter:   "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-  Lent:     "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  Ordinary: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-};
+import { getBibleContent } from "./actions";
 
 const otGroups = groupBooksByCategory("OT");
 const ntGroups = groupBooksByCategory("NT");
@@ -41,6 +21,43 @@ export default function BiblePage() {
   const [activeTab, setActiveTab] = useState("Browse");
   const [search, setSearch] = useState("");
   const [testament, setTestament] = useState<"OT" | "NT">("NT");
+  const [bookmarks, setBookmarks] = useState<{ bookSlug: string, ch: string, v: string, name: string }[]>([]);
+  const [lastRead, setLastRead] = useState<{ slug: string, ch: string, name: string, total: number } | null>(null);
+
+  const [featured, setFeatured] = useState<any[]>([]);
+  const [readingPlans, setReadingPlans] = useState<any[]>([]);
+
+  useEffect(() => {
+    getBibleContent().then((res) => {
+      setFeatured(res.featured.map((f: any) => ({
+        slug: f.reference.split(":")[0],
+        chapter: f.reference.split(":")[1] || 1,
+        label: f.text,
+        emoji: f.theme
+      })));
+      setReadingPlans(res.plans);
+    });
+
+    // Load last read
+    const lr = localStorage.getItem("last_read");
+    if (lr) {
+      const [slug, ch] = lr.split(":");
+      const b = getBookBySlug(slug);
+      if (b) setLastRead({ slug, ch, name: b.name, total: b.chapters });
+    }
+
+    // Load bookmarks
+    const bms = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("bm:")) {
+        const [, slug, ch, v] = key.split(":");
+        const b = getBookBySlug(slug);
+        if (b) bms.push({ bookSlug: slug, ch, v, name: b.name });
+      }
+    }
+    setBookmarks(bms);
+  }, [activeTab]);
 
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
@@ -132,34 +149,34 @@ export default function BiblePage() {
 
                 {/* Quick access */}
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">⭐ Beloved Passages</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {FEATURED.map((f) => (
-                      <Link
-                        key={f.label}
-                        href={`/bible/${f.slug}/${f.chapter}`}
-                        className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl bg-card border border-border/60 card-holy card-holy-hover text-center"
-                      >
-                        <span className="text-2xl">{f.emoji}</span>
-                        <span className="text-[11px] font-bold text-foreground font-serif leading-tight">{f.label}</span>
-                      </Link>
-                    ))}
-                  </div>
+                  <h3 className="font-bold text-foreground font-serif mb-3 px-1">Featured</h3>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                {featured.map((f) => (
+                  <Link href={`/bible/${f.slug}/${f.chapter}`} key={f.label} className="bg-card border border-border/60 hover:border-primary/30 p-3 rounded-2xl flex items-center gap-2.5 transition-colors group">
+                    <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition-transform">
+                      {f.emoji}
+                    </div>
+                    <span className="text-[11px] font-bold text-foreground leading-tight">{f.label}</span>
+                  </Link>
+                ))}
+              </div>
                 </div>
 
                 {/* Continue Reading */}
-                <Link href="/bible/philippians/4" className="block rounded-2xl p-4 bg-gradient-to-r from-amber-500/10 to-yellow-500/8 dark:from-amber-500/20 dark:to-yellow-500/15 border border-amber-200/50 dark:border-amber-800/30 card-holy card-holy-hover">
-                  <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1.5">📌 Continue Reading</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-bold text-foreground text-lg font-serif">Philippians · Chapter 4</p>
-                      <p className="text-sm text-muted-foreground">4 of 4 chapters</p>
+                {lastRead && (
+                  <Link href={`/bible/${lastRead.slug}/${lastRead.ch}`} className="block rounded-2xl p-4 bg-gradient-to-r from-amber-500/10 to-yellow-500/8 dark:from-amber-500/20 dark:to-yellow-500/15 border border-amber-200/50 dark:border-amber-800/30 card-holy card-holy-hover">
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1.5">📌 Continue Reading</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-foreground text-lg font-serif">{lastRead.name} · Chapter {lastRead.ch}</p>
+                        <p className="text-sm text-muted-foreground">{lastRead.ch} of {lastRead.total} chapters</p>
+                      </div>
+                      <div className="w-11 h-11 rounded-xl gradient-gold flex items-center justify-center shadow-md halo-glow">
+                        <ChevronRight className="w-5 h-5 text-white" />
+                      </div>
                     </div>
-                    <div className="w-11 h-11 rounded-xl gradient-gold flex items-center justify-center shadow-md halo-glow">
-                      <ChevronRight className="w-5 h-5 text-white" />
-                    </div>
-                  </div>
-                </Link>
+                  </Link>
+                )}
 
                 {/* OT / NT toggle */}
                 <div className="flex gap-2">
@@ -212,30 +229,24 @@ export default function BiblePage() {
                 <p className="text-xs text-muted-foreground italic font-serif">
                   "Blessed is the one who meditates on the law of the Lord day and night." — Psalm 1:2
                 </p>
-                {plans.map((plan) => (
-                  <Link
-                    key={plan.title}
-                    href={`/bible/${plan.slug}/${plan.chapter}`}
-                    className="block rounded-2xl p-4 bg-card border border-border/60 card-holy card-holy-hover"
-                  >
+                {readingPlans.map((plan, i) => (
+                  <div key={i} className="block rounded-2xl p-4 bg-card border border-border/60 card-holy card-holy-hover group">
                     <div className="flex items-start gap-3">
-                      <span className="text-3xl">{plan.emoji}</span>
+                      <span className="text-3xl">{plan.icon}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1 flex-wrap gap-1">
                           <p className="font-bold text-sm text-foreground font-serif">{plan.title}</p>
-                          <Badge className={cn("text-[10px] border-0 px-2", seasonColor[plan.season])}>{plan.season}</Badge>
+                          <Badge className={cn("text-[10px] border-0 px-2", plan.color)}>{plan.duration}</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground mb-2">{plan.desc}</p>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mt-2">
                           <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
                             <div className="h-full rounded-full gradient-gold transition-all" style={{ width: `${plan.progress}%` }} />
                           </div>
                           <span className="text-[11px] font-bold text-primary">{plan.progress}%</span>
-                          <span className="text-[10px] text-muted-foreground">{plan.days}d</span>
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </motion.div>
             )}
@@ -246,11 +257,28 @@ export default function BiblePage() {
                 <p className="text-xs text-muted-foreground italic font-serif mb-3">
                   "I have hidden your word in my heart." — Psalm 119:11
                 </p>
-                <div className="text-center py-12 text-muted-foreground">
-                  <Bookmark className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p className="font-serif font-semibold">No bookmarks yet</p>
-                  <p className="text-sm italic mt-1">Tap any verse while reading to bookmark it.</p>
-                </div>
+                {bookmarks.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Bookmark className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                    <p className="font-serif font-semibold">No bookmarks yet</p>
+                    <p className="text-sm italic mt-1">Tap any verse while reading to bookmark it.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {bookmarks.map((bm, i) => (
+                      <Link
+                        key={i}
+                        href={`/bible/${bm.bookSlug}/${bm.ch}`}
+                        className="flex items-center justify-between px-4 py-3 rounded-xl bg-card border border-border/60 card-holy card-holy-hover"
+                      >
+                        <div>
+                          <p className="font-bold text-sm text-foreground font-serif">{bm.name} {bm.ch}:{bm.v}</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
           </>

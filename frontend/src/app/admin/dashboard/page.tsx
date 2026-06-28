@@ -16,7 +16,7 @@ const SYSTEM_ALERTS = [
 ];
 
 import { useRouter } from "next/navigation";
-import { getAdminDashboardData, getPendingPrayers, approvePrayer, deletePrayer } from "../actions";
+import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent } from "../actions";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -31,11 +31,19 @@ export default function AdminDashboardPage() {
     chaptersRead: 0
   });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
-  const [pendingPrayers, setPendingPrayers] = useState<any[]>([]);
+  const [allPrayers, setAllPrayers] = useState<any[]>([]);
+  const [existingEvents, setExistingEvents] = useState<any[]>([]);
+  const [existingAnnouncements, setExistingAnnouncements] = useState<any[]>([]);
 
   const fetchPrayers = async () => {
-    const res = await getPendingPrayers();
-    if (res.success && res.prayers) setPendingPrayers(res.prayers);
+    const res = await getAllPrayers();
+    if (res.success && res.prayers) setAllPrayers(res.prayers);
+  };
+
+  const fetchEventsAndNotices = async () => {
+    const [evs, anns] = await Promise.all([getUpcomingEvents(), getAnnouncements()]);
+    setExistingEvents(evs);
+    setExistingAnnouncements(anns);
   };
 
   useEffect(() => {
@@ -46,6 +54,7 @@ export default function AdminDashboardPage() {
         setRecentUsers(res.recentUsers);
       }
       await fetchPrayers();
+      await fetchEventsAndNotices();
     }
     fetchData();
   }, []);
@@ -74,6 +83,7 @@ export default function AdminDashboardPage() {
     if (res.success) {
       setNoticeStatus("success");
       setNoticeTitle(""); setNoticeContent("");
+      await fetchEventsAndNotices();
       setTimeout(() => setNoticeStatus("idle"), 2000);
     } else setNoticeStatus("error");
   };
@@ -86,21 +96,27 @@ export default function AdminDashboardPage() {
       setCreatedEventId(res.event.id);
       setEvStatus("success");
       setEvTitle(""); setEvDesc(""); setEvDate(""); setEvLoc("");
+      await fetchEventsAndNotices();
     } else setEvStatus("error");
   };
 
-  const handleApprovePrayer = async (id: string) => {
-    await approvePrayer(id);
-    await fetchPrayers();
-  };
-
   const handleDeletePrayer = async (id: string) => {
-    if (!confirm("Delete this prayer request?")) return;
+    if (!confirm("Delete this prayer from the wall?")) return;
     await deletePrayer(id);
     await fetchPrayers();
   };
 
+  const handleDeleteAnnouncement = async (id: string) => {
+    if (!confirm("Delete this announcement?")) return;
+    await deleteAnnouncement(id);
+    await fetchEventsAndNotices();
+  };
 
+  const handleDeleteEvent = async (id: string) => {
+    if (!confirm("Delete this event? This will also remove all RSVPs.")) return;
+    await deleteEvent(id);
+    await fetchEventsAndNotices();
+  };
 
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
@@ -132,8 +148,8 @@ export default function AdminDashboardPage() {
               "flex-1 py-2 px-3 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors whitespace-nowrap",
               activeTab === t ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
             )}>
-              {t} {t === "prayers" && pendingPrayers.length > 0 && (
-                <span className="ml-1.5 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[9px]">{pendingPrayers.length}</span>
+              {t} {t === "prayers" && allPrayers.length > 0 && (
+                <span className="ml-1.5 bg-purple-500 text-white px-1.5 py-0.5 rounded-full text-[9px]">{allPrayers.length}</span>
               )}
             </button>
           ))}
@@ -141,6 +157,7 @@ export default function AdminDashboardPage() {
 
         {activeTab === "overview" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+
             {/* ── System Alerts ── */}
             {SYSTEM_ALERTS.length > 0 && (
               <div className="space-y-2">
@@ -225,48 +242,48 @@ export default function AdminDashboardPage() {
                 <div className="w-10 h-10 rounded-xl gradient-lent text-white flex items-center justify-center shadow-md">
                   <Heart className="w-5 h-5" />
                 </div>
-                <div>
-                  <h2 className="font-bold font-serif text-lg">Prayer Moderation</h2>
-                  <p className="text-xs text-muted-foreground">Approve or reject community prayer requests.</p>
+                <div className="flex-1">
+                  <h2 className="font-bold font-serif text-lg">Prayer Wall</h2>
+                  <p className="text-xs text-muted-foreground">All community prayers — delete any inappropriate submissions.</p>
                 </div>
+                <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-0">
+                  {allPrayers.length} total
+                </Badge>
               </div>
 
-              {pendingPrayers.length === 0 ? (
+              {allPrayers.length === 0 ? (
                 <div className="text-center py-10 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
-                  <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm font-bold text-slate-500">All Caught Up</p>
-                  <p className="text-xs text-slate-400 mt-1">No pending prayer requests to review.</p>
+                  <p className="text-3xl mb-2">🙏</p>
+                  <p className="text-sm font-bold text-slate-500">No prayers yet</p>
+                  <p className="text-xs text-slate-400 mt-1">Community prayers will appear here.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {pendingPrayers.map((prayer) => (
+                  {allPrayers.map((prayer) => (
                     <div key={prayer.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border/50">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-0 text-[10px]">
-                              {prayer.isAnonymous ? "Anonymous" : `${prayer.user?.firstName} ${prayer.user?.lastName}`}
+                              {prayer.isAnonymous ? "Anonymous" : `${prayer.user?.firstName ?? ""} ${prayer.user?.lastName ?? ""}`.trim() || "Unknown"}
+                            </Badge>
+                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0 text-[10px]">
+                              ✓ Live
                             </Badge>
                             <span className="text-[10px] text-muted-foreground">{new Date(prayer.createdAt).toLocaleDateString()}</span>
                           </div>
-                          <p className="text-sm text-foreground font-medium leading-relaxed">
-                            "{prayer.content}"
+                          <p className="text-sm text-foreground font-medium leading-relaxed italic">
+                            &ldquo;{prayer.content}&rdquo;
                           </p>
+                          <p className="text-[10px] text-muted-foreground mt-1.5">{prayer.prayCount} 🙏 prayers</p>
                         </div>
-                        <div className="flex flex-col gap-2 shrink-0">
-                          <button 
-                            onClick={() => handleApprovePrayer(prayer.id)}
-                            className="w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-lg flex items-center justify-center transition-colors"
-                          >
-                            <CheckCircle2 className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeletePrayer(prayer.id)}
-                            className="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors"
-                          >
-                            <AlertTriangle className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => handleDeletePrayer(prayer.id)}
+                          className="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors shrink-0"
+                          title="Delete prayer"
+                        >
+                          <AlertTriangle className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -310,6 +327,35 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </div>
+
+            {/* ── Posted Notices List ── */}
+            {existingAnnouncements.length > 0 && (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-border/50 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-border/50">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Posted Notices ({existingAnnouncements.length})</p>
+                </div>
+                <div className="divide-y divide-border/50">
+                  {existingAnnouncements.map((ann) => (
+                    <div key={ann.id} className="px-4 py-3 flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-foreground">{ann.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{ann.content}</p>
+                        <p className="text-[10px] text-primary font-semibold mt-1">
+                          {new Date(ann.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteAnnouncement(ann.id)}
+                        className="w-7 h-7 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors shrink-0 mt-0.5"
+                        title="Delete notice"
+                      >
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -388,6 +434,36 @@ export default function AdminDashboardPage() {
                 )}
               </div>
             </div>
+
+            {/* ── Existing Events List ── */}
+            {existingEvents.length > 0 && (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-border/50 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-border/50">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Upcoming Events ({existingEvents.length})</p>
+                </div>
+                <div className="divide-y divide-border/50">
+                  {existingEvents.map((ev) => (
+                    <div key={ev.id} className="px-4 py-3 flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-foreground">{ev.title}</p>
+                        <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground flex-wrap">
+                          <span>📅 {new Date(ev.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>
+                          {ev.location && <span>📍 {ev.location}</span>}
+                          <span>👥 {ev.attendees} going</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteEvent(ev.id)}
+                        className="w-7 h-7 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors shrink-0 mt-0.5"
+                        title="Delete event"
+                      >
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
         

@@ -10,19 +10,13 @@ import { LogOut, ChevronRight, Edit3, Check, X, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import { getProfileStats } from "@/app/actions/profile";
 
 /* ─── Static data ──────────────────────────────────────────────────────────── */
-const spiritualBadges = [
-  { emoji: "📖", label: "Gospel Reader",    desc: "Read all 4 Gospels",      color: "bg-amber-50 dark:bg-amber-900/20   border-amber-200/50 dark:border-amber-800/30"  },
-  { emoji: "🤝", label: "Servant Heart",    desc: "10 Acts of Charity",      color: "bg-green-50 dark:bg-green-900/20   border-green-200/50 dark:border-green-800/30"  },
-  { emoji: "🕯️", label: "Adorer",           desc: "5 Adoration sessions",   color: "bg-amber-50 dark:bg-amber-900/20   border-amber-200/50 dark:border-amber-800/30"  },
-  { emoji: "🌿", label: "Lenten Warrior",   desc: "Completed Lent plan",     color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200/50 dark:border-purple-800/30"},
-  { emoji: "⛪", label: "Sunday Faithful",  desc: "8 weeks of Mass",         color: "bg-blue-50 dark:bg-blue-900/20     border-blue-200/50 dark:border-blue-800/30"    },
-  { emoji: "✝️", label: "Confirmed",         desc: "Received Confirmation",  color: "bg-red-50 dark:bg-red-900/20       border-red-200/50 dark:border-red-800/30"      },
-];
 
 const weekDays = ["S", "M", "T", "W", "T", "F", "S"];
-const streakDone = [false, true, true, true, true, true, false];
+const defaultStreak = [false, false, false, false, false, false, false];
 
 const saintQuote = { quote: "Do small things with great love.", author: "St. Teresa of Calcutta" };
 
@@ -115,6 +109,13 @@ function NameEditor({ currentName, onSave }: { currentName: string; onSave: (n: 
 export default function ProfilePage() {
   const { user, updateDisplayName, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[] }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [] });
+
+  useEffect(() => {
+    getProfileStats().then(s => {
+      if (s) setStats(s);
+    });
+  }, []);
 
   const initials = user?.displayName
     ? user.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
@@ -198,8 +199,8 @@ export default function ProfilePage() {
           {[
             { emoji: "⚡", value: xp.toLocaleString(), label: "Grace Pts" },
             { emoji: "🕯️", value: streak.toString(),    label: "Day Streak" },
-            { emoji: "🏅", value: "0",    label: "Badges" },
-            { emoji: "📖", value: "0",    label: "Chapters" },
+            { emoji: "🏅", value: stats.badges.toString(),    label: "Badges" },
+            { emoji: "📖", value: stats.chapters.toString(),    label: "Chapters" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -233,9 +234,9 @@ export default function ProfilePage() {
               <div key={i} className="flex flex-col items-center gap-1">
                 <div className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                  streakDone[i] ? "gradient-gold text-white shadow-sm" : "bg-muted text-muted-foreground"
+                  stats.streakDone[i] ? "gradient-gold text-white shadow-sm" : "bg-muted text-muted-foreground"
                 )}>
-                  {streakDone[i] ? "✓" : d}
+                  {stats.streakDone[i] ? "✓" : d}
                 </div>
                 <span className="text-[9px] text-muted-foreground">{d}</span>
               </div>
@@ -252,21 +253,21 @@ export default function ProfilePage() {
             View All <ChevronRight className="w-3 h-3" />
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {spiritualBadges.map((b, i) => (
-            <motion.div
-              key={b.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.06 }}
-              className={cn("rounded-xl p-3 flex flex-col items-center text-center border card-holy", b.color)}
-            >
-              <span className="text-2xl mb-1">{b.emoji}</span>
-              <p className="text-[10px] font-bold text-foreground leading-tight font-serif">{b.label}</p>
-              <p className="text-[9px] text-muted-foreground mt-0.5 leading-tight">{b.desc}</p>
-            </motion.div>
-          ))}
-        </div>
+        <div className="grid grid-cols-2 gap-2 mt-4">
+            {stats.badgeList.length > 0 ? stats.badgeList.map((b) => (
+              <div key={b.label} className={cn("p-3 rounded-xl border flex items-center gap-3", b.color)}>
+                <span className="text-2xl drop-shadow-sm">{b.emoji}</span>
+                <div>
+                  <p className="text-[11px] font-bold text-foreground font-serif leading-tight">{b.label}</p>
+                  <p className="text-[9px] text-muted-foreground mt-0.5">{b.desc}</p>
+                </div>
+              </div>
+            )) : (
+              <div className="col-span-2 text-center text-muted-foreground text-sm py-4">
+                No badges earned yet. Start a journey!
+              </div>
+            )}
+          </div>
       </div>
 
       {/* ── Saint Quote ── */}

@@ -97,7 +97,10 @@ export default function BibleReaderPage() {
   useEffect(() => { 
     setMarkedRead(false);
     void load(); 
-  }, [load]);
+    if (book) {
+      localStorage.setItem("last_read", `${book.slug}:${chapter}`);
+    }
+  }, [load, book, chapter]);
 
   if (!book) {
     return (

@@ -20,30 +20,39 @@ interface PrayerRequest {
   time: string;
 }
 
-import { submitPrayer, getApprovedPrayers, incrementPrayerCount } from "./actions";
+import { submitPrayer, getApprovedPrayers, incrementPrayerCount, getCategories } from "./actions";
 
 /* ─── Categories ── */
-
-const CATEGORIES = ["All", "Healing", "Strength", "Thanksgiving", "Comfort", "Family", "Community"];
-
-const categoryColor: Record<string, string> = {
-  Healing:      "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  Strength:     "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-  Thanksgiving: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  Comfort:      "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  Family:       "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  Community:    "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",
-};
+// We now fetch these from the database, but we still define an "All" fallback for filtering
+const DEFAULT_CATEGORY_COLOR = "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
 
 /* ─── Prayer Card ── */
-function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: string) => void }) {
+function PrayerCard({ req, onPray, catColor }: { req: PrayerRequest; onPray: (id: string) => void; catColor: string }) {
   const [animating, setAnimating] = useState(false);
+  const [praying, setPraying] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (praying && timeLeft > 0) {
+      timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
+    } else if (praying && timeLeft === 0) {
+      setPraying(false);
+      if (!req.prayed) {
+        setAnimating(true);
+        onPray(req.id);
+        setTimeout(() => setAnimating(false), 600);
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [praying, timeLeft, req.prayed, onPray, req.id]);
 
   const handlePray = () => {
     if (req.prayed) return;
-    setAnimating(true);
-    onPray(req.id);
-    setTimeout(() => setAnimating(false), 600);
+    if (!praying) {
+      setPraying(true);
+      setTimeLeft(60);
+    }
   };
 
   return (
@@ -68,7 +77,7 @@ function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: string) 
               <p className="text-[10px] text-muted-foreground">{new Date(req.time).toLocaleDateString()}</p>
             </div>
           </div>
-          <Badge className={cn("text-[10px] border-0 px-2 shrink-0", categoryColor[req.category] || "bg-muted text-muted-foreground")}>
+          <Badge className={cn("text-[10px] uppercase font-bold", catColor)}>
             {req.category}
           </Badge>
         </div>
@@ -84,19 +93,22 @@ function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: string) 
           <span className="font-semibold">{req.prayers} praying</span>
         </div>
         <motion.button
-          whileTap={{ scale: 0.9 }}
+          whileTap={!praying && !req.prayed ? { scale: 0.9 } : undefined}
           onClick={handlePray}
+          disabled={praying}
           className={cn(
             "flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl transition-all",
             req.prayed
               ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+              : praying
+              ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700"
               : "gradient-royal text-white shadow-md hover:opacity-90"
           )}
         >
-          <motion.span animate={animating ? { scale: [1, 1.5, 1] } : {}}>
+          <motion.span animate={animating || praying ? { scale: [1, 1.2, 1], transition: { repeat: praying ? Infinity : 0, duration: 1 } } : {}}>
             🙏
           </motion.span>
-          {req.prayed ? "Prayed ✓" : "Pray for this"}
+          {req.prayed ? "Prayed ✓" : praying ? `Meditating... ${timeLeft}s` : "Pray for this (1m)"}
         </motion.button>
       </div>
     </motion.div>
@@ -104,21 +116,45 @@ function PrayerCard({ req, onPray }: { req: PrayerRequest; onPray: (id: string) 
 }
 
 /* ─── Main Page ── */
-export default function PrayerWallPage() {
-  const [requests, setRequests] = useState<PrayerRequest[]>([]);
-  const [activeCategory, setActiveCategory] = useState("All");
+export default function PrayerWall() {
+  const [filter, setFilter] = useState("All");
+  const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
+  const [dbCategories, setDbCategories] = useState<{name: string, color: string}[]>([]);
+  
   const [text, setText] = useState("");
   const [anonymous, setAnonymous] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("General");
+  const [newCat, setNewCat] = useState("General");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    getApprovedPrayers().then(setRequests);
+    loadData();
   }, []);
 
+  const loadData = async () => {
+    setRefreshing(true);
+    try {
+      const [fetchedPrayers, fetchedCats] = await Promise.all([
+        getApprovedPrayers(),
+        getCategories()
+      ]);
+      setPrayers(fetchedPrayers);
+      setDbCategories(fetchedCats);
+      if (fetchedCats.length > 0 && !fetchedCats.find(c => c.name === "General")) {
+        setNewCat(fetchedCats[0].name);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const categories = ["All", ...dbCategories.map(c => c.name)];
+
   const onPray = async (id: string) => {
-    setRequests((prev) =>
+    setPrayers((prev) =>
       prev.map((r) => r.id === id ? { ...r, prayers: r.prayed ? r.prayers - 1 : r.prayers + 1, prayed: !r.prayed } : r)
     );
     await incrementPrayerCount(id);
@@ -127,15 +163,15 @@ export default function PrayerWallPage() {
   const handleSubmit = async () => {
     if (!text.trim()) return;
     setSubmitting(true);
-    await submitPrayer(text.trim(), anonymous, selectedCategory);
+    await submitPrayer(text.trim(), anonymous, newCat);
     setText("");
     setSubmitting(false);
     setSubmitted(true);
+    loadData();
     setTimeout(() => setSubmitted(false), 5000);
   };
 
-  const filtered = requests; // Disable category filtering for now since db doesn't store categories
-  const totalPrayers = requests.reduce((acc, r) => acc + r.prayers, 0);
+  const totalPrayers = prayers.reduce((acc, r) => acc + r.prayers, 0);
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -163,7 +199,7 @@ export default function PrayerWallPage() {
             </div>
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
               <span>✝️</span>
-              <span className="text-white text-xs font-semibold">{requests.length} requests</span>
+              <span className="text-white text-xs font-semibold">{prayers.length} requests</span>
             </div>
           </div>
         </div>
@@ -190,12 +226,12 @@ export default function PrayerWallPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Category picker */}
                 <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  value={newCat}
+                  onChange={(e) => setNewCat(e.target.value)}
                   className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border/60 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
-                  {CATEGORIES.filter(c => c !== "All").map(c => (
-                    <option key={c} value={c}>{c}</option>
+                  {dbCategories.map(c => (
+                    <option key={c.name} value={c.name}>{c.name}</option>
                   ))}
                 </select>
                 {/* Anonymous toggle */}
@@ -228,7 +264,7 @@ export default function PrayerWallPage() {
                   exit={{ opacity: 0 }}
                   className="text-xs text-green-600 dark:text-green-400 font-semibold text-center mt-3"
                 >
-                  ✓ Your request has been shared and is pending review by the admin. 🙏
+                  ✓ Your prayer has been shared with the community. 🙏
                 </motion.p>
               )}
             </AnimatePresence>
@@ -237,18 +273,18 @@ export default function PrayerWallPage() {
 
         {/* ── Category filter ── */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {CATEGORIES.map((cat) => (
+          {categories.map(c => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={c}
+              onClick={() => setFilter(c)}
               className={cn(
                 "shrink-0 text-xs font-bold px-4 py-2 rounded-full transition-all whitespace-nowrap border",
-                activeCategory === cat
+                filter === c
                   ? "gradient-lent text-white border-transparent shadow-md"
                   : "border-border/60 text-muted-foreground hover:text-foreground bg-card"
               )}
             >
-              {cat}
+              {c}
             </button>
           ))}
         </div>
@@ -256,11 +292,15 @@ export default function PrayerWallPage() {
         {/* ── Prayer requests ── */}
         <div className="space-y-3">
           <AnimatePresence>
-            {filtered.map((req) => (
-              <PrayerCard key={req.id} req={req} onPray={onPray} />
-            ))}
+            {(() => {
+              let filtered = filter === "All" ? prayers : prayers.filter(p => p.category === filter);
+              return filtered.map(req => {
+                const catDef = dbCategories.find(c => c.name === req.category);
+                return <PrayerCard key={req.id} req={req} onPray={onPray} catColor={catDef?.color || DEFAULT_CATEGORY_COLOR} />
+              });
+            })()}
           </AnimatePresence>
-          {filtered.length === 0 && (
+          {prayers.length === 0 && !refreshing && (
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-3xl mb-2">🕊️</p>
               <p className="font-serif font-semibold">No requests in this category</p>
