@@ -1,0 +1,187 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, Trophy, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { awardXP } from "@/app/actions/gamification";
+import { useAuth } from "@/context/AuthContext";
+
+const TARGET_WORD = "GRACE";
+const MAX_GUESSES = 6;
+const WORD_LENGTH = 5;
+
+const KEYBOARD_ROWS = [
+  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+  ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"]
+];
+
+export default function WordlePage() {
+  const [guesses, setGuesses] = useState<string[]>([]);
+  const [currentGuess, setCurrentGuess] = useState("");
+  const [gameOver, setGameOver] = useState(false);
+  const [won, setWon] = useState(false);
+  const { user, setUser } = useAuth();
+  const [awarded, setAwarded] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameOver) return;
+      if (e.key === "Enter") {
+        submitGuess();
+      } else if (e.key === "Backspace") {
+        setCurrentGuess(prev => prev.slice(0, -1));
+      } else if (/^[A-Za-z]$/.test(e.key) && currentGuess.length < WORD_LENGTH) {
+        setCurrentGuess(prev => (prev + e.key).toUpperCase());
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentGuess, gameOver]);
+
+  const submitGuess = async () => {
+    if (currentGuess.length !== WORD_LENGTH) return;
+    
+    const newGuesses = [...guesses, currentGuess];
+    setGuesses(newGuesses);
+    setCurrentGuess("");
+
+    if (currentGuess === TARGET_WORD) {
+      setWon(true);
+      setGameOver(true);
+      if (user && !awarded) {
+        setAwarded(true);
+        const res = await awardXP(10, "Won Scripture Wordle");
+        if (res.success && res.xp) setUser({ ...user, xp: res.xp, level: res.level });
+      }
+    } else if (newGuesses.length >= MAX_GUESSES) {
+      setGameOver(true);
+    }
+  };
+
+  const onKeyPress = (key: string) => {
+    if (gameOver) return;
+    if (key === "ENTER") {
+      submitGuess();
+    } else if (key === "BACKSPACE") {
+      setCurrentGuess(prev => prev.slice(0, -1));
+    } else if (currentGuess.length < WORD_LENGTH) {
+      setCurrentGuess(prev => (prev + key).toUpperCase());
+    }
+  };
+
+  const getLetterStatus = (letter: string, index: number, guess: string) => {
+    if (TARGET_WORD[index] === letter) return "correct";
+    if (TARGET_WORD.includes(letter)) return "present";
+    return "absent";
+  };
+
+  const getKeyStatus = (key: string) => {
+    let status = "unused";
+    for (const guess of guesses) {
+      for (let i = 0; i < WORD_LENGTH; i++) {
+        if (guess[i] === key) {
+          if (TARGET_WORD[i] === key) return "correct";
+          status = "present";
+        }
+      }
+    }
+    for (const guess of guesses) {
+      if (guess.includes(key) && status === "unused") status = "absent";
+    }
+    return status;
+  };
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-background">
+      <div className="px-4 pt-6 pb-4 border-b border-border flex items-center justify-between bg-card">
+        <Link href="/quizzes" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
+          <ChevronLeft className="w-5 h-5" />
+        </Link>
+        <h1 className="text-xl font-bold font-serif text-foreground">Scripture Wordle</h1>
+        <div className="w-10 h-10 rounded-full gradient-royal text-white flex items-center justify-center shadow-md">🧩</div>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="grid gap-2 mb-8">
+          {Array.from({ length: MAX_GUESSES }).map((_, rowIndex) => {
+            const guess = guesses[rowIndex];
+            const isCurrentRow = rowIndex === guesses.length;
+            const rowStr = guess || (isCurrentRow ? currentGuess : "");
+
+            return (
+              <div key={rowIndex} className="flex gap-2">
+                {Array.from({ length: WORD_LENGTH }).map((_, colIndex) => {
+                  const letter = rowStr[colIndex] || "";
+                  let status = "empty";
+                  if (guess) status = getLetterStatus(letter, colIndex, guess);
+                  else if (letter) status = "tbd";
+
+                  return (
+                    <motion.div 
+                      key={colIndex}
+                      initial={guess ? { rotateX: 90 } : false}
+                      animate={guess ? { rotateX: 0 } : { scale: letter ? 1.05 : 1 }}
+                      transition={{ delay: guess ? colIndex * 0.1 : 0 }}
+                      className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center text-2xl font-bold font-serif rounded-xl border-2 transition-colors ${
+                        status === "correct" ? "bg-green-500 border-green-600 text-white shadow-lg" :
+                        status === "present" ? "bg-yellow-500 border-yellow-600 text-white shadow-lg" :
+                        status === "absent" ? "bg-stone-500 border-stone-600 text-white" :
+                        status === "tbd" ? "border-primary text-foreground" :
+                        "border-border bg-card text-foreground"
+                      }`}
+                    >
+                      {letter}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+
+        {gameOver && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center bg-card p-6 rounded-2xl border border-border/60 card-holy shadow-xl max-w-sm w-full">
+            <div className="w-16 h-16 rounded-full gradient-gold flex items-center justify-center mx-auto mb-3 shadow-lg halo-glow text-3xl">
+              {won ? "🏆" : "😔"}
+            </div>
+            <h2 className="text-2xl font-extrabold font-serif mb-1">{won ? "You Won!" : "Game Over"}</h2>
+            <p className="text-muted-foreground mb-4">The word was <strong className="text-foreground">{TARGET_WORD}</strong></p>
+            {won && <p className="text-amber-600 font-bold mb-4">+10 Grace Points Awarded!</p>}
+            <Button onClick={() => window.location.reload()} className="w-full h-11 rounded-xl gradient-royal text-white font-bold">
+              <RotateCcw className="w-4 h-4 mr-2" /> Play Again
+            </Button>
+          </motion.div>
+        )}
+
+        <div className="w-full max-w-md px-1 mt-auto pb-4">
+          {KEYBOARD_ROWS.map((row, i) => (
+            <div key={i} className="flex justify-center gap-1.5 mb-1.5">
+              {row.map(key => {
+                const status = getKeyStatus(key);
+                return (
+                  <button
+                    key={key}
+                    onClick={() => onKeyPress(key)}
+                    className={`h-12 rounded-lg font-bold text-sm transition-colors flex items-center justify-center ${
+                      key === "ENTER" || key === "BACKSPACE" ? "px-3 bg-muted text-foreground" : "flex-1 max-w-[40px] " + (
+                        status === "correct" ? "bg-green-500 text-white" :
+                        status === "present" ? "bg-yellow-500 text-white" :
+                        status === "absent" ? "bg-stone-500 text-white opacity-50" :
+                        "bg-muted text-foreground hover:bg-muted-foreground/20"
+                      )
+                    }`}
+                  >
+                    {key === "BACKSPACE" ? "⌫" : key}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

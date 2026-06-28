@@ -31,6 +31,7 @@ model User {
   badges        UserBadge[]
   xpLogs        XPLog[]
   quizAttempts  QuizAttempt[]
+  appointments  Appointment[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -237,4 +238,15 @@ model Guide {
   type        String   // e.g. "PRAYER", "EXAMINATION"
   content     String   // Can store JSON or text
   icon        String?
+}
+
+model Appointment {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  date        String
+  time        String
+  purpose     String?
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
 }

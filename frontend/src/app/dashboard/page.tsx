@@ -399,6 +399,27 @@ export default async function DashboardPage() {
           </div>
         </a>
 
+        {/* Meet the Priest */}
+        <a href="/appointments" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
+          <div className="bg-gradient-to-r from-stone-700/10 to-neutral-600/8 dark:from-stone-700/20 dark:to-neutral-600/15 px-4 pt-4 pb-3 border-b border-stone-200/30 dark:border-stone-800/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-stone-400 to-neutral-600 text-white flex items-center justify-center shadow-md text-lg">🗓️</div>
+                <div>
+                  <p className="font-bold text-sm text-foreground">Meet the Priest</p>
+                  <p className="text-xs text-stone-600 dark:text-stone-400 font-semibold">Spiritual Direction</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </div>
+          <div className="px-5 py-4 bg-card">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Book a time for confession, counseling, or spiritual guidance with the parish priest.
+            </p>
+          </div>
+        </a>
+
         {/* Spiritual Stats */}
         <div>
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Spiritual Progress</h2>

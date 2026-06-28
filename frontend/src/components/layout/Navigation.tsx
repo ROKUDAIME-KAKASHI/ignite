@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Target, Calendar, User as UserIcon, HelpCircle } from "lucide-react";
+import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
@@ -40,7 +40,7 @@ const navItems = [
   { name: "Home",      href: "/dashboard", icon: Home       },
   { name: "Scripture", href: "/bible",     icon: BookOpen   },
   { name: "Missions",  href: "/missions",  icon: Target     },
-  { name: "Quizzes",   href: "/quizzes",   icon: HelpCircle },
+  { name: "Games",     href: "/quizzes",   icon: Gamepad2 },
   { name: "Events",    href: "/events",    icon: Calendar   },
   { name: "Profile",   href: "/profile",   icon: UserIcon   },
 ];
