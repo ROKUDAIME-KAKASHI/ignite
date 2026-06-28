@@ -673,7 +673,7 @@ export default function BibleLudoPage() {
               </h2>
               <p className="text-sm text-muted-foreground mb-6">The Journey to Emmaus is complete.</p>
               
-              {(winner === "red" || (gameMode === "team" && winner === "red")) && (
+              {winner === "red" && (
                 <p className="text-amber-600 font-bold mb-6 text-lg">+{gameMode === "team" ? "40" : "25"} Grace Points Awarded!</p>
               )}
 

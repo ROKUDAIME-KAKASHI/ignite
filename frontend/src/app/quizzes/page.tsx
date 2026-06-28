@@ -342,14 +342,9 @@ export default function QuizzesPage() {
                           <Badge className="text-[10px] border-0 px-2 gradient-life text-white">Up to 40 XP</Badge>
                         </div>
                         <p className="text-xs text-muted-foreground mb-3">Roll the dice and race your tokens to the heavenly kingdom. Answer bible trivia to get out of base!</p>
-                        <Button
-                          asChild
-                          className="w-full h-9 rounded-xl font-bold text-sm text-white gradient-life shadow-md hover:opacity-90"
-                        >
-                          <Link href="/ludo">
-                            Play Ludo <ChevronRight className="w-4 h-4 ml-1" />
-                          </Link>
-                        </Button>
+                        <Link href="/ludo" className="inline-flex items-center justify-center w-full h-9 rounded-xl font-bold text-sm text-white gradient-life shadow-md hover:opacity-90">
+                          Play Ludo <ChevronRight className="w-4 h-4 ml-1" />
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -363,14 +358,9 @@ export default function QuizzesPage() {
                           <Badge className="text-[10px] border-0 px-2 gradient-royal text-white">+10 XP</Badge>
                         </div>
                         <p className="text-xs text-muted-foreground mb-3">Guess the 5-letter biblical word in 6 tries. A new word is available every day.</p>
-                        <Button
-                          asChild
-                          className="w-full h-9 rounded-xl font-bold text-sm text-white gradient-royal shadow-md hover:opacity-90"
-                        >
-                          <Link href="/wordle">
-                            Play Wordle <ChevronRight className="w-4 h-4 ml-1" />
-                          </Link>
-                        </Button>
+                        <Link href="/wordle" className="inline-flex items-center justify-center w-full h-9 rounded-xl font-bold text-sm text-white gradient-royal shadow-md hover:opacity-90">
+                          Play Wordle <ChevronRight className="w-4 h-4 ml-1" />
+                        </Link>
                       </div>
                     </div>
                   </div>
