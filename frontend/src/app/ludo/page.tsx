@@ -7,6 +7,8 @@ import { ChevronLeft, Dices, Trophy, Users, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { awardXP } from "@/app/actions/gamification";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { Loader2, Plus } from "lucide-react";
 
