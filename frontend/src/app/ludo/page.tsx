@@ -513,6 +513,7 @@ export default function BibleLudoPage() {
           )}
         </div>
       ) : (
+        <>
         <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center pb-32">
           
           {/* Status Bar */}
@@ -686,6 +687,7 @@ export default function BibleLudoPage() {
           </motion.div>
         )}
       </AnimatePresence>
+        </>
       )}
     </div>
   );
