@@ -5,6 +5,7 @@ import { Navigation } from "@/components/layout/Navigation";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { GlobalChat } from "@/components/GlobalChat";
+import { PushNotificationManager } from "@/components/PushNotificationManager";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <main className="flex-1 flex flex-col w-full overflow-hidden relative">
               {children}
               <GlobalChat />
+              <PushNotificationManager />
             </main>
           </AuthProvider>
         </ThemeProvider>
