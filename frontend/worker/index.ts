@@ -1,30 +1,30 @@
 // To disable all workbox logging during development, you can set self.__WB_DISABLE_DEV_LOGS to true
 // https://developers.google.com/web/tools/workbox/guides/configure-workbox#disable_logging
 
-declare let self: ServiceWorkerGlobalScope;
+const _self = self as any;
 
 // listen to message event from window
-self.addEventListener('message', event => {
+_self.addEventListener('message', (event: any) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+    _self.skipWaiting();
   }
 });
 
 // PWABuilder requirements
 // Background Sync
-self.addEventListener('sync', (event) => {
+_self.addEventListener('sync', (event: any) => {
   console.log('Background sync event fired:', event.tag);
   // Add your background sync logic here
 });
 
 // Periodic Sync
-self.addEventListener('periodicsync', (event) => {
+_self.addEventListener('periodicsync', (event: any) => {
   console.log('Periodic sync event fired:', event.tag);
   // Add your periodic sync logic here
 });
 
 // Push Notifications
-self.addEventListener('push', (event) => {
+_self.addEventListener('push', (event: any) => {
   if (event.data) {
     const data = event.data.json();
     const options = {
@@ -36,6 +36,9 @@ self.addEventListener('push', (event) => {
         primaryKey: '2'
       }
     };
-    event.waitUntil(self.registration.showNotification(data.title, options));
+    event.waitUntil(_self.registration.showNotification(data.title, options));
   }
 });
+
+export {};
+
