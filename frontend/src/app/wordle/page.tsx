@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Trophy, RotateCcw } from "lucide-react";
@@ -26,22 +26,7 @@ export default function WordlePage() {
   const { user, setUser } = useAuth();
   const [awarded, setAwarded] = useState(false);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (gameOver) return;
-      if (e.key === "Enter") {
-        submitGuess();
-      } else if (e.key === "Backspace") {
-        setCurrentGuess(prev => prev.slice(0, -1));
-      } else if (/^[A-Za-z]$/.test(e.key) && currentGuess.length < WORD_LENGTH) {
-        setCurrentGuess(prev => (prev + e.key).toUpperCase());
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentGuess, gameOver]);
-
-  const submitGuess = async () => {
+  const submitGuess = useCallback(async () => {
     if (currentGuess.length !== WORD_LENGTH) return;
     
     const newGuesses = [...guesses, currentGuess];
@@ -59,7 +44,22 @@ export default function WordlePage() {
     } else if (newGuesses.length >= MAX_GUESSES) {
       setGameOver(true);
     }
-  };
+  }, [currentGuess, guesses, user, awarded, setUser]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameOver) return;
+      if (e.key === "Enter") {
+        submitGuess();
+      } else if (e.key === "Backspace") {
+        setCurrentGuess(prev => prev.slice(0, -1));
+      } else if (/^[A-Za-z]$/.test(e.key) && currentGuess.length < WORD_LENGTH) {
+        setCurrentGuess(prev => (prev + e.key).toUpperCase());
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentGuess, gameOver, submitGuess]);
 
   const onKeyPress = (key: string) => {
     if (gameOver) return;

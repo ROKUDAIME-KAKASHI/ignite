@@ -9,9 +9,14 @@ export function PushNotificationManager() {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      setIsSupported(true);
-      setPermission(Notification.permission);
+    if (typeof window !== "undefined") {
+      const dismissed = localStorage.getItem("push-notifications-dismissed");
+      if (dismissed === "true") {
+        setTimeout(() => setPermission("denied"), 0);
+      } else if ("Notification" in window) {
+        setTimeout(() => setIsSupported(true), 0);
+        setTimeout(() => setPermission(Notification.permission), 0);
+      }
     }
     
     // Listen for incoming messages while app is in foreground
@@ -38,11 +43,12 @@ export function PushNotificationManager() {
       // Here you would typically send the token to your backend API
       // await fetch('/api/user/push-token', { method: 'POST', body: JSON.stringify({ token: fcmToken }) });
     } else {
+      localStorage.setItem("push-notifications-dismissed", "true");
       setPermission("denied");
     }
   };
 
-  if (!isSupported || permission === "granted") return null;
+  if (!isSupported || permission === "granted" || permission === "denied") return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-w-sm">
@@ -54,7 +60,10 @@ export function PushNotificationManager() {
         <div className="flex justify-end gap-2 mt-2">
           <button 
             className="text-xs px-3 py-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-            onClick={() => setPermission("denied")}
+            onClick={() => {
+              localStorage.setItem("push-notifications-dismissed", "true");
+              setPermission("denied");
+            }}
           >
             Not Now
           </button>

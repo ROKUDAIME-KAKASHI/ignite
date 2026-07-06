@@ -1,7 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
 const secretKey = process.env.JWT_SECRET || "fallback-secret-key-for-dev";
 const key = new TextEncoder().encode(secretKey);
 

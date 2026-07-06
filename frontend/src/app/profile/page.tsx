@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { getProfileStats } from "@/app/actions/profile";
+import { requestNotificationPermission } from "@/lib/firebase";
 
 /* ─── Static data ──────────────────────────────────────────────────────────── */
 
@@ -110,12 +111,47 @@ export default function ProfilePage() {
   const { user, updateDisplayName, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[] }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [] });
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   useEffect(() => {
     getProfileStats().then(s => {
       if (s) setStats(s);
     });
+
+    const handler = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
+
+  const handleInstallClick = () => {
+    if (!installPrompt) {
+      alert("App is already installed or your browser doesn't support this feature (try 'Add to Home Screen' from the browser menu).");
+      return;
+    }
+    installPrompt.prompt();
+    installPrompt.userChoice.then((choiceResult: any) => {
+      if (choiceResult.outcome === "accepted") {
+        console.log("User accepted the install prompt");
+      }
+      setInstallPrompt(null);
+    });
+  };
+
+  const handleEnableNotifications = async () => {
+    try {
+      const token = await requestNotificationPermission();
+      if (token) {
+        alert("Push notifications enabled successfully!");
+      } else {
+        alert("Permission denied. You may need to enable notifications in your browser settings.");
+      }
+    } catch (e) {
+      alert("Failed to enable notifications. Please check your browser permissions.");
+    }
+  };
 
   const initials = user?.displayName
     ? user.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
@@ -291,14 +327,22 @@ export default function ProfilePage() {
             </div>
             <Badge className="text-[10px] bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">Verified</Badge>
           </div>
-          {/* Notifications Link */}
-          <a href="/notifications" className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors">
+          {/* Notifications Setting */}
+          <div onClick={handleEnableNotifications} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer">
             <div>
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Notifications</p>
-              <p className="text-sm font-medium text-foreground mt-0.5">Manage alerts & preferences</p>
+              <p className="text-sm font-medium text-foreground mt-0.5">Turn on push notifications</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </a>
+          </div>
+          {/* Install App */}
+          <div onClick={handleInstallClick} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer">
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Install App</p>
+              <p className="text-sm font-medium text-foreground mt-0.5">Add to your home screen</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </div>
         </div>
       </div>
 

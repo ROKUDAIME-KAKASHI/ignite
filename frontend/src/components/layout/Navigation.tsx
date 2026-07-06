@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, MessageSquare } from "lucide-react";
+import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
@@ -149,7 +149,7 @@ export function Navigation() {
           <div className="border-t border-gray-100 dark:border-gray-800 my-4" />
           <div className="rounded-xl p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
             <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1">Verse of the Day</p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed font-serif">"{dailyVerse.text}"</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed font-serif">&quot;{dailyVerse.text}&quot;</p>
             <p className="text-[10px] text-amber-700 font-semibold mt-1.5">— {dailyVerse.ref}</p>
           </div>
           <p className="text-center text-[10px] text-gray-400 mt-3 tracking-widest uppercase font-medium">✝ Soli Deo Gloria ✝</p>

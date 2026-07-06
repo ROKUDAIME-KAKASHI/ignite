@@ -53,7 +53,7 @@ export function GlobalChat() {
   // Close the modal automatically if navigating to a game
   useEffect(() => {
     if (isHidden) {
-      setIsOpen(false);
+      setTimeout(() => setIsOpen(false), 0);
     }
   }, [isHidden]);
 

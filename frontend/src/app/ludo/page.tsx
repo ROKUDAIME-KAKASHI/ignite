@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { Loader2, Plus } from "lucide-react";
+import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 
 /* ─── Ludo Board Constants ─── */
 const BOARD_SIZE = 15;
@@ -54,21 +55,12 @@ const BG_COLORS = {
   yellow: "bg-yellow-500",
   blue: "bg-blue-500"
 };
-
 const BORDER_COLORS = {
   red: "border-red-600",
   green: "border-green-600",
   yellow: "border-yellow-600",
   blue: "border-blue-600"
 };
-
-const TRIVIA_QUESTIONS = [
-  { q: "Who baptized Jesus?", options: ["Peter", "John the Baptist", "James", "Paul"], a: "John the Baptist" },
-  { q: "How many days was Jesus in the tomb?", options: ["1", "2", "3", "7"], a: "3" },
-  { q: "What was the first miracle of Jesus?", options: ["Water to Wine", "Walking on Water", "Healing the Blind", "Feeding 5000"], a: "Water to Wine" },
-  { q: "Who betrayed Jesus?", options: ["Peter", "Judas", "Thomas", "Matthew"], a: "Judas" },
-  { q: "What did Jesus feed the 5000 with?", options: ["Bread & Fish", "Manna", "Figs", "Lamb"], a: "Bread & Fish" }
-];
 
 /* ─── Main Component ─── */
 export default function BibleLudoPage() {
@@ -87,6 +79,7 @@ export default function BibleLudoPage() {
   const [dice, setDice] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [trivia, setTrivia] = useState<typeof TRIVIA_QUESTIONS[0] | null>(null);
+  const [unusedQuestions, setUnusedQuestions] = useState<typeof TRIVIA_QUESTIONS>([...TRIVIA_QUESTIONS]);
   const [tokens, setTokens] = useState<Record<Color, number[]>>({
     red: [-1, -1, -1, -1], // -1 = base, 0-51 = path, 100-104 = home stretch, 200 = home
     green: [-1, -1, -1, -1],
@@ -147,7 +140,7 @@ export default function BibleLudoPage() {
         ((gameMode === "solo" && turn !== "red") || (gameMode === "team" && turn !== "red"));
         
       if (isBotTurn) {
-        setTimeout(() => rollDice(false), 800);
+        setTimeout(() => executeRoll(false), 800);
       }
     }
   }, [dice, turn, isRolling, trivia, winner, gameMode, tokens]);
@@ -196,10 +189,37 @@ export default function BibleLudoPage() {
     }
   };
 
-  const rollDice = (sync = true) => {
+  const handleRollClick = () => {
     if (dice !== null || isRolling || winner) return;
-    if (gameMode === "live" && turn !== myColor && sync) return; // Only roll for yourself in live
+    if (gameMode === "live" && turn !== myColor) return; // Only roll for yourself in live
 
+    const isHuman = (gameMode === "local") || 
+                    (gameMode === "live" && turn === myColor) || 
+                    (gameMode === "solo" && turn === "red") ||
+                    (gameMode === "team" && turn === "red");
+
+    if (isHuman) {
+      // Trigger trivia before rolling
+      let questionsToUse = unusedQuestions;
+      if (questionsToUse.length === 0) {
+        questionsToUse = [...TRIVIA_QUESTIONS];
+      }
+      
+      const qIndex = Math.floor(Math.random() * questionsToUse.length);
+      const selectedTrivia = questionsToUse[qIndex];
+      
+      setTrivia(selectedTrivia);
+      
+      // Remove the selected question from the unused list
+      const updatedQuestions = [...questionsToUse];
+      updatedQuestions.splice(qIndex, 1);
+      setUnusedQuestions(updatedQuestions);
+    } else {
+      executeRoll(true);
+    }
+  };
+
+  const executeRoll = (sync = true) => {
     setIsRolling(true);
     
     // Animate dice
@@ -210,11 +230,6 @@ export default function BibleLudoPage() {
       
       if (sync && gameMode === "live" && gameChannel) {
         gameChannel.send({ type: 'broadcast', event: 'roll_dice', payload: { result } });
-      }
-
-      // If user rolled 6 in base, trigger trivia (only for local user 'red' or their own live turn)
-      if (result === 6 && tokens[turn].includes(-1) && ((gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor))) {
-        setTrivia(TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)]);
       }
     }, 600);
   };
@@ -330,8 +345,9 @@ export default function BibleLudoPage() {
   const handleTrivia = (opt: string) => {
     if (!trivia) return;
     if (opt === trivia.a) {
-      // Correct! Can now click a token in base to move it out.
+      // Correct! Can now roll.
       setTrivia(null);
+      executeRoll(true);
     } else {
       // Wrong. Lose turn.
       setTrivia(null);
@@ -542,7 +558,7 @@ export default function BibleLudoPage() {
                 </div>
               ) : (
                 <Button 
-                  onClick={() => rollDice()} 
+                  onClick={() => handleRollClick()} 
                   disabled={gameMode !== "local" && gameMode !== "live" && turn !== "red"}
                   size="sm"
                   className={`rounded-xl font-bold ${((gameMode === "local" || turn === "red") || (gameMode === "live" && turn === myColor)) ? "gradient-gold shadow-md halo-glow" : "bg-muted text-muted-foreground"}`}
@@ -631,7 +647,7 @@ export default function BibleLudoPage() {
                 <ShieldAlert className="w-6 h-6" />
               </div>
               <h2 className="text-xl font-bold text-center font-serif mb-2">Bible Trivia Challenge!</h2>
-              <p className="text-sm text-center text-muted-foreground mb-6">Answer correctly to unlock a token from your base.</p>
+              <p className="text-sm text-center text-muted-foreground mb-6">Answer correctly to roll the dice.</p>
               
               <div className="bg-muted/50 p-4 rounded-xl border mb-6">
                 <p className="font-bold text-base text-foreground font-serif leading-snug">{trivia.q}</p>
