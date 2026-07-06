@@ -8,17 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Droplets, Trophy, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
+import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 
-const WORDS = [
-  { word: "JERUSALEM", hint: "The Holy City" },
-  { word: "GOLIATH", hint: "The giant defeated by David" },
-  { word: "GENESIS", hint: "The first book of the Bible" },
-  { word: "APOSTLE", hint: "One of the 12 chosen by Jesus" },
-  { word: "BETHLEHEM", hint: "The birthplace of Jesus" },
-  { word: "REVELATION", hint: "The final book of the Bible" },
-  { word: "PROPHET", hint: "A messenger of God" },
-  { word: "COVENANT", hint: "A sacred promise or agreement" }
-];
+// Filter trivia questions to only those with letters and spaces in the answer
+const WORDS = TRIVIA_QUESTIONS
+  .filter(q => /^[a-zA-Z\s]+$/.test(q.a))
+  .map(q => ({
+    word: q.a.toUpperCase(),
+    hint: q.q
+  }));
 
 export default function NoahsArkPage() {
   const { user, setUser } = useAuth();

@@ -40,6 +40,20 @@ export default function NotificationsPage() {
     try {
       const perm = await Notification.requestPermission();
       setPermission(perm);
+      
+      if (perm === "granted" && "serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        });
+        
+        await fetch("/api/notifications/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription })
+        });
+      }
     } catch (error) {
       console.error("Failed to request permission", error);
     } finally {

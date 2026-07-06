@@ -1,4 +1,10 @@
 {
   "buildCommand": "next build --webpack",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/daily-notify",
+      "schedule": "0 10 * * *"
+    }
+  ]
 }
