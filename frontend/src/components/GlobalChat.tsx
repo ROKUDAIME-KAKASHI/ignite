@@ -28,7 +28,6 @@ export function GlobalChat() {
   const { user } = useAuth();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
 
   // Hide the floating button on game/quiz pages
   const isHidden = pathname.startsWith("/quizzes") || pathname.startsWith("/ludo") || pathname.startsWith("/wordle");
@@ -58,7 +57,7 @@ export function GlobalChat() {
     }
   }, [isHidden]);
 
-  if (isHidden || isDismissed) return null;
+  if (isHidden) return null;
 
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
@@ -100,14 +99,6 @@ export function GlobalChat() {
             exit={{ scale: 0, opacity: 0 }}
             className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50 flex flex-col items-end gap-2"
           >
-            <Button
-              onClick={() => setIsDismissed(true)}
-              variant="secondary"
-              className="w-6 h-6 rounded-full bg-white/80 dark:bg-black/50 text-foreground p-0 shadow-sm hover:scale-110 transition-transform"
-              title="Hide AI Chat"
-            >
-              <X className="w-3 h-3" />
-            </Button>
             <Button
               onClick={() => setIsOpen(true)}
               className="w-14 h-14 rounded-full gradient-spirit text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all p-0 flex items-center justify-center halo-glow"
