@@ -198,7 +198,7 @@ export function GlobalChat() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <div ref={messagesEndRef} className="h-px w-full" />
+                <div ref={scrollRef} className="h-px w-full" />
               </div>
             </div>
 
