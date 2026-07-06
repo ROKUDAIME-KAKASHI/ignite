@@ -140,7 +140,7 @@ export function GlobalChat() {
             </div>
 
             {/* Chat Area */}
-            <ScrollArea className="flex-1 p-4 bg-muted/20">
+            <div className="flex-1 p-4 bg-muted/20 overflow-y-auto min-h-0">
               <div className="space-y-5 pb-4">
                 <AnimatePresence initial={false}>
                   {messages.map((msg) => {
@@ -181,28 +181,26 @@ export function GlobalChat() {
                       </motion.div>
                     );
                   })}
+                  {isTyping && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex gap-2.5 max-w-[85%] mr-auto"
+                    >
+                      <div className="w-7 h-7 shrink-0 rounded-full gradient-spirit text-white flex items-center justify-center shadow-sm">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <div className="px-4 py-3 rounded-2xl bg-card border border-border/50 rounded-tl-sm shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
-
-                {isTyping && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex gap-2.5 max-w-[85%] mr-auto"
-                  >
-                    <div className="w-7 h-7 shrink-0 rounded-full gradient-spirit text-white flex items-center justify-center shadow-sm">
-                      <Sparkles className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="p-3.5 rounded-2xl bg-card border border-border/50 shadow-sm rounded-tl-sm card-holy flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-1.5 h-1.5 bg-primary/80 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                    </div>
-                  </motion.div>
-                )}
-                
-                <div ref={scrollRef} />
+                <div ref={messagesEndRef} className="h-px w-full" />
               </div>
-            </ScrollArea>
+            </div>
 
             {/* Input Area */}
             <div className="p-3 bg-background border-t border-border shrink-0">
