@@ -365,6 +365,54 @@ export default function QuizzesPage() {
                     </div>
                   </div>
 
+                  <div className="bg-card rounded-2xl border border-border/60 card-holy card-holy-hover overflow-hidden mb-4">
+                    <div className="p-5 flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl gradient-spirit flex items-center justify-center text-3xl shadow-lg shrink-0">🌊</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                          <h3 className="font-bold text-foreground font-serif text-base">Noah's Ark</h3>
+                          <Badge className="text-[10px] border-0 px-2 gradient-spirit text-white">+15 XP</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">Guess the biblical word before the floodwaters rise completely to save the ark.</p>
+                        <Link href="/noahs-ark" className="inline-flex items-center justify-center w-full h-9 rounded-xl font-bold text-sm text-white gradient-spirit shadow-md hover:opacity-90">
+                          Play Noah's Ark <ChevronRight className="w-4 h-4 ml-1" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-card rounded-2xl border border-border/60 card-holy card-holy-hover overflow-hidden mb-4">
+                    <div className="p-5 flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl gradient-gold flex items-center justify-center text-3xl shadow-lg shrink-0">🧠</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                          <h3 className="font-bold text-foreground font-serif text-base">Memory Match</h3>
+                          <Badge className="text-[10px] border-0 px-2 gradient-gold text-white">Up to 35 XP</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">Flip the cards and match the biblical figures with their famous stories.</p>
+                        <Link href="/memory-match" className="inline-flex items-center justify-center w-full h-9 rounded-xl font-bold text-sm text-white gradient-gold shadow-md hover:opacity-90">
+                          Play Memory Match <ChevronRight className="w-4 h-4 ml-1" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-card rounded-2xl border border-border/60 card-holy card-holy-hover overflow-hidden mb-4">
+                    <div className="p-5 flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl gradient-dawn flex items-center justify-center text-3xl shadow-lg shrink-0">🦁</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                          <h3 className="font-bold text-foreground font-serif text-base">The Lion's Den</h3>
+                          <Badge className="text-[10px] border-0 px-2 gradient-dawn text-white">+30 XP</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">Answer the riddles correctly to escape the room before the lions wake up.</p>
+                        <Link href="/lions-den" className="inline-flex items-center justify-center w-full h-9 rounded-xl font-bold text-sm text-white gradient-dawn shadow-md hover:opacity-90">
+                          Escape the Den <ChevronRight className="w-4 h-4 ml-1" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Quizzes list */}
                   <h3 className="font-bold font-serif text-foreground mt-6 mb-2">Knowledge Quizzes</h3>
                   {quizSets.map((set) => (
