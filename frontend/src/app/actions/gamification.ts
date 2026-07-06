@@ -30,6 +30,10 @@ export async function awardXP(amount: number, reason: string) {
       });
     }
 
+    // Force Next.js to clear the cache so Dashboard and Profile update instantly
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/", "layout");
+
     return { success: true, xp: user.xp, level: newLevel };
   } catch (error) {
     console.error(error);
