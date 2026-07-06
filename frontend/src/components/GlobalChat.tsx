@@ -28,6 +28,7 @@ export function GlobalChat() {
   const { user } = useAuth();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   // Hide the floating button on game/quiz pages
   const isHidden = pathname.startsWith("/quizzes") || pathname.startsWith("/ludo") || pathname.startsWith("/wordle");
@@ -57,7 +58,7 @@ export function GlobalChat() {
     }
   }, [isHidden]);
 
-  if (isHidden) return null;
+  if (isHidden || isDismissed) return null;
 
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
@@ -97,8 +98,16 @@ export function GlobalChat() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50"
+            className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50 flex flex-col items-end gap-2"
           >
+            <Button
+              onClick={() => setIsDismissed(true)}
+              variant="secondary"
+              className="w-6 h-6 rounded-full bg-white/80 dark:bg-black/50 text-foreground p-0 shadow-sm hover:scale-110 transition-transform"
+              title="Hide AI Chat"
+            >
+              <X className="w-3 h-3" />
+            </Button>
             <Button
               onClick={() => setIsOpen(true)}
               className="w-14 h-14 rounded-full gradient-spirit text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all p-0 flex items-center justify-center halo-glow"
@@ -163,12 +172,14 @@ export function GlobalChat() {
                         </div>
                         
                         <div className={cn(
-                          "p-3 rounded-2xl text-sm leading-relaxed",
+                          "p-3 rounded-2xl text-sm leading-relaxed max-w-full overflow-hidden flex flex-col",
                           isAi 
                             ? "bg-card border border-border/50 text-foreground shadow-sm rounded-tl-sm card-holy" 
                             : "gradient-gold text-white shadow-md rounded-tr-sm"
                         )}>
-                          <p className={cn(isAi && "font-serif text-[14px]")}>{msg.content}</p>
+                          <div className="max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+                            <p className={cn("whitespace-pre-wrap break-words", isAi && "font-serif text-[14px]")}>{msg.content}</p>
+                          </div>
                           <span className={cn(
                             "text-[9px] font-bold uppercase tracking-wider mt-1.5 block",
                             isAi ? "text-muted-foreground" : "text-white/70 text-right"
