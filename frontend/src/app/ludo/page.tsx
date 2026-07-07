@@ -3,14 +3,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Dices, Trophy, Users, ShieldAlert } from "lucide-react";
+import { Loader2, Plus, ChevronLeft, Dices, Trophy, Users, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { awardXP } from "@/app/actions/gamification";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-import { Loader2, Plus, ChevronLeft, Dices, Trophy, Users, ShieldAlert } from "lucide-react";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 import { useRouter } from "next/navigation";
 
