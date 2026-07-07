@@ -440,6 +440,24 @@ export default function QuizzesPage() {
                 </>
               ) : (
                 <div className="space-y-4">
+                  {/* Dedicated Live Trivia Nights */}
+                  <div className="bg-card rounded-2xl border border-border/60 card-holy card-holy-hover overflow-hidden mb-6 shadow-md">
+                    <div className="p-5 flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl gradient-royal flex items-center justify-center text-3xl shadow-lg shrink-0">✨</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                          <h3 className="font-bold text-foreground font-serif text-lg">Kahoot-style Live Trivia</h3>
+                          <Badge className="text-[10px] border-0 px-2 gradient-royal text-white">New!</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">Host or join a fast-paced trivia night with your parish. Answer fast for more points!</p>
+                        <Link href="/trivia" className="inline-flex items-center justify-center w-full h-10 rounded-xl font-bold text-sm text-white gradient-royal shadow-md hover:opacity-90">
+                          Play Live Trivia <ChevronRight className="w-4 h-4 ml-1" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 className="font-bold font-serif text-foreground mt-4 mb-2">Other Multiplayer Rooms</h3>
                   {!user ? (
                     <div className="text-center p-8 bg-card rounded-2xl border border-border/60 card-holy">
                       <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">

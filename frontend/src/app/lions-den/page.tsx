@@ -6,9 +6,10 @@ import { awardXP } from "@/app/actions/gamification";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Key, Skull, Trophy, RotateCcw } from "lucide-react";
+import { Loader2, Key, Skull, Trophy, RotateCcw, ChevronLeft } from "lucide-react";
 import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const RIDDLES = [
   {
@@ -89,7 +90,14 @@ export default function LionsDenPage() {
       {/* Dark scary background for the den */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/20 via-background to-background -z-10" />
 
-      <div className="container max-w-2xl mx-auto px-4 pt-24">
+      <div className="px-4 pt-6 pb-4 flex items-center justify-between relative z-10">
+        <Link href="/quizzes" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
+          <ChevronLeft className="w-5 h-5" />
+        </Link>
+        <div className="w-10 h-10" />
+      </div>
+
+      <div className="container max-w-2xl mx-auto px-4 pt-4">
         <div className="text-center mb-10">
           <Badge className="mb-4 gradient-dawn text-white border-0">Escape Room</Badge>
           <h1 className="text-4xl md:text-5xl font-extrabold font-serif mb-4">The Lion's Den</h1>

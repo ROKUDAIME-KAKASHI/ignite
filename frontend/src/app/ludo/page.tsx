@@ -10,8 +10,9 @@ import { awardXP } from "@/app/actions/gamification";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, ChevronLeft, Dices, Trophy, Users, ShieldAlert } from "lucide-react";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
+import { useRouter } from "next/navigation";
 
 /* ─── Ludo Board Constants ─── */
 const BOARD_SIZE = 15;
@@ -65,6 +66,7 @@ const BORDER_COLORS = {
 /* ─── Main Component ─── */
 export default function BibleLudoPage() {
   const { user, setUser } = useAuth();
+  const router = useRouter();
   
   // Game Setup
   const [gameMode, setGameMode] = useState<"setup" | "solo" | "team" | "local" | "live" | "lobby">("setup");
@@ -408,7 +410,7 @@ export default function BibleLudoPage() {
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7]">
       <div className="px-4 pt-6 pb-4 border-b border-border flex items-center justify-between bg-white shadow-sm z-10">
-        <Button onClick={() => gameMode === "setup" ? window.history.back() : setGameMode("setup")} variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:text-foreground">
+        <Button onClick={() => gameMode === "setup" ? router.push('/quizzes') : setGameMode("setup")} variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-5 h-5" />
         </Button>
         <h1 className="text-xl font-bold font-serif text-foreground">Journey to Emmaus</h1>
@@ -697,7 +699,7 @@ export default function BibleLudoPage() {
                 <Button onClick={() => setGameMode("setup")} className="flex-1 gradient-gold text-white font-bold h-11 rounded-xl shadow-md">
                   Play Again
                 </Button>
-                <Button onClick={() => window.history.back()} variant="outline" className="flex-1 h-11 rounded-xl font-bold">
+                <Button onClick={() => router.push('/quizzes')} variant="outline" className="flex-1 h-11 rounded-xl font-bold">
                   Exit
                 </Button>
               </div>

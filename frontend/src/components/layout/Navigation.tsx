@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2 } from "lucide-react";
+import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
@@ -39,9 +39,11 @@ function getDailyVerse(userId?: string) {
 const navItems = [
   { name: "Home",      href: "/dashboard", icon: Home       },
   { name: "Scripture", href: "/bible",     icon: BookOpen   },
+  { name: "Journeys",  href: "/journeys",  icon: Map        },
   { name: "Missions",  href: "/missions",  icon: Target     },
   { name: "Games",     href: "/quizzes",   icon: Gamepad2 },
   { name: "Events",    href: "/events",    icon: Calendar   },
+  { name: "Notices",   href: "/notifications", icon: Bell   },
   { name: "Profile",   href: "/profile",   icon: UserIcon   },
 ];
 

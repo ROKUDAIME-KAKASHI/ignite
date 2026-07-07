@@ -5,9 +5,10 @@ import { useAuth } from "@/context/AuthContext";
 import { awardXP } from "@/app/actions/gamification";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, RotateCcw, Trophy, Brain } from "lucide-react";
+import { Loader2, RotateCcw, Trophy, Brain, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
+import Link from "next/link";
 
 type Card = {
   id: number;
@@ -121,7 +122,14 @@ export default function MemoryMatchPage() {
     <div className="min-h-screen bg-background pb-20 overflow-hidden relative">
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-indigo-900/20 to-transparent -z-10" />
       
-      <div className="container max-w-3xl mx-auto px-4 pt-24">
+      <div className="px-4 pt-6 pb-4 flex items-center justify-between relative z-10">
+        <Link href="/quizzes" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
+          <ChevronLeft className="w-5 h-5" />
+        </Link>
+        <div className="w-10 h-10" /> {/* Spacer for centering if needed */}
+      </div>
+
+      <div className="container max-w-3xl mx-auto px-4 pt-4">
         <div className="text-center mb-10">
           <Badge className="mb-4 gradient-spirit border-0">Memory Match</Badge>
           <h1 className="text-4xl md:text-5xl font-extrabold font-serif mb-4">Find the Pairs</h1>

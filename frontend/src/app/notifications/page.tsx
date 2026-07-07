@@ -6,6 +6,17 @@ import { Bell, BellRing, BellOff, CheckCircle2, Info, Megaphone, Calendar } from
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getAnnouncements } from "@/app/admin/actions";
+import { getNotifications, markAsRead, markAllAsRead } from "./actions";
+import { useAuth } from "@/context/AuthContext";
+
+type NotificationItem = {
+  id: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  link: string | null;
+  createdAt: Date;
+};
 
 type Announcement = {
   id: string;
@@ -21,6 +32,8 @@ export default function NotificationsPage() {
   const [supported, setSupported] = useState(true);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loadingAnn, setLoadingAnn] = useState(true);
+  const [inbox, setInbox] = useState<NotificationItem[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -33,7 +46,24 @@ export default function NotificationsPage() {
       setAnnouncements(data);
       setLoadingAnn(false);
     });
-  }, []);
+    if (user) {
+      getNotifications().then((data) => {
+        setInbox(data as unknown as NotificationItem[]);
+      });
+    }
+  }, [user]);
+
+  const handleMarkAsRead = async (id: string) => {
+    setInbox(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    await markAsRead(id);
+  };
+
+  const handleMarkAllAsRead = async () => {
+    setInbox(prev => prev.map(n => ({ ...n, isRead: true })));
+    await markAllAsRead();
+  };
+
+  const unreadCount = inbox.filter(n => !n.isRead).length;
 
   const requestPermission = async () => {
     setIsRequesting(true);
@@ -79,11 +109,17 @@ export default function NotificationsPage() {
               <p className="text-blue-200 text-xs font-bold uppercase tracking-wider">Stay Connected in Prayer</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
               <Megaphone className="w-3.5 h-3.5 text-white" />
               <span className="text-white text-xs font-semibold">{announcements.length} notices</span>
             </div>
+            {unreadCount > 0 && (
+              <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20 cursor-pointer" onClick={handleMarkAllAsRead}>
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                <span className="text-white text-xs font-semibold">Mark {unreadCount} as read</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -137,6 +173,63 @@ export default function NotificationsPage() {
             </div>
           )}
         </div>
+
+        {/* ── Personal Inbox ── */}
+        {user && (
+          <div>
+            <div className="flex items-center gap-2 mb-3 px-1 pt-4">
+              <Bell className="w-4 h-4 text-primary" />
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Personal Inbox</p>
+            </div>
+            {inbox.length === 0 ? (
+              <div className="bg-card rounded-2xl border border-border/60 p-8 text-center text-muted-foreground shadow-sm">
+                <p className="text-3xl mb-2">📭</p>
+                <p className="font-serif font-semibold">Inbox is empty</p>
+                <p className="text-xs mt-1">You're all caught up on your personal notifications.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <AnimatePresence>
+                  {inbox.map(notif => (
+                    <motion.div 
+                      key={notif.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={cn(
+                        "relative flex gap-4 p-4 rounded-2xl border transition-all cursor-pointer",
+                        notif.isRead 
+                          ? "bg-white border-border/40 opacity-75" 
+                          : "bg-amber-50/50 border-amber-200 dark:bg-amber-950/20 shadow-sm"
+                      )}
+                      onClick={() => {
+                        if (!notif.isRead) handleMarkAsRead(notif.id);
+                        if (notif.link) window.location.href = notif.link;
+                      }}
+                    >
+                      {!notif.isRead && (
+                        <div className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                      )}
+                      
+                      <div className="flex-1 pr-4">
+                        <div className="flex justify-between items-start mb-1">
+                          <h3 className={cn("font-bold text-sm", notif.isRead ? "text-foreground/80" : "text-foreground")}>
+                            {notif.title}
+                          </h3>
+                          <span className="text-[10px] font-semibold text-muted-foreground whitespace-nowrap ml-2 mt-0.5">
+                            {new Date(notif.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                        <p className={cn("text-sm", notif.isRead ? "text-muted-foreground" : "text-foreground/90 font-medium")}>
+                          {notif.message}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── Push Notification Status ── */}
         <div>

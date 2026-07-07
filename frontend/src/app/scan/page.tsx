@@ -6,14 +6,16 @@ import { motion } from "framer-motion";
 import { CheckCircle2, XCircle, Loader2, ArrowLeft, ScanLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { checkInToEvent } from "./actions";
+import { checkInToEvent, validateEvent } from "./actions";
 
 export default function ScanPage() {
   const router = useRouter();
   const { user, setUser } = useAuth();
-  const [status, setStatus] = useState<"idle" | "scanning" | "processing" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "scanning" | "processing" | "reflection" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [eventTitle, setEventTitle] = useState("");
+  const [eventIdStr, setEventIdStr] = useState("");
+  const [reflection, setReflection] = useState("");
 
   const handleScan = async (data: string) => {
     if (status !== "scanning" && status !== "idle") return;
@@ -34,22 +36,34 @@ export default function ScanPage() {
 
       setStatus("processing");
       
-      const res = await checkInToEvent(eventId);
+      const res = await validateEvent(eventId);
       
       if (res.error) {
         setMessage(res.error);
         setStatus("error");
-      } else if (res.success && res.xp && res.level) {
-        if (user) {
-          setUser({ ...user, xp: res.xp, level: res.level });
-        }
+      } else if (res.success) {
         setEventTitle(res.eventTitle || "Event");
-        setMessage("+100 XP Earned!");
-        setStatus("success");
+        setEventIdStr(res.eventId || eventId);
+        setStatus("reflection");
       }
     } catch (error) {
       setMessage("Invalid QR Code.");
       setStatus("error");
+    }
+  };
+
+  const submitReflection = async () => {
+    setStatus("processing");
+    const res = await checkInToEvent(eventIdStr, reflection);
+    if (res.error) {
+      setMessage(res.error);
+      setStatus("error");
+    } else if (res.success && res.xp && res.level) {
+      if (user) {
+        setUser({ ...user, xp: res.xp, level: res.level });
+      }
+      setMessage("+150 XP Earned!");
+      setStatus("success");
     }
   };
 
@@ -91,8 +105,28 @@ export default function ScanPage() {
             <Loader2 className="w-12 h-12 text-amber-400 animate-spin mb-4" />
             <p className="font-bold text-lg">Verifying Check-in...</p>
           </motion.div>
+        ) : status === "reflection" ? (
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center bg-slate-900 p-6 rounded-3xl border border-slate-700 w-full max-w-md text-left">
+            <h2 className="font-extrabold text-2xl font-serif mb-2 text-white w-full">Sermon Notes</h2>
+            <p className="font-semibold text-amber-400 mb-4 w-full">{eventTitle}</p>
+            <p className="text-sm text-white/70 mb-4 w-full">To complete your check-in and earn your 150 Grace Points, please share one key takeaway or verse from today's sermon/event.</p>
+            <textarea
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 resize-none"
+              rows={4}
+              placeholder="What did you learn today?"
+              value={reflection}
+              onChange={(e) => setReflection(e.target.value)}
+            />
+            <button 
+              onClick={submitReflection}
+              disabled={reflection.trim().length < 5}
+              className="mt-6 px-6 py-3 gradient-gold text-white hover:opacity-90 disabled:opacity-50 disabled:grayscale rounded-xl font-bold transition-all w-full flex justify-center"
+            >
+              Submit & Check-in
+            </button>
+          </motion.div>
         ) : status === "success" ? (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center bg-green-950/30 p-8 rounded-3xl border border-green-900/50">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center bg-green-950/30 p-8 rounded-3xl border border-green-900/50 w-full max-w-md">
             <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(74,222,128,0.3)]">
               <CheckCircle2 className="w-10 h-10" />
             </div>
@@ -109,7 +143,7 @@ export default function ScanPage() {
             </button>
           </motion.div>
         ) : (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center bg-red-950/30 p-8 rounded-3xl border border-red-900/50">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center bg-red-950/30 p-8 rounded-3xl border border-red-900/50 w-full max-w-md">
             <div className="w-20 h-20 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mb-4">
               <XCircle className="w-10 h-10" />
             </div>

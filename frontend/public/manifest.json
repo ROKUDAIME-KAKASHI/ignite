@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Youth Movement",
-  "short_name": "YouthApp",
-  "description": "Church Youth Movement platform for spiritual growth and community.",
+  "name": "IGNITE",
+  "short_name": "IGNITE",
+  "description": "IGNITE: Youth Movement platform for spiritual growth and community.",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "tabbed", "standalone"],
@@ -77,9 +77,9 @@
   },
   "widgets": [
     {
-      "name": "Youth Widget",
-      "short_name": "Widget",
-      "description": "A widget for the Youth App",
+      "name": "IGNITE Widget",
+      "short_name": "IGNITE",
+      "description": "A widget for IGNITE",
       "tag": "youth-widget",
       "template": "widget.html",
       "ms_ac_template": "widget.html",

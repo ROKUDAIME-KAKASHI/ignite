@@ -33,6 +33,9 @@ model User {
   quizAttempts  QuizAttempt[]
   appointments  Appointment[]
   pushSubscriptions PushSubscription[]
+  uploadedPhotos EventGalleryPhoto[]
+  notifications Notification[]
+  mentorshipQuestions MentorshipQuestion[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -141,6 +144,18 @@ model Event {
   churchId    String?
   church      Church?  @relation(fields: [churchId], references: [id])
   attendances Attendance[]
+  photos      EventGalleryPhoto[]
+  createdAt   DateTime @default(now())
+}
+
+model EventGalleryPhoto {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  imageUrl    String
+  caption     String?
+  uploadedById String?
+  uploadedBy  User?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
 }
 
@@ -150,6 +165,7 @@ model Attendance {
   user        User     @relation(fields: [userId], references: [id])
   eventId     String
   event       Event    @relation(fields: [eventId], references: [id])
+  reflection  String?
   checkedInAt DateTime @default(now())
 }
 
@@ -261,4 +277,26 @@ model PushSubscription {
   auth        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+}
+
+model MentorshipQuestion {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  text        String
+  answer      String?
+  answeredBy  String?
+  isAnonymous Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }

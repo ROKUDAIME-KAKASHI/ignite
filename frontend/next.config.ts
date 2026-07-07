@@ -9,6 +9,17 @@ const withPWA = withPWAInit({
   workboxOptions: {
     runtimeCaching: [
       {
+        urlPattern: /\/(guides|scripture).*/i,
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'offline-content-cache',
+          expiration: {
+            maxEntries: 100,
+            maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+          },
+        }
+      },
+      {
         urlPattern: /\/api\/.*/i,
         handler: 'NetworkOnly',
         options: {

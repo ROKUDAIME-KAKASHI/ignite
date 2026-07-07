@@ -5,10 +5,11 @@ import { useAuth } from "@/context/AuthContext";
 import { awardXP } from "@/app/actions/gamification";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Droplets, Trophy, RotateCcw } from "lucide-react";
+import { Loader2, Droplets, Trophy, RotateCcw, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
+import Link from "next/link";
 
 // Filter trivia questions to only those with letters and spaces in the answer
 const WORDS = TRIVIA_QUESTIONS
@@ -87,7 +88,14 @@ export default function NoahsArkPage() {
         <div className="w-full h-4 bg-blue-400/50 animate-pulse" />
       </div>
 
-      <div className="container max-w-2xl mx-auto px-4 pt-24">
+      <div className="px-4 pt-6 pb-4 flex items-center justify-between relative z-10">
+        <Link href="/quizzes" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
+          <ChevronLeft className="w-5 h-5" />
+        </Link>
+        <div className="w-10 h-10" />
+      </div>
+
+      <div className="container max-w-2xl mx-auto px-4 pt-4">
         <div className="text-center mb-10">
           <Badge className="mb-4 gradient-spirit border-0">Noah's Ark</Badge>
           <h1 className="text-4xl md:text-5xl font-extrabold font-serif mb-4">Beat the Flood</h1>

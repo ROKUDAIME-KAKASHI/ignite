@@ -3,15 +3,15 @@
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Clock, Users, ChevronRight } from "lucide-react";
+import { Calendar, MapPin, Clock, Users, ChevronRight, Camera, X, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { getEvents, rsvpEvent } from "./actions";
+import { getEvents, rsvpEvent, getEventGallery, uploadEventPhoto } from "./actions";
 
 const tabs = ["Upcoming", "Registered", "Past"];
 
 type EventType = {
-  id: string | number;
+  id: string;
   title: string;
   date: string;
   time: string;
@@ -25,6 +25,7 @@ type EventType = {
   description: string;
   isoDate?: string;
   rawDate?: Date;
+  photosCount?: number;
 };
 
 // Style palette cycling for DB events
@@ -77,9 +78,14 @@ const categoryColors: Record<string, string> = {
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("Upcoming");
-  const [registered, setRegistered] = useState<(string | number)[]>([]);
+  const [registered, setRegistered] = useState<string[]>([]);
   const [events, setEvents] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Gallery State
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+  const [galleryLoading, setGalleryLoading] = useState(false);
 
   useEffect(() => {
     getEvents().then((dbEvents) => {
@@ -92,15 +98,41 @@ export default function EventsPage() {
           rawDate,
         };
       });
-      setEvents(mapped);
+      setEvents(mapped as EventType[]);
       setLoading(false);
     });
   }, []);
 
-  const toggleReg = async (id: string | number) => {
+  const toggleReg = async (id: string) => {
     setRegistered((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
     if (typeof id === "string") {
       await rsvpEvent(id);
+    }
+  };
+
+  const openGallery = async (eventId: string) => {
+    setSelectedEventId(eventId);
+    setGalleryLoading(true);
+    const photos = await getEventGallery(eventId);
+    setGalleryPhotos(photos);
+    setGalleryLoading(false);
+  };
+  
+  const handleUploadPhoto = async () => {
+    if (!selectedEventId) return;
+    const url = prompt("Enter the URL of your photo to share:");
+    if (!url) return;
+    
+    // Optimistic update could go here
+    const res = await uploadEventPhoto(selectedEventId, url, "Shared memory from the event!");
+    if (res.success) {
+      alert("Photo uploaded! You earned 15 Grace Points.");
+      const updatedPhotos = await getEventGallery(selectedEventId);
+      setGalleryPhotos(updatedPhotos);
+      // update event photos count in state
+      setEvents(events.map(e => e.id === selectedEventId ? {...e, photosCount: (e.photosCount || 0) + 1} : e));
+    } else {
+      alert("Error: " + res.error);
     }
   };
 
@@ -113,7 +145,7 @@ export default function EventsPage() {
       : events.filter((e) => !e.rawDate || e.rawDate >= now);
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto relative">
 
       {/* ── Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-10 gradient-life">
@@ -184,6 +216,7 @@ export default function EventsPage() {
             <AnimatePresence>
               {shown.map((event, i) => {
                 const isReg = registered.includes(event.id);
+                const isPast = event.rawDate && event.rawDate < now;
                 return (
                   <motion.div
                     key={event.id}
@@ -204,7 +237,7 @@ export default function EventsPage() {
                               <Badge className={cn("text-[10px] border-0 px-2", categoryColors[event.category] || categoryColors["General"])}>
                                 {event.category}
                               </Badge>
-                              {isReg && <span className="text-green-600 dark:text-green-400 text-sm font-bold">✓</span>}
+                              {!isPast && isReg && <span className="text-green-600 dark:text-green-400 text-sm font-bold">✓</span>}
                             </div>
                           </div>
                         </div>
@@ -218,24 +251,36 @@ export default function EventsPage() {
                         <div className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-primary/50" />{event.date}</div>
                         <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary/50" />{event.time}</div>
                         <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary/50" />{event.location}</div>
-                        <div className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-primary/50" />{event.attendees} going</div>
+                        <div className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-primary/50" />{event.attendees} {isPast ? "attended" : "going"}</div>
                       </div>
                       <div className="flex gap-2 pt-1">
-                        <Button
-                          onClick={() => toggleReg(event.id)}
-                          className={cn(
-                            "flex-1 h-9 rounded-xl font-bold text-sm transition-all",
-                            isReg
-                              ? "bg-muted text-muted-foreground border border-border"
-                              : `${event.gradient || "gradient-gold"} text-white shadow-md`
-                          )}
-                          variant={isReg ? "outline" : "default"}
-                        >
-                          {isReg ? "✓ Registered" : "Register · RSVP"}
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
-                          <ChevronRight className="w-4 h-4" />
-                        </Button>
+                        {!isPast ? (
+                          <>
+                            <Button
+                              onClick={() => toggleReg(event.id)}
+                              className={cn(
+                                "flex-1 h-9 rounded-xl font-bold text-sm transition-all",
+                                isReg
+                                  ? "bg-muted text-muted-foreground border border-border"
+                                  : `${event.gradient || "gradient-gold"} text-white shadow-md`
+                              )}
+                              variant={isReg ? "outline" : "default"}
+                            >
+                              {isReg ? "✓ Registered" : "Register · RSVP"}
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
+                              <ChevronRight className="w-4 h-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            onClick={() => openGallery(event.id)}
+                            className="flex-1 h-9 rounded-xl font-bold text-sm transition-all bg-secondary text-secondary-foreground hover:bg-secondary/80 flex items-center justify-center gap-2 border border-border/50"
+                          >
+                            <Camera className="w-4 h-4" />
+                            View Gallery ({event.photosCount || 0})
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -245,6 +290,69 @@ export default function EventsPage() {
           </div>
         )}
       </div>
+
+      {/* Gallery Modal */}
+      <AnimatePresence>
+        {selectedEventId && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col"
+          >
+            <div className="flex items-center justify-between p-4 border-b bg-card">
+              <div>
+                <h2 className="font-bold font-serif text-lg">Event Gallery</h2>
+                <p className="text-xs text-muted-foreground">Community memories</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setSelectedEventId(null)}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <Button onClick={handleUploadPhoto} className="w-full h-12 rounded-xl border-2 border-dashed border-primary/50 bg-primary/5 hover:bg-primary/10 text-primary font-bold shadow-none flex gap-2">
+                <Plus className="w-5 h-5" /> Share a Photo (Earn 15 XP)
+              </Button>
+
+              {galleryLoading ? (
+                <div className="text-center py-10">
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }} className="w-8 h-8 border-4 border-primary/30 border-t-primary mx-auto rounded-full mb-4" />
+                </div>
+              ) : galleryPhotos.length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground">
+                  <Camera className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                  <p className="font-serif">No photos yet.</p>
+                  <p className="text-sm">Be the first to share a memory!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {galleryPhotos.map((photo) => (
+                    <div key={photo.id} className="relative aspect-square rounded-xl overflow-hidden border border-border group bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={photo.imageUrl} alt={photo.caption || "Event Photo"} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6">
+                        <div className="flex items-center gap-1.5">
+                          {photo.uploadedBy?.avatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={photo.uploadedBy.avatarUrl} alt="Uploader" className="w-4 h-4 rounded-full border border-white/20" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center text-[8px] text-white font-bold">
+                              {photo.uploadedBy?.firstName?.[0] || "?"}
+                            </div>
+                          )}
+                          <p className="text-[10px] text-white/90 truncate font-medium">
+                            {photo.uploadedBy?.firstName}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

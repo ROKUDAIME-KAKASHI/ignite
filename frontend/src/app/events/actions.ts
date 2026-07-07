@@ -8,6 +8,7 @@ export async function getEvents() {
     orderBy: { date: "asc" },
     include: {
       attendances: true,
+      photos: true,
     },
   });
 
@@ -27,6 +28,7 @@ export async function getEvents() {
     description: e.description || "Join us for this parish event.",
     // Return the ISO string so client can compare with today for Upcoming/Past tabs
     isoDate: e.date.toISOString(),
+    photosCount: e.photos.length,
   }));
 }
 
@@ -60,5 +62,36 @@ export async function rsvpEvent(eventId: string) {
     });
   }
 
+  return { success: true };
+}
+
+export async function getEventGallery(eventId: string) {
+  const photos = await prisma.eventGalleryPhoto.findMany({
+    where: { eventId },
+    orderBy: { createdAt: "desc" },
+    include: { uploadedBy: { select: { firstName: true, lastName: true, avatarUrl: true } } }
+  });
+  return photos;
+}
+
+export async function uploadEventPhoto(eventId: string, imageUrl: string, caption?: string) {
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not logged in" };
+
+  await prisma.eventGalleryPhoto.create({
+    data: {
+      eventId,
+      imageUrl,
+      caption,
+      uploadedById: session.id
+    }
+  });
+  
+  // Award XP for sharing a memory
+  await prisma.user.update({
+    where: { id: session.id },
+    data: { xp: { increment: 15 } },
+  });
+  
   return { success: true };
 }
