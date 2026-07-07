@@ -8,20 +8,48 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { getJourneys } from "./actions";
+import { getJourneys, enrollCourse, completeNode } from "./actions";
 
 export default function JourneysPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"map" | "library">("map");
   const [courses, setCourses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedNode, setSelectedNode] = useState<any | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+
+  const fetchJourneys = async () => {
+    const data = await getJourneys();
+    setCourses(data);
+    if (!activeCourseId && data.length > 0) {
+      // Find the first course with progress, else fallback to the first course
+      const inProgress = data.find(c => c.completedNodes > 0);
+      setActiveCourseId(inProgress ? inProgress.id : data[0].id);
+    }
+  };
 
   useEffect(() => {
-    getJourneys().then(data => {
-      setCourses(data);
-      setIsLoading(false);
-    });
+    fetchJourneys().then(() => setIsLoading(false));
   }, []);
+
+  const handleEnroll = async (courseId: string) => {
+    setIsProcessing(true);
+    await enrollCourse(courseId);
+    await fetchJourneys();
+    setActiveCourseId(courseId);
+    setActiveTab("map");
+    setIsProcessing(false);
+  };
+
+  const handleCompleteNode = async () => {
+    if (!selectedNode) return;
+    setIsProcessing(true);
+    await completeNode(selectedNode.id);
+    await fetchJourneys();
+    setSelectedNode(null);
+    setIsProcessing(false);
+  };
 
   if (isLoading) {
     return (
@@ -31,8 +59,8 @@ export default function JourneysPage() {
     );
   }
 
-  // Active course defaults to Synoptic Gospels or the first one
-  const activeCourse = courses.find(c => c.title === "The Synoptic Gospels") || courses[0];
+  // Active course defaults to the selected activeCourseId
+  const activeCourse = courses.find(c => c.id === activeCourseId) || courses[0];
   const maxStars = activeCourse?.totalNodes * 3 || 0;
 
   return (
@@ -132,6 +160,11 @@ export default function JourneysPage() {
 
                     {/* Node Button */}
                     <motion.button 
+                      onClick={() => {
+                        if (node.status !== "locked") {
+                          setSelectedNode(node);
+                        }
+                      }}
                       whileHover={node.status !== "locked" ? { scale: 1.1 } : {}}
                       whileTap={node.status !== "locked" ? { scale: 0.95 } : {}}
                       className={cn(
@@ -163,13 +196,68 @@ export default function JourneysPage() {
                 <p className="text-xs text-muted-foreground mt-0.5 mb-3 line-clamp-1">{course.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase">{course.completedNodes} / {course.totalNodes} Lessons</span>
-                  <Button size="sm" variant={course.completedNodes > 0 ? "default" : "outline"} className="h-7 text-xs rounded-lg">
-                    {course.completedNodes > 0 ? "Continue" : "Enroll"}
-                  </Button>
+                  {course.completedNodes > 0 ? (
+                    <Button size="sm" onClick={() => { setActiveCourseId(course.id); setActiveTab("map"); }} className="h-7 text-xs rounded-lg">
+                      Continue
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={() => handleEnroll(course.id)} disabled={isProcessing} className="h-7 text-xs rounded-lg">
+                      {isProcessing ? "..." : "Enroll"}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Node Content Modal */}
+      {selectedNode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative overflow-hidden"
+          >
+            {selectedNode.status === "completed" && (
+              <div className="absolute top-0 left-0 right-0 h-2 bg-emerald-500" />
+            )}
+            
+            <button 
+              onClick={() => setSelectedNode(null)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700"
+            >
+              ✕
+            </button>
+
+            <div className="mt-4 mb-2 flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              {selectedNode.type === "read" ? <BookOpen className="w-5 h-5" /> : <Star className="w-5 h-5" />}
+              <span className="text-xs font-bold uppercase tracking-wider">{selectedNode.type}</span>
+            </div>
+
+            <h2 className="text-2xl font-black font-serif text-slate-900 dark:text-white mb-2">
+              {selectedNode.title}
+            </h2>
+            
+            <p className="text-slate-600 dark:text-slate-300 mb-8 text-sm leading-relaxed">
+              {selectedNode.content}
+            </p>
+
+            {selectedNode.status === "completed" ? (
+              <div className="flex items-center justify-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-xl font-bold">
+                <CheckCircle2 className="w-5 h-5" /> Completed
+              </div>
+            ) : (
+              <Button 
+                onClick={handleCompleteNode} 
+                disabled={isProcessing}
+                className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
+              >
+                {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Step"}
+              </Button>
+            )}
+          </motion.div>
         </div>
       )}
     </div>

@@ -62,20 +62,6 @@ export async function getJourneys() {
       where: { userId },
     });
 
-    // If user has no progress, enroll them in Synoptic Gospels automatically for demo
-    if (userNodes.length === 0) {
-      const synopticCourse = courses.find(c => c.title === "The Synoptic Gospels");
-      if (synopticCourse && synopticCourse.nodes.length >= 2) {
-        await prisma.userJourneyNode.createMany({
-          data: [
-            { userId, nodeId: synopticCourse.nodes[0].id, status: "completed", stars: 3 },
-            { userId, nodeId: synopticCourse.nodes[1].id, status: "completed", stars: 3 },
-            { userId, nodeId: synopticCourse.nodes[2].id, status: "current", stars: 0 },
-          ]
-        });
-        userNodes = await prisma.userJourneyNode.findMany({ where: { userId } });
-      }
-    }
   }
 
   // Map progress to nodes
@@ -106,4 +92,77 @@ export async function getJourneys() {
   });
 
   return coursesWithProgress;
+}
+
+export async function enrollCourse(courseId: string) {
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not authenticated" };
+
+  // Get course nodes
+  const course = await prisma.journeyCourse.findUnique({
+    where: { id: courseId },
+    include: { nodes: { orderBy: { order: "asc" } } }
+  });
+
+  if (!course || course.nodes.length === 0) return { success: false, error: "Course not found or empty" };
+
+  // Create progress for first node
+  await prisma.userJourneyNode.create({
+    data: {
+      userId: session.id,
+      nodeId: course.nodes[0].id,
+      status: "current",
+      stars: 0
+    }
+  });
+
+  return { success: true };
+}
+
+export async function completeNode(nodeId: string) {
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not authenticated" };
+
+  // Mark current node completed
+  const progress = await prisma.userJourneyNode.update({
+    where: { userId_nodeId: { userId: session.id, nodeId } },
+    data: { status: "completed", stars: 3 }
+  });
+
+  // Find next node in course
+  const node = await prisma.journeyNode.findUnique({ where: { id: nodeId } });
+  if (node) {
+    const nextNode = await prisma.journeyNode.findFirst({
+      where: { courseId: node.courseId, order: { gt: node.order } },
+      orderBy: { order: "asc" }
+    });
+
+    if (nextNode) {
+      // Unlock next node
+      await prisma.userJourneyNode.create({
+        data: {
+          userId: session.id,
+          nodeId: nextNode.id,
+          status: "current",
+          stars: 0
+        }
+      });
+    }
+
+    // Award XP
+    await prisma.user.update({
+      where: { id: session.id },
+      data: { xp: { increment: 50 } }
+    });
+
+    await prisma.xPLog.create({
+      data: {
+        userId: session.id,
+        amount: 50,
+        reason: `Completed Journey Node: ${node.title}`
+      }
+    });
+  }
+
+  return { success: true };
 }
