@@ -31,7 +31,9 @@ export async function requestPasswordReset(email: string) {
     console.log(`👉 ${resetUrl}`);
     console.log(`========================================\n\n`);
 
-    return { success: true };
+    // Returning resetUrl purely so you can copy it in the app without checking console.
+    // REMOVE THIS in production when real emails are implemented!
+    return { success: true, resetUrl };
   } catch (error) {
     console.error("Error requesting password reset:", error);
     return { success: false, error: "Something went wrong" };
