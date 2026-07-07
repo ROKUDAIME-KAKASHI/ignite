@@ -24,6 +24,10 @@ export const metadata: Metadata = {
     description: "In a world that never stops, your faith never should.",
     type: "website",
   },
+  icons: {
+    icon: "/icon-192x192.png",
+    apple: "/icon-192x192.png",
+  },
 };
 
 export const viewport: Viewport = {

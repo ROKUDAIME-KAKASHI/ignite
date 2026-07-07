@@ -146,7 +146,12 @@ export default function ProfilePage() {
 
   const handleInstallClick = () => {
     if (!installPrompt) {
-      alert("App is already installed or your browser doesn't support this feature (try 'Add to Home Screen' from the browser menu).");
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+      if (isIOS) {
+        alert("To install on iOS:\n1. Tap the Share icon (square with arrow) at the bottom of Safari\n2. Scroll down and tap 'Add to Home Screen'");
+      } else {
+        alert("App is either already installed, or your browser requires manual installation.\n\nTry opening your browser menu (usually three dots in the top right) and look for 'Install app' or 'Add to Home Screen'.");
+      }
       return;
     }
     installPrompt.prompt();
