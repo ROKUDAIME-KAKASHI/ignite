@@ -18,32 +18,6 @@ type Question = {
   askedBy: string;
 };
 
-const MOCK_QUESTIONS: Question[] = [
-  {
-    id: "1",
-    text: "Why do we ask the saints to pray for us instead of just praying directly to Jesus?",
-    answer: "Great question! Just like you might ask a righteous friend on earth to pray for you when you're going through a hard time, we ask the saints in heaven to pray for us. They are alive in Christ (Luke 20:38) and the prayer of a righteous person has great power (James 5:16). We still pray directly to Jesus, but having the whole family of God intercede for us is a beautiful part of the Communion of Saints.",
-    answeredBy: "Fr. Thomas",
-    isAnonymous: false,
-    createdAt: new Date(Date.now() - 86400000 * 2),
-  },
-  {
-    id: "2",
-    text: "How do I explain the real presence of Christ in the Eucharist to my Protestant friends?",
-    answer: "Start with John 6, where Jesus repeatedly says 'My flesh is true food, and my blood is true drink.' Also mention that for the first 1,500 years of Christianity, this was unanimously believed by all Christians. It's a mystery, but we take Jesus at His word at the Last Supper: 'This IS my body.'",
-    answeredBy: "Deacon John",
-    isAnonymous: true,
-    createdAt: new Date(Date.now() - 86400000 * 5),
-  },
-  {
-    id: "3",
-    text: "I've been struggling to pray lately. Any advice on how to build a routine?",
-    answer: null,
-    answeredBy: null,
-    isAnonymous: true,
-    createdAt: new Date(),
-  },
-];
 
 export default function MentorshipPage() {
   const router = useRouter();
