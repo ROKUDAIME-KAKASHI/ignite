@@ -17,6 +17,8 @@ export async function GET() {
       xp: true,
       level: true,
       streak: true,
+      stars: true,
+      churchId: true,
     }
   });
 

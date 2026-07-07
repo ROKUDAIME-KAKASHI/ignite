@@ -1,25 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, Lock, Star, Map, BookOpen, CheckCircle2, ChevronRight } from "lucide-react";
+import { ChevronLeft, Lock, Star, Map, BookOpen, CheckCircle2, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-const JOURNEY_NODES = [
-  { id: 1, title: "The Incarnation", type: "read", status: "completed", stars: 3 },
-  { id: 2, title: "Sermon on the Mount", type: "quiz", status: "completed", stars: 3 },
-  { id: 3, title: "The Parables", type: "read", status: "current", stars: 0 },
-  { id: 4, title: "The Bread of Life", type: "read", status: "locked", stars: 0 },
-  { id: 5, title: "The Passion Narrative", type: "boss", status: "locked", stars: 0 },
-];
+import { getJourneys } from "./actions";
 
 export default function JourneysPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"map" | "library">("map");
+  const [courses, setCourses] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    getJourneys().then(data => {
+      setCourses(data);
+      setIsLoading(false);
+    });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-700" />
+      </div>
+    );
+  }
+
+  // Active course defaults to Synoptic Gospels or the first one
+  const activeCourse = courses.find(c => c.title === "The Synoptic Gospels") || courses[0];
+  const maxStars = activeCourse?.totalNodes * 3 || 0;
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7]">
@@ -35,13 +49,15 @@ export default function JourneysPage() {
             </div>
             <div>
               <h1 className="text-2xl font-extrabold text-white font-serif">Biblical Journeys</h1>
-              <p className="text-green-200 text-xs font-bold uppercase tracking-wider">A Deep Dive into the Life of Christ</p>
+              <p className="text-green-200 text-xs font-bold uppercase tracking-wider">Deepen your knowledge</p>
             </div>
           </div>
-          <div className="flex gap-2 mt-4">
-            <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm hover:bg-white/30">✝️ The Synoptic Gospels</Badge>
-            <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm hover:bg-white/30">⭐ 6/15 Stars</Badge>
-          </div>
+          {activeCourse && (
+            <div className="flex gap-2 mt-4">
+              <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm hover:bg-white/30">{activeCourse.icon} {activeCourse.title}</Badge>
+              <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm hover:bg-white/30">⭐ {activeCourse.earnedStars}/{maxStars} Stars</Badge>
+            </div>
+          )}
         </div>
       </div>
 
@@ -74,7 +90,7 @@ export default function JourneysPage() {
             <div className="absolute left-1/2 top-4 bottom-4 w-2 bg-emerald-100 dark:bg-emerald-900/30 -translate-x-1/2 rounded-full z-0" />
             
             <div className="space-y-12 relative z-10 py-4">
-              {JOURNEY_NODES.map((node, index) => {
+              {activeCourse?.nodes.map((node: any, index: number) => {
                 const isLeft = index % 2 === 0;
                 
                 let bgColor = "bg-muted text-muted-foreground";
@@ -137,22 +153,19 @@ export default function JourneysPage() {
         <div className="flex-1 p-6 space-y-4">
           <p className="text-sm text-muted-foreground mb-4">Enroll in a new biblical journey to deepen your knowledge of scripture and church history.</p>
           
-          {[
-            { title: "The Patriarchs", desc: "Genesis: The origin story of God's people.", progress: 5, total: 15, icon: "📖", color: "from-amber-500 to-orange-400" },
-            { title: "The Synoptic Gospels", desc: "A deep dive into the life of Jesus Christ.", progress: 2, total: 5, icon: "✝️", color: "from-purple-500 to-indigo-400" },
-            { title: "The Exodus Experience", desc: "Follow Moses and the Israelites out of Egypt.", progress: 0, total: 20, icon: "🌊", color: "from-blue-500 to-cyan-400" },
-            { title: "Acts of the Apostles", desc: "The birth of the early church.", progress: 0, total: 15, icon: "🕊️", color: "from-rose-500 to-red-400" },
-          ].map((course, i) => (
-            <div key={i} className="bg-card rounded-2xl border border-border/60 card-holy p-4 flex gap-4">
+          {courses.map((course) => (
+            <div key={course.id} className="bg-card rounded-2xl border border-border/60 card-holy p-4 flex gap-4">
               <div className={cn("w-16 h-16 rounded-2xl bg-gradient-to-br flex items-center justify-center text-3xl shadow-inner shrink-0", course.color)}>
                 {course.icon}
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-foreground font-serif">{course.title}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5 mb-3 line-clamp-1">{course.desc}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 mb-3 line-clamp-1">{course.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{course.progress} / {course.total} Lessons</span>
-                  <Button size="sm" variant="outline" className="h-7 text-xs rounded-lg">Enroll</Button>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{course.completedNodes} / {course.totalNodes} Lessons</span>
+                  <Button size="sm" variant={course.completedNodes > 0 ? "default" : "outline"} className="h-7 text-xs rounded-lg">
+                    {course.completedNodes > 0 ? "Continue" : "Enroll"}
+                  </Button>
                 </div>
               </div>
             </div>

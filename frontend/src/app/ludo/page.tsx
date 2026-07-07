@@ -436,7 +436,7 @@ export default function BibleLudoPage() {
             <Button onClick={() => { setGameMode("team"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4">
               <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center"><Trophy className="w-5 h-5" /></div>
               <div>
-                <p className="font-bold text-foreground">2v2 Team Mode <Badge className="ml-2 text-[10px] gradient-gold border-0">40 XP</Badge></p>
+                <p className="font-bold text-foreground">2v2 Team Mode <Badge className="ml-2 text-[10px] gradient-gold border-0">40 Grace Points</Badge></p>
                 <p className="text-xs text-muted-foreground font-normal">You & Yellow vs Green & Blue</p>
               </div>
             </Button>

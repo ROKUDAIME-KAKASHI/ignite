@@ -265,7 +265,7 @@ export default async function DashboardPage() {
             </div>
             <div>
               <p className="font-bold text-white text-lg leading-tight">Event Check-In</p>
-              <p className="text-emerald-100 text-sm">Scan QR code to earn XP</p>
+              <p className="text-emerald-100 text-sm">Scan QR code to earn Grace Points</p>
             </div>
             <ChevronRight className="w-5 h-5 text-white/70 ml-auto" />
           </div>
@@ -343,7 +343,7 @@ export default async function DashboardPage() {
                 <div className="w-9 h-9 rounded-xl gradient-spirit flex items-center justify-center shadow-md text-lg">🎓</div>
                 <div>
                   <p className="font-bold text-sm text-foreground">Daily Quiz</p>
-                  <p className="text-xs text-orange-600 dark:text-orange-400 font-semibold">Earn up to 100 XP</p>
+                  <p className="text-xs text-orange-600 dark:text-orange-400 font-semibold">Earn up to 100 Grace Points</p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />

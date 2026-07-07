@@ -40,3 +40,25 @@ export async function awardXP(amount: number, reason: string) {
     return { error: "Failed to award XP" };
   }
 }
+
+export async function awardStars(amount: number, reason: string) {
+  try {
+    const session = await getSession();
+    if (!session?.id) return { error: "Not authenticated" };
+
+    const user = await prisma.user.update({
+      where: { id: session.id },
+      data: {
+        stars: { increment: amount },
+      }
+    });
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/", "layout");
+
+    return { success: true, stars: user.stars };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to award Stars" };
+  }
+}

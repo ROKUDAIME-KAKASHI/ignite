@@ -14,6 +14,7 @@ interface AuthUser {
   xp?: number;
   level?: number;
   streak?: number;
+  stars?: number;
   churchId?: string | null;
 }
 

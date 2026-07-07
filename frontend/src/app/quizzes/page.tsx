@@ -754,7 +754,7 @@ export default function QuizzesPage() {
               </div>
               <div className="rounded-2xl gradient-gold p-4 text-white text-center card-holy halo-glow">
                 <p className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">Grace Points Earned</p>
-                <p className="text-3xl font-extrabold font-serif">+{Math.round((score / totalQ) * activeSet.xp)} XP</p>
+                <p className="text-3xl font-extrabold font-serif">+{Math.round((score / totalQ) * activeSet.xp)} Grace Points</p>
               </div>
               <div className="flex gap-3">
                 <Button onClick={() => startQuiz(activeSet)} variant="outline" className="flex-1 h-11 rounded-xl font-bold border-border/60">

@@ -20,6 +20,7 @@ model User {
   
   // Gamification
   xp            Int       @default(0)
+  stars         Int       @default(0)
   level         Int       @default(1)
   streak        Int       @default(0)
   lastActiveAt  DateTime?
@@ -36,6 +37,7 @@ model User {
   uploadedPhotos EventGalleryPhoto[]
   notifications Notification[]
   mentorshipQuestions MentorshipQuestion[]
+  journeyNodes  UserJourneyNode[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -247,6 +249,40 @@ model FeaturedVerse {
   text        String
   reference   String
   theme       String
+}
+
+model JourneyCourse {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  color       String
+  icon        String
+  nodes       JourneyNode[]
+  createdAt   DateTime @default(now())
+}
+
+model JourneyNode {
+  id          String   @id @default(uuid())
+  courseId    String
+  course      JourneyCourse @relation(fields: [courseId], references: [id])
+  title       String
+  type        String   // "read", "quiz", "boss"
+  content     String
+  order       Int
+  users       UserJourneyNode[]
+}
+
+model UserJourneyNode {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  nodeId      String
+  node        JourneyNode @relation(fields: [nodeId], references: [id])
+  status      String   // "completed", "current", "locked"
+  stars       Int      @default(0) // 1-3 stars
+  completedAt DateTime?
+
+  @@unique([userId, nodeId])
 }
 
 model Guide {

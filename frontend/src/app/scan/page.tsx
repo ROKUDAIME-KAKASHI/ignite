@@ -62,7 +62,7 @@ export default function ScanPage() {
       if (user) {
         setUser({ ...user, xp: res.xp, level: res.level });
       }
-      setMessage("+150 XP Earned!");
+      setMessage("+150 Grace Points Earned!");
       setStatus("success");
     }
   };
