@@ -16,10 +16,9 @@ import { requestNotificationPermission } from "@/lib/firebase";
 
 /* ─── Static data ──────────────────────────────────────────────────────────── */
 
-const weekDays = ["S", "M", "T", "W", "T", "F", "S"];
 const defaultStreak = [false, false, false, false, false, false, false];
-
-const saintQuote = { quote: "Do small things with great love.", author: "St. Teresa of Calcutta" };
+const defaultWeekDays = ["S", "M", "T", "W", "T", "F", "S"];
+const defaultQuote = { quote: "Do small things with great love.", author: "St. Teresa of Calcutta" };
 
 /* ─── Name editor ──────────────────────────────────────────────────────────── */
 function NameEditor({ currentName, onSave }: { currentName: string; onSave: (n: string) => Promise<void> }) {
@@ -110,7 +109,7 @@ function NameEditor({ currentName, onSave }: { currentName: string; onSave: (n: 
 export default function ProfilePage() {
   const { user, updateDisplayName, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
-  const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [] });
+  const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any, weekDays?: string[], quoteOfTheDay?: {quote: string, author: string} }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [], weekDays: defaultWeekDays, quoteOfTheDay: defaultQuote });
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   
   const [inviteCode, setInviteCode] = useState("");
@@ -285,7 +284,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <div className="flex justify-between gap-1">
-            {weekDays.map((d, i) => (
+            {(stats.weekDays || defaultWeekDays).map((d, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
                 <div className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
@@ -329,8 +328,8 @@ export default function ProfilePage() {
       <div className="px-4 mb-5">
         <div className="rounded-2xl p-4 gradient-lent card-holy">
           <p className="text-[10px] text-purple-200 font-bold uppercase tracking-widest">Quote of the Day</p>
-          <p className="text-sm font-serif italic text-white mt-2 leading-relaxed">"{saintQuote.quote}"</p>
-          <p className="text-purple-300 text-xs font-semibold mt-2">— {saintQuote.author}</p>
+          <p className="text-sm font-serif italic text-white mt-2 leading-relaxed">"{stats.quoteOfTheDay?.quote || defaultQuote.quote}"</p>
+          <p className="text-purple-300 text-xs font-semibold mt-2">— {stats.quoteOfTheDay?.author || defaultQuote.author}</p>
         </div>
       </div>
 

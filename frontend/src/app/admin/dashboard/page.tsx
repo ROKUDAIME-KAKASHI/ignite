@@ -10,18 +10,13 @@ import { cn } from "@/lib/utils";
 import { createAnnouncement, createEvent, getChurches, createChurch } from "../actions";
 import QRCode from "react-qr-code";
 
-const SYSTEM_ALERTS = [
-  { id: 1, type: "warning", message: "Database connection pool near capacity (85%)" },
-  { id: 2, type: "info", message: "Database backup completed successfully at 03:00 AM" },
-];
-
+import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge } from "../actions";
 import { useRouter } from "next/navigation";
-import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent } from "../actions";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events" | "parishes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events" | "parishes" | "content">("overview");
 
   // Real data state
   const [stats, setStats] = useState({
@@ -38,9 +33,56 @@ export default function AdminDashboardPage() {
   const [existingAnnouncements, setExistingAnnouncements] = useState<any[]>([]);
   const [churches, setChurches] = useState<any[]>([]);
 
+  const [quotes, setQuotes] = useState<any[]>([]);
+  const [chatSuggestions, setChatSuggestions] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
+
+  const [newQuoteText, setNewQuoteText] = useState("");
+  const [newQuoteAuthor, setNewQuoteAuthor] = useState("");
+  const [newSuggestionText, setNewSuggestionText] = useState("");
+  const [creatingQuote, setCreatingQuote] = useState(false);
+  const [creatingSuggestion, setCreatingSuggestion] = useState(false);
+
+  const handleCreateQuote = async () => {
+    if (!newQuoteText.trim() || !newQuoteAuthor.trim()) return;
+    setCreatingQuote(true);
+    await createQuote(newQuoteText.trim(), newQuoteAuthor.trim());
+    setNewQuoteText("");
+    setNewQuoteAuthor("");
+    await fetchContent();
+    setCreatingQuote(false);
+  };
+
+  const handleToggleQuote = async (id: string) => {
+    await toggleQuoteActive(id);
+    await fetchContent();
+  };
+
+  const handleCreateSuggestion = async () => {
+    if (!newSuggestionText.trim()) return;
+    setCreatingSuggestion(true);
+    await createChatSuggestion(newSuggestionText.trim());
+    setNewSuggestionText("");
+    await fetchContent();
+    setCreatingSuggestion(false);
+  };
+
+  const handleDeleteSuggestion = async (id: string) => {
+    if (!confirm("Delete this suggestion?")) return;
+    await deleteChatSuggestion(id);
+    await fetchContent();
+  };
+
   const fetchPrayers = async () => {
     const res = await getAllPrayers();
     if (res.success && res.prayers) setAllPrayers(res.prayers);
+  };
+
+  const fetchContent = async () => {
+    const [qRes, cRes, bRes] = await Promise.all([getQuotes(), getAllChatSuggestions(), getBadges()]);
+    if (qRes.success && qRes.quotes) setQuotes(qRes.quotes);
+    if (cRes.success && cRes.suggestions) setChatSuggestions(cRes.suggestions);
+    if (bRes.success && bRes.badges) setBadges(bRes.badges);
   };
 
   const fetchEventsAndNotices = async () => {
@@ -61,9 +103,10 @@ export default function AdminDashboardPage() {
         setStats(res.stats);
         setRecentUsers(res.recentUsers);
       }
-      await fetchPrayers();
-      await fetchEventsAndNotices();
-      await fetchChurches();
+      fetchPrayers();
+      fetchEventsAndNotices();
+      fetchChurches();
+      fetchContent();
     }
     fetchData();
   }, []);
@@ -168,7 +211,7 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["overview", "prayers", "notices", "events", "parishes"] as const).map(t => (
+          {(["overview", "prayers", "notices", "events", "parishes", "content"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition-all whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -182,22 +225,6 @@ export default function AdminDashboardPage() {
 
         {activeTab === "overview" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-
-            {/* ── System Alerts ── */}
-            {SYSTEM_ALERTS.length > 0 && (
-              <div className="space-y-2">
-                {SYSTEM_ALERTS.map(alert => (
-                  <div key={alert.id} className={cn(
-                    "px-4 py-3 rounded-xl border flex items-start gap-3 text-sm",
-                    alert.type === "warning" ? "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-900/50 dark:text-amber-300" :
-                    "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/30 dark:border-blue-900/50 dark:text-blue-300"
-                  )}>
-                    {alert.type === "warning" ? <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /> : <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />}
-                    <p>{alert.message}</p>
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* ── Key Metrics ── */}
             <div>
@@ -571,6 +598,65 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             )}
+          </motion.div>
+        )}
+
+        {activeTab === "content" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            
+            {/* ── Quotes Management ── */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <h2 className="text-lg font-bold text-foreground mb-4">Quotes of the Day</h2>
+              
+              <div className="space-y-4 mb-6">
+                <Input value={newQuoteText} onChange={e => setNewQuoteText(e.target.value)} placeholder="Quote text (e.g. Do small things with great love.)" />
+                <Input value={newQuoteAuthor} onChange={e => setNewQuoteAuthor(e.target.value)} placeholder="Author (e.g. St. Teresa of Calcutta)" />
+                <button onClick={handleCreateQuote} disabled={creatingQuote} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold w-full">
+                  {creatingQuote ? "Adding..." : "Add Quote"}
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {quotes.map(q => (
+                  <div key={q.id} className="p-4 border rounded-xl flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold">"{q.quote}"</p>
+                      <p className="text-xs text-muted-foreground">— {q.author}</p>
+                    </div>
+                    <button 
+                      onClick={() => handleToggleQuote(q.id)}
+                      className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase", q.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500 hover:bg-slate-200")}
+                    >
+                      {q.isActive ? "Active" : "Set Active"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Chat Suggestions ── */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <h2 className="text-lg font-bold text-foreground mb-4">AI Chat Suggestions</h2>
+              
+              <div className="flex gap-2 mb-6">
+                <Input value={newSuggestionText} onChange={e => setNewSuggestionText(e.target.value)} placeholder="e.g. Explain the Holy Trinity" className="flex-1" />
+                <button onClick={handleCreateSuggestion} disabled={creatingSuggestion} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold">
+                  {creatingSuggestion ? "Adding..." : "Add"}
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {chatSuggestions.map(s => (
+                  <div key={s.id} className="p-3 border rounded-xl flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                    <p className="text-sm font-medium">{s.text}</p>
+                    <button onClick={() => handleDeleteSuggestion(s.id)} className="text-red-500 text-xs font-bold hover:underline">
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </motion.div>
         )}
         

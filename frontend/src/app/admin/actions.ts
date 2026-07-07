@@ -168,6 +168,75 @@ export async function createChurch(name: string, location: string) {
   return { success: true, church };
 }
 
+// ── Content Management ────────────────────────────────────────────────────────
+
+export async function getQuotes() {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  const quotes = await prisma.quote.findMany({ orderBy: { createdAt: "desc" } });
+  return { success: true, quotes };
+}
+
+export async function createQuote(quote: string, author: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  const q = await prisma.quote.create({ data: { quote, author } });
+  return { success: true, quote: q };
+}
+
+export async function toggleQuoteActive(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  await prisma.quote.updateMany({ data: { isActive: false } }); // Only one active at a time
+  await prisma.quote.update({ where: { id }, data: { isActive: true } });
+  return { success: true };
+}
+
+export async function deleteQuote(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  await prisma.quote.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function getChatSuggestions() {
+  const suggestions = await prisma.chatSuggestion.findMany({ where: { isActive: true }, orderBy: { createdAt: "desc" } });
+  return { success: true, suggestions };
+}
+
+export async function getAllChatSuggestions() {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  const suggestions = await prisma.chatSuggestion.findMany({ orderBy: { createdAt: "desc" } });
+  return { success: true, suggestions };
+}
+
+export async function createChatSuggestion(text: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  const s = await prisma.chatSuggestion.create({ data: { text } });
+  return { success: true, suggestion: s };
+}
+
+export async function deleteChatSuggestion(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  await prisma.chatSuggestion.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function getBadges() {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  const badges = await prisma.badge.findMany();
+  return { success: true, badges };
+}
+
+export async function createBadge(name: string, description: string, imageUrl: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  const b = await prisma.badge.create({ data: { name, description, imageUrl } });
+  return { success: true, badge: b };
+}
+
+export async function deleteBadge(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  await prisma.userBadge.deleteMany({ where: { badgeId: id } });
+  await prisma.badge.delete({ where: { id } });
+  return { success: true };
+}
+
 // ── Public (no admin auth required) ──────────────────────────────────────────
 
 export async function getAnnouncements() {

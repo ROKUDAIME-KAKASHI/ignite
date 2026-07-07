@@ -2,6 +2,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { getSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
 export async function askAbba(prompt: string, history: {role: string, content: string}[]) {
   try {
@@ -31,4 +32,9 @@ Do not use markdown formatting like **bold** or *italics* as the chat UI does no
     console.error("Gemini Error:", error);
     return { success: false, error: "Abba is currently resting. Please try again later." };
   }
+}
+
+export async function getPublicChatSuggestions() {
+  const suggestions = await prisma.chatSuggestion.findMany({ where: { isActive: true }, orderBy: { createdAt: "desc" } });
+  return suggestions.map(s => s.text);
 }

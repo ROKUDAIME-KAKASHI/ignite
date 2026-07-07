@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 
 export async function getProfileStats() {
   const session = await getSession();
-  if (!session?.id) return { chapters: 0, badges: 0, streakDone: [false, false, false, false, false, false, false], badgeList: [] };
+  if (!session?.id) return { chapters: 0, badges: 0, streakDone: [false, false, false, false, false, false, false], badgeList: [], weekDays: ["S", "M", "T", "W", "T", "F", "S"], quoteOfTheDay: { quote: "Do small things with great love.", author: "St. Teresa of Calcutta" } };
 
   const [chapters, badgeCount, user] = await Promise.all([
     prisma.xPLog.count({ where: { userId: session.id, reason: { contains: "Chapter" } } }),
@@ -69,7 +69,31 @@ export async function getProfileStats() {
     }
   });
 
-  return { chapters, badges: badgeCount, streakDone, badgeList, user };
+  // Generate dynamic weekDays array ending today
+  const dayNames = ["S", "M", "T", "W", "T", "F", "S"];
+  const dynamicWeekDays = [];
+  const todayDay = now.getDay();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    dynamicWeekDays.push(dayNames[d.getDay()]);
+  }
+
+  // Fetch active quote
+  let activeQuote = await prisma.quote.findFirst({ where: { isActive: true }, orderBy: { createdAt: "desc" } });
+  if (!activeQuote) {
+    activeQuote = { id: "default", quote: "Do small things with great love.", author: "St. Teresa of Calcutta", isActive: true, createdAt: new Date() };
+  }
+
+  return { 
+    chapters, 
+    badges: badgeCount, 
+    streakDone, 
+    badgeList, 
+    user,
+    weekDays: dynamicWeekDays,
+    quoteOfTheDay: { quote: activeQuote.quote, author: activeQuote.author }
+  };
 }
 
 export async function joinParish(inviteCode: string) {

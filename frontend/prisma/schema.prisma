@@ -193,11 +193,26 @@ model PrayerRequest {
 }
 
 model Badge {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   name        String
   description String
-  imageUrl    String?
+  imageUrl    String?     // Can store emoji or URL
   users       UserBadge[]
+}
+
+model ChatSuggestion {
+  id        String   @id @default(uuid())
+  text      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Quote {
+  id        String   @id @default(uuid())
+  quote     String
+  author    String
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model UserBadge {

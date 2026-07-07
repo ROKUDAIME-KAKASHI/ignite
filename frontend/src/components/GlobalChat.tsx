@@ -9,7 +9,6 @@ import { useAuth } from "@/context/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import { askAbba } from "@/app/actions/chat";
 
 interface Message {
   id: string;
@@ -18,10 +17,13 @@ interface Message {
   timestamp: Date;
 }
 
-const MOCK_SUGGESTIONS = [
+import { askAbba, getPublicChatSuggestions } from "@/app/actions/chat";
+
+const DEFAULT_SUGGESTIONS = [
   "Explain the Holy Trinity",
   "How should I pray effectively?",
-  "What does Orthodox mean?"
+  "What does Orthodox mean?",
+  "Tell me about St. Thomas"
 ];
 
 export function GlobalChat() {
@@ -42,7 +44,14 @@ export function GlobalChat() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getPublicChatSuggestions().then(res => {
+      if (res && res.length > 0) setSuggestions(res);
+    });
+  }, []);
 
   useEffect(() => {
     if (isOpen && scrollRef.current) {
@@ -205,8 +214,8 @@ export function GlobalChat() {
             {/* Input Area */}
             <div className="p-3 bg-background border-t border-border shrink-0">
               {messages.length === 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
-                  {MOCK_SUGGESTIONS.map(sug => (
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">
+                  {suggestions.map(sug => (
                     <button
                       key={sug}
                       onClick={() => { setInput(sug); }}

@@ -16,7 +16,9 @@ interface Message {
   timestamp: Date;
 }
 
-const MOCK_SUGGESTIONS = [
+import { askAbba, getPublicChatSuggestions } from "@/app/actions/chat";
+
+const DEFAULT_SUGGESTIONS = [
   "Explain the Holy Trinity",
   "How should I pray effectively?",
   "What does Orthodox mean?",
@@ -35,7 +37,14 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getPublicChatSuggestions().then(res => {
+      if (res && res.length > 0) setSuggestions(res);
+    });
+  }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -174,8 +183,8 @@ export default function ChatPage() {
       <div className="p-4 bg-background/80 backdrop-blur-md border-t border-border shrink-0">
         <div className="max-w-2xl mx-auto">
           {messages.length === 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
-              {MOCK_SUGGESTIONS.map(sug => (
+            <div className="flex gap-2 p-2">
+              {suggestions.map(sug => (
                 <button
                   key={sug}
                   onClick={() => { setInput(sug); }}
