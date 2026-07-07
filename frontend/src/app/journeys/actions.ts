@@ -13,7 +13,8 @@ export async function getJourneys() {
       nodes: {
         orderBy: { order: "asc" },
       },
-    }
+    },
+    orderBy: { createdAt: "asc" }
   });
 
   if (courses.length === 0) {
@@ -55,6 +56,34 @@ export async function getJourneys() {
     courses = [synoptic, patriarchs];
   }
 
+  // Ensure "Essential Bible Chapters" exists
+  let essentialCourse = courses.find(c => c.title === "Essential Bible Chapters");
+  if (!essentialCourse) {
+    essentialCourse = await prisma.journeyCourse.create({
+      data: {
+        title: "Essential Bible Chapters",
+        description: "The most important foundational chapters of the Bible to start your journey.",
+        color: "from-emerald-500 to-teal-400",
+        icon: "🌟",
+        nodes: {
+          create: [
+            { title: "The Creation", type: "read", content: "Read Genesis 1. This chapter describes God's creation of the heavens and the earth.", order: 1 },
+            { title: "The Fall", type: "read", content: "Read Genesis 3. The story of Adam and Eve in the Garden of Eden.", order: 2 },
+            { title: "The Ten Commandments", type: "read", content: "Read Exodus 20. God's moral law given to Moses.", order: 3 },
+            { title: "The Good Shepherd", type: "read", content: "Read Psalm 23. A beautiful psalm of comfort.", order: 4 },
+            { title: "The Word Made Flesh", type: "read", content: "Read John 1. The profound prologue about Jesus Christ.", order: 5 },
+            { title: "The Love Chapter", type: "quiz", content: "Read 1 Corinthians 13. What is the greatest of these?", order: 6 },
+            { title: "The Faith Chapter", type: "read", content: "Read Hebrews 11. Examples of great faith.", order: 7 },
+            { title: "The New Heaven", type: "boss", content: "Read Revelation 21. The glorious future for believers.", order: 8 },
+          ]
+        }
+      },
+      include: { nodes: { orderBy: { order: "asc" } } }
+    });
+    // Add it to the beginning
+    courses = [essentialCourse, ...courses];
+  }
+
   // 2. Fetch User Progress if logged in
   let userNodes: any[] = [];
   if (userId) {
@@ -65,7 +94,7 @@ export async function getJourneys() {
   }
 
   // Map progress to nodes
-  const coursesWithProgress = courses.map(course => {
+  let coursesWithProgress = courses.map(course => {
     let completedCount = 0;
     let earnedStars = 0;
 
@@ -89,6 +118,13 @@ export async function getJourneys() {
       totalNodes: course.nodes.length,
       earnedStars,
     };
+  });
+
+  // Ensure "Essential Bible Chapters" is always first in the array
+  coursesWithProgress = coursesWithProgress.sort((a, b) => {
+    if (a.title === "Essential Bible Chapters") return -1;
+    if (b.title === "Essential Bible Chapters") return 1;
+    return 0;
   });
 
   return coursesWithProgress;
