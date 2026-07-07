@@ -6,9 +6,10 @@ export async function getProfileStats() {
   const session = await getSession();
   if (!session?.id) return { chapters: 0, badges: 0, streakDone: [false, false, false, false, false, false, false], badgeList: [] };
 
-  const [chapters, badgeCount] = await Promise.all([
+  const [chapters, badgeCount, user] = await Promise.all([
     prisma.xPLog.count({ where: { userId: session.id, reason: { contains: "Chapter" } } }),
-    prisma.userBadge.count({ where: { userId: session.id } })
+    prisma.userBadge.count({ where: { userId: session.id } }),
+    prisma.user.findUnique({ where: { id: session.id }, select: { xp: true, level: true, streak: true } })
   ]);
 
   let allBadges = await prisma.badge.findMany();
@@ -68,5 +69,5 @@ export async function getProfileStats() {
     }
   });
 
-  return { chapters, badges: badgeCount, streakDone, badgeList };
+  return { chapters, badges: badgeCount, streakDone, badgeList, user };
 }

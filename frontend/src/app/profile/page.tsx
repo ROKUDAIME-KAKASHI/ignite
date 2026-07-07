@@ -110,7 +110,7 @@ function NameEditor({ currentName, onSave }: { currentName: string; onSave: (n: 
 export default function ProfilePage() {
   const { user, updateDisplayName, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
-  const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[] }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [] });
+  const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [] });
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   useEffect(() => {
@@ -159,9 +159,9 @@ export default function ProfilePage() {
 
   const displayName = user?.displayName || user?.email?.split("@")[0] || "Beloved";
   
-  const xp = user?.xp || 0;
-  const level = user?.level || 1;
-  const streak = user?.streak || 0;
+  const xp = stats?.user?.xp ?? user?.xp ?? 0;
+  const level = stats?.user?.level ?? user?.level ?? 1;
+  const streak = stats?.user?.streak ?? user?.streak ?? 0;
   const nextLevelXp = level * 500;
   const progress = Math.min(100, Math.round((xp / nextLevelXp) * 100));
 
@@ -221,7 +221,7 @@ export default function ProfilePage() {
           <div className="flex justify-between items-center mb-2">
             <div>
               <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Grace Points · Progress</p>
-              <p className="text-2xl font-extrabold text-gradient-gold mt-0.5">{xp.toLocaleString()} XP</p>
+              <p className="text-2xl font-extrabold text-gradient-gold mt-0.5">{xp.toLocaleString()} Grace Points</p>
             </div>
             <p className="text-sm font-semibold text-muted-foreground">{nextLevelXp - xp} until <span className="text-primary font-bold">Next Rank</span></p>
           </div>
