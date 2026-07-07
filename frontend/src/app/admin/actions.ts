@@ -155,8 +155,15 @@ export async function getChurches() {
 
 export async function createChurch(name: string, location: string) {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  
+  // Generate random 6 character code
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let inviteCode = '';
+  for (let i = 0; i < 6; i++) inviteCode += chars.charAt(Math.floor(Math.random() * chars.length));
+
+  // Ensure unique (very unlikely collision, but safe to loop if needed in production)
   const church = await prisma.church.create({
-    data: { name, location }
+    data: { name, location, inviteCode }
   });
   return { success: true, church };
 }

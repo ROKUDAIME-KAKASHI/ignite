@@ -550,6 +550,11 @@ export default function AdminDashboardPage() {
                           ⛪ {church.name}
                         </p>
                         {church.location && <p className="text-xs text-muted-foreground mt-1">📍 {church.location}</p>}
+                        {church.inviteCode && (
+                          <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                            Invite Code: <span className="text-primary">{church.inviteCode}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-4 text-center">
                         <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">

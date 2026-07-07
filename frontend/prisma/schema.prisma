@@ -47,6 +47,7 @@ model Church {
   id          String   @id @default(uuid())
   name        String
   location    String?
+  inviteCode  String?  @unique
   users       User[]
   events      Event[]
   createdAt   DateTime @default(now())

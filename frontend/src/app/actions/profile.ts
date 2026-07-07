@@ -9,7 +9,7 @@ export async function getProfileStats() {
   const [chapters, badgeCount, user] = await Promise.all([
     prisma.xPLog.count({ where: { userId: session.id, reason: { contains: "Chapter" } } }),
     prisma.userBadge.count({ where: { userId: session.id } }),
-    prisma.user.findUnique({ where: { id: session.id }, select: { xp: true, level: true, streak: true } })
+    prisma.user.findUnique({ where: { id: session.id }, select: { xp: true, level: true, streak: true, church: true } })
   ]);
 
   let allBadges = await prisma.badge.findMany();
@@ -70,4 +70,24 @@ export async function getProfileStats() {
   });
 
   return { chapters, badges: badgeCount, streakDone, badgeList, user };
+}
+
+export async function joinParish(inviteCode: string) {
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not authenticated" };
+
+  const church = await prisma.church.findUnique({
+    where: { inviteCode }
+  });
+
+  if (!church) {
+    return { success: false, error: "Invalid invite code" };
+  }
+
+  await prisma.user.update({
+    where: { id: session.id },
+    data: { churchId: church.id }
+  });
+
+  return { success: true, churchName: church.name };
 }

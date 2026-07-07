@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-import { getProfileStats } from "@/app/actions/profile";
+import { getProfileStats, joinParish } from "@/app/actions/profile";
 import { requestNotificationPermission } from "@/lib/firebase";
 
 /* ─── Static data ──────────────────────────────────────────────────────────── */
@@ -112,6 +112,25 @@ export default function ProfilePage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [] });
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  
+  const [inviteCode, setInviteCode] = useState("");
+  const [joiningParish, setJoiningParish] = useState(false);
+  const [joinError, setJoinError] = useState("");
+
+  const handleJoinParish = async () => {
+    if (!inviteCode.trim()) return;
+    setJoiningParish(true);
+    setJoinError("");
+    const res = await joinParish(inviteCode.trim().toUpperCase());
+    if (res.success) {
+      setInviteCode("");
+      const updated = await getProfileStats();
+      if (updated) setStats(updated);
+    } else {
+      setJoinError(res.error || "Failed to join");
+    }
+    setJoiningParish(false);
+  };
 
   useEffect(() => {
     getProfileStats().then(s => {
@@ -317,6 +336,48 @@ export default function ProfilePage() {
 
       {/* ── Account Section ── */}
       <div className="px-4 mb-8">
+        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Community</h3>
+        <div className="rounded-2xl border border-border/60 card-holy overflow-hidden bg-card divide-y divide-border/50 mb-5">
+          {stats.user?.church ? (
+            <div className="px-4 py-4">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Your Parish</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-lg">
+                  ⛪
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">{stats.user.church.name}</p>
+                  <p className="text-xs text-muted-foreground">{stats.user.church.location || "Local Parish"}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="px-4 py-4 space-y-3">
+              <div>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Join a Parish</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Connect with your local church community using an invite code from your youth leader.</p>
+              </div>
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="Enter 6-digit code" 
+                  value={inviteCode} 
+                  onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                  maxLength={6}
+                  className="font-mono uppercase h-10"
+                />
+                <Button 
+                  onClick={handleJoinParish} 
+                  disabled={joiningParish || inviteCode.length < 5}
+                  className="h-10 px-4"
+                >
+                  {joiningParish ? <Loader2 className="w-4 h-4 animate-spin" /> : "Join"}
+                </Button>
+              </div>
+              {joinError && <p className="text-[10px] text-red-500 font-bold">{joinError}</p>}
+            </div>
+          )}
+        </div>
+
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Account</h3>
         <div className="rounded-2xl border border-border/60 card-holy overflow-hidden bg-card divide-y divide-border/50">
           {/* Email (read-only) */}
