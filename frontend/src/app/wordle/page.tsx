@@ -8,7 +8,16 @@ import Link from "next/link";
 import { awardXP } from "@/app/actions/gamification";
 import { useAuth } from "@/context/AuthContext";
 
-const TARGET_WORD = "GRACE";
+const BIBLICAL_WORDS = [
+  "GRACE", "FAITH", "JESUS", "DAVID", "MOSES", "PEACE", "CROSS", 
+  "GLORY", "MERCY", "ANGEL", "ALTAR", "BIBLE", "PETER", "MARYS",
+  "SPIRIT", "BLOOD", "BREAD", "WATER", "LIGHT", "TRUTH" 
+].filter(w => w.length === 5);
+
+let initialWord = "GRACE";
+if (typeof window !== "undefined") {
+  initialWord = BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)];
+}
 const MAX_GUESSES = 6;
 const WORD_LENGTH = 5;
 
@@ -24,7 +33,22 @@ export default function WordlePage() {
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const { user, setUser } = useAuth();
+  const [targetWord, setTargetWord] = useState(initialWord);
   const [awarded, setAwarded] = useState(false);
+
+  useEffect(() => {
+    // Select randomly on client mount to avoid hydration mismatch
+    setTargetWord(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
+  }, []);
+
+  const resetGame = () => {
+    setTargetWord(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
+    setGuesses([]);
+    setCurrentGuess("");
+    setGameOver(false);
+    setWon(false);
+    setAwarded(false);
+  };
 
   const submitGuess = useCallback(async () => {
     if (currentGuess.length !== WORD_LENGTH) return;
@@ -33,7 +57,7 @@ export default function WordlePage() {
     setGuesses(newGuesses);
     setCurrentGuess("");
 
-    if (currentGuess === TARGET_WORD) {
+    if (currentGuess === targetWord) {
       setWon(true);
       setGameOver(true);
       if (user && !awarded) {
@@ -44,7 +68,7 @@ export default function WordlePage() {
     } else if (newGuesses.length >= MAX_GUESSES) {
       setGameOver(true);
     }
-  }, [currentGuess, guesses, user, awarded, setUser]);
+  }, [currentGuess, guesses, user, awarded, setUser, targetWord]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -73,25 +97,21 @@ export default function WordlePage() {
   };
 
   const getLetterStatus = (letter: string, index: number, guess: string) => {
-    if (TARGET_WORD[index] === letter) return "correct";
-    if (TARGET_WORD.includes(letter)) return "present";
+    if (targetWord[index] === letter) return "correct";
+    if (targetWord.includes(letter)) return "present";
     return "absent";
   };
 
   const getKeyStatus = (key: string) => {
-    let status = "unused";
-    for (const guess of guesses) {
-      for (let i = 0; i < WORD_LENGTH; i++) {
-        if (guess[i] === key) {
-          if (TARGET_WORD[i] === key) return "correct";
-          status = "present";
-        }
-      }
-    }
-    for (const guess of guesses) {
-      if (guess.includes(key) && status === "unused") status = "absent";
-    }
-    return status;
+    const statuses: Record<string, string> = {};
+    guesses.forEach(guess => {
+      Array.from(guess).forEach((char, i) => {
+        if (targetWord[i] === char) statuses[char] = "correct";
+        else if (targetWord.includes(char) && statuses[char] !== "correct") statuses[char] = "present";
+        else if (statuses[char] !== "correct" && statuses[char] !== "present") statuses[char] = "absent";
+      });
+    });
+    return statuses[key] || "unused";
   };
 
   return (
@@ -148,9 +168,9 @@ export default function WordlePage() {
               {won ? "🏆" : "😔"}
             </div>
             <h2 className="text-2xl font-extrabold font-serif mb-1">{won ? "You Won!" : "Game Over"}</h2>
-            <p className="text-muted-foreground mb-4">The word was <strong className="text-foreground">{TARGET_WORD}</strong></p>
+            <p className="text-muted-foreground mb-4">The word was <strong className="text-foreground">{targetWord}</strong></p>
             {won && <p className="text-amber-600 font-bold mb-4">+10 Grace Points Awarded!</p>}
-            <Button onClick={() => window.location.reload()} className="w-full h-11 rounded-xl gradient-royal text-white font-bold">
+            <Button onClick={resetGame} className="mt-6 w-full h-11 rounded-xl gradient-royal text-white font-bold">
               <RotateCcw className="w-4 h-4 mr-2" /> Play Again
             </Button>
           </motion.div>

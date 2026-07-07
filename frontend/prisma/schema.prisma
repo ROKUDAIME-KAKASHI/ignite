@@ -43,6 +43,15 @@ model User {
   updatedAt     DateTime  @updatedAt
 }
 
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+
 model Church {
   id          String   @id @default(uuid())
   name        String
