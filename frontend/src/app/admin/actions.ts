@@ -62,11 +62,13 @@ export async function createEvent(title: string, description: string, dateStr: s
 export async function getAdminDashboardData() {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
-  const [totalUsers, prayersOffered, quizzesTaken, chaptersRead] = await Promise.all([
+  const [totalUsers, prayersOffered, quizzesTaken, chaptersRead, journeyNodesDone, totalStarsEarned] = await Promise.all([
     prisma.user.count(),
     prisma.prayerRequest.count(),
     prisma.quizAttempt.count(),
     prisma.xPLog.count({ where: { reason: { contains: "Chapter" } } }),
+    prisma.userJourneyNode.count({ where: { status: "completed" } }),
+    prisma.user.aggregate({ _sum: { stars: true } })
   ]);
 
   const recentUsersData = await prisma.user.findMany({
@@ -95,7 +97,9 @@ export async function getAdminDashboardData() {
       totalUsers,
       prayersOffered,
       quizzesTaken,
-      chaptersRead
+      chaptersRead,
+      journeyNodesDone,
+      totalStarsEarned: totalStarsEarned._sum.stars || 0
     },
     recentUsers
   };
@@ -138,6 +142,23 @@ export async function deleteEvent(id: string) {
   revalidatePath("/dashboard");
   revalidatePath("/events");
   return { success: true };
+}
+
+export async function getChurches() {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  const churches = await prisma.church.findMany({
+    include: { _count: { select: { users: true, events: true } } },
+    orderBy: { createdAt: "desc" }
+  });
+  return { success: true, churches };
+}
+
+export async function createChurch(name: string, location: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  const church = await prisma.church.create({
+    data: { name, location }
+  });
+  return { success: true, church };
 }
 
 // ── Public (no admin auth required) ──────────────────────────────────────────
