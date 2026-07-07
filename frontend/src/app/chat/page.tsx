@@ -180,7 +180,7 @@ export default function ChatPage() {
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="p-4 bg-background/80 backdrop-blur-md border-t border-border shrink-0">
+      <div className="p-4 pb-[5.5rem] md:pb-4 bg-background/80 backdrop-blur-md border-t border-border shrink-0">
         <div className="max-w-2xl mx-auto">
           {messages.length === 1 && (
             <div className="flex gap-2 p-2">

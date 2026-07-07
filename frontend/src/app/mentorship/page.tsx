@@ -151,7 +151,7 @@ export default function MentorshipPage() {
       </div>
 
       {/* Input Box */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-safe z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-[5.5rem] md:pb-safe z-30">
         <div className="max-w-3xl mx-auto flex flex-col gap-2">
           <div className="flex items-center gap-2 px-2">
             <input 
