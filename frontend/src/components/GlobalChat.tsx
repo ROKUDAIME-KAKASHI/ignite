@@ -46,6 +46,7 @@ export function GlobalChat() {
   const [isTyping, setIsTyping] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const constraintsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getPublicChatSuggestions().then(res => {
@@ -99,14 +100,19 @@ export function GlobalChat() {
 
   return (
     <>
+      <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-[60]" />
       {/* Floating Action Button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
+            drag
+            dragConstraints={constraintsRef}
+            dragElastic={0.1}
+            dragMomentum={false}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50 flex flex-col items-end gap-2"
+            className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-[60] flex flex-col items-end gap-2 pointer-events-auto cursor-grab active:cursor-grabbing"
           >
             <Button
               onClick={() => setIsOpen(true)}
