@@ -272,7 +272,7 @@ export default async function DashboardPage() {
         </a>
       </div>
 
-      <div className="px-4 space-y-5 pb-8">
+      <div className="px-4 space-y-5 pb-24 md:pb-8">
 
         {/* Daily Verse */}
         <div className="rounded-2xl overflow-hidden card-holy card-holy-hover">
