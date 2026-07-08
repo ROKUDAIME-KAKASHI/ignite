@@ -80,14 +80,14 @@ export function Navigation() {
         >
           <ThemeToggle />
         </motion.div>
-        <div className="glass dark:glass-dark border-t border-amber-200/50 dark:border-amber-900/20 shadow-2xl">
+        <div className="bg-white dark:bg-[#0f1229] border-t border-amber-200/50 dark:border-amber-900/20 shadow-2xl">
 
-          <ul className="flex justify-around items-center h-16 px-1">
+          <ul className="flex overflow-x-auto items-center h-16 px-4 gap-2 snap-x [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {navItems.map((item) => {
               const isActive = pathname === item.href || (item.href === "/dashboard" && pathname === "/dashboard");
               const Icon = item.icon;
               return (
-                <li key={item.name} className="flex-1 flex justify-center">
+                <li key={item.name} className="shrink-0 snap-center flex justify-center w-20">
                   <Link href={item.href} className="relative flex flex-col items-center justify-center w-full py-2 gap-1">
                     {isActive && (
                       <motion.span
