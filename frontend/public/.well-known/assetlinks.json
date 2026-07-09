@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.ignite_rouge.twa",
+    "sha256_cert_fingerprints": ["01:08:56:27:10:C3:49:61:32:91:BF:DB:0A:53:AA:E5:C3:B9:FD:75:59:18:9F:BB:D6:96:D3:B2:52:37:B9:74"]
+  }
+}]
