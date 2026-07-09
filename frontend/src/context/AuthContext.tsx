@@ -112,9 +112,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const isProtected = PROTECTED_ROUTES.some(r => pathname.startsWith(r));
+  const shouldHideChildren = isProtected && !user && !loading;
+
   return (
     <AuthContext.Provider value={{ user, loading, updateDisplayName, logout, setUser, refreshUser }}>
-      {children}
+      {shouldHideChildren ? (
+        <div className="flex-1 flex bg-background items-center justify-center">
+           <div className="animate-pulse flex flex-col items-center gap-4">
+             <div className="w-10 h-10 rounded-2xl bg-amber-700 flex items-center justify-center shadow-md">
+               <svg viewBox="0 0 40 40" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                 <line x1="20" y1="4" x2="20" y2="36" />
+                 <line x1="6" y1="14" x2="34" y2="14" />
+               </svg>
+             </div>
+           </div>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 }
