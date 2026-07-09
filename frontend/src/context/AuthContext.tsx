@@ -24,6 +24,7 @@ interface AuthContextType {
   updateDisplayName: (name: string) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: AuthUser | null) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -31,7 +32,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   updateDisplayName: async () => {},
   logout: async () => {},
-  setUser: () => {}
+  setUser: () => {},
+  refreshUser: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -69,8 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/");
   }, [router]);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      if (data.user) {
+        setUser({ ...data.user, displayName: `${data.user.firstName} ${data.user.lastName}` });
+      }
+    } catch (e) {
+      console.error("Failed to refresh user", e);
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, updateDisplayName, logout, setUser }}>
+    <AuthContext.Provider value={{ user, loading, updateDisplayName, logout, setUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

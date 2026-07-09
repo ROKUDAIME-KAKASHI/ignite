@@ -10,14 +10,14 @@ import { cn } from "@/lib/utils";
 import { createAnnouncement, createEvent, getChurches, createChurch } from "../actions";
 import QRCode from "react-qr-code";
 
-import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge } from "../actions";
+import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge, getAppointments, updateAppointmentStatus } from "../actions";
 import { getMissions } from "@/app/missions/actions";
 import { useRouter } from "next/navigation";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events" | "parishes" | "content" | "qrcodes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes">("overview");
 
   // Real data state
   const [stats, setStats] = useState({
@@ -38,6 +38,7 @@ export default function AdminDashboardPage() {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [chatSuggestions, setChatSuggestions] = useState<any[]>([]);
   const [badges, setBadges] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
 
   const [newQuoteText, setNewQuoteText] = useState("");
   const [newQuoteAuthor, setNewQuoteAuthor] = useState("");
@@ -81,10 +82,11 @@ export default function AdminDashboardPage() {
   };
 
   const fetchContent = async () => {
-    const [qRes, cRes, bRes] = await Promise.all([getQuotes(), getAllChatSuggestions(), getBadges()]);
+    const [qRes, cRes, bRes, appRes] = await Promise.all([getQuotes(), getAllChatSuggestions(), getBadges(), getAppointments()]);
     if (qRes.success && qRes.quotes) setQuotes(qRes.quotes);
     if (cRes.success && cRes.suggestions) setChatSuggestions(cRes.suggestions);
     if (bRes.success && bRes.badges) setBadges(bRes.badges);
+    if (appRes.success && appRes.appointments) setAppointments(appRes.appointments);
   };
 
   const fetchEventsAndNotices = async () => {
@@ -214,13 +216,17 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["overview", "prayers", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
+          {(["overview", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition-all whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             )}>
-              {t} {t === "prayers" && allPrayers.length > 0 && (
+              {t} 
+              {t === "prayers" && allPrayers.length > 0 && (
                 <span className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{allPrayers.length}</span>
+              )}
+              {t === "appointments" && appointments.filter(a => a.status === "PENDING").length > 0 && (
+                <span className="ml-2 bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{appointments.filter(a => a.status === "PENDING").length}</span>
               )}
             </button>
           ))}
@@ -601,6 +607,87 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             )}
+          </motion.div>
+        )}
+
+        {activeTab === "appointments" && (
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="font-bold font-serif text-lg">Meeting Requests</h2>
+                  <p className="text-xs text-muted-foreground">Manage spiritual direction and confession requests.</p>
+                </div>
+              </div>
+
+              {appointments.length === 0 ? (
+                <div className="text-center py-10 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+                  <p className="text-3xl mb-2">🗓️</p>
+                  <p className="text-sm font-bold text-slate-500">No appointments yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {appointments.map((apt) => (
+                    <div key={apt.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border/50">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-0 text-[10px]">
+                              {apt.user?.firstName} {apt.user?.lastName}
+                            </Badge>
+                            <Badge className={cn(
+                              "border-0 text-[10px]",
+                              apt.status === "PENDING" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                              apt.status === "CONFIRMED" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                              "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            )}>
+                              {apt.status}
+                            </Badge>
+                            <span className="text-[10px] text-muted-foreground">Submitted: {new Date(apt.createdAt).toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-sm text-foreground font-medium mb-1">Requested: {apt.date} at {apt.time}</p>
+                          {apt.purpose && (
+                            <p className="text-xs text-muted-foreground italic">Purpose: "{apt.purpose}"</p>
+                          )}
+                          {apt.user?.email && (
+                            <p className="text-[10px] text-slate-400 mt-1">Contact: {apt.user.email}</p>
+                          )}
+                        </div>
+                        {apt.status === "PENDING" && (
+                          <div className="flex gap-2">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={async () => {
+                                await updateAppointmentStatus(apt.id, "CONFIRMED");
+                                await fetchContent();
+                              }}
+                              className="px-3 py-1.5 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 text-green-700 rounded-lg text-xs font-bold transition-colors"
+                            >
+                              Confirm
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={async () => {
+                                await updateAppointmentStatus(apt.id, "DECLINED");
+                                await fetchContent();
+                              }}
+                              className="px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 text-red-700 rounded-lg text-xs font-bold transition-colors"
+                            >
+                              Decline
+                            </motion.button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
 

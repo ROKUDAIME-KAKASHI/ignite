@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchChapter, TRANSLATIONS, type Translation, type BibleVerse } from "@/lib/bible-api";
 import { getBookBySlug, getAdjacentBook } from "@/lib/bible-books";
-import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft } from "lucide-react";
+import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Clock as ClockIcon } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -65,8 +65,47 @@ export default function BibleReaderPage() {
   const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
   const [markingRead, setMarkingRead] = useState(false);
   const [markedRead, setMarkedRead] = useState(false);
+  
+  // Timer state
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [isActive, setIsActive] = useState(true);
 
   const { user, setUser } = useAuth();
+
+  // Handle Inactivity
+  useEffect(() => {
+    let idleTimeout: NodeJS.Timeout;
+    const resetIdle = () => {
+      setIsActive(true);
+      clearTimeout(idleTimeout);
+      idleTimeout = setTimeout(() => setIsActive(false), 15000); // 15 seconds of no interaction = idle
+    };
+
+    window.addEventListener("mousemove", resetIdle);
+    window.addEventListener("keydown", resetIdle);
+    window.addEventListener("scroll", resetIdle, true);
+    window.addEventListener("touchstart", resetIdle);
+
+    resetIdle();
+    return () => {
+      clearTimeout(idleTimeout);
+      window.removeEventListener("mousemove", resetIdle);
+      window.removeEventListener("keydown", resetIdle);
+      window.removeEventListener("scroll", resetIdle, true);
+      window.removeEventListener("touchstart", resetIdle);
+    };
+  }, []);
+
+  // Countdown logic
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const interval = setInterval(() => {
+      if (isActive && !document.hidden) {
+        setTimeLeft(t => Math.max(0, t - 1));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timeLeft, isActive]);
 
   // Load bookmarks from localStorage
   useEffect(() => {
@@ -96,6 +135,7 @@ export default function BibleReaderPage() {
 
   useEffect(() => { 
     setMarkedRead(false);
+    setTimeLeft(60); // Reset timer on new chapter
     void load(); 
     if (book) {
       localStorage.setItem("last_read", `${book.slug}:${chapter}`);
@@ -334,18 +374,32 @@ export default function BibleReaderPage() {
 
             {/* ── Chapter Navigation ── */}
             <div className="mt-10">
-              <div className="flex justify-center mb-8">
-                <Button 
-                  onClick={handleMarkAsRead} 
-                  disabled={markedRead || markingRead}
-                  className={cn(
-                    "rounded-xl h-12 px-8 font-bold shadow-md transition-all",
-                    markedRead ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30" : "gradient-gold text-white halo-glow"
-                  )}
-                >
-                  {markingRead ? <Loader2 className="w-4 h-4 animate-spin" /> : 
-                   markedRead ? "Chapter Read (+10 XP) ✅" : "Mark Chapter as Read (+10 XP)"}
-                </Button>
+              <div className="flex flex-col items-center mb-8 space-y-3">
+                {timeLeft > 0 ? (
+                  <div className="flex flex-col items-center text-center p-3 rounded-xl bg-muted/50 border border-border/50">
+                    <div className="flex items-center gap-2 text-primary font-bold mb-1">
+                      <ClockIcon className="w-5 h-5 animate-pulse" />
+                      <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground font-medium">
+                      {!isActive 
+                        ? "Paused (Are you still there? Scroll to resume)" 
+                        : "Active reading required to earn XP"}
+                    </p>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={handleMarkAsRead} 
+                    disabled={markedRead || markingRead}
+                    className={cn(
+                      "rounded-xl h-12 px-8 font-bold shadow-md transition-all",
+                      markedRead ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30" : "gradient-gold text-white halo-glow"
+                    )}
+                  >
+                    {markingRead ? <Loader2 className="w-4 h-4 animate-spin" /> : 
+                     markedRead ? "Chapter Read (+10 XP) ✅" : "Mark Chapter as Read (+10 XP)"}
+                  </Button>
+                )}
               </div>
               <div className="divider-cross mb-6" />
               <div className="flex gap-3">

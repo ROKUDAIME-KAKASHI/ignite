@@ -20,6 +20,7 @@ const typeLabel: Record<string, string> = {
 
 import { completeMission, getMissions } from "./actions";
 import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MissionsPage() {
   const [activeTab, setActiveTab] = useState("Active");
@@ -29,6 +30,7 @@ export default function MissionsPage() {
   const [errorMsg, setErrorMsg] = useState<Record<string, string>>({});
   const [selectedMission, setSelectedMission] = useState<string | null>(null);
   const [reflection, setReflection] = useState("");
+  const { user, refreshUser } = useAuth();
 
   useEffect(() => {
     getMissions().then(data => {
@@ -54,6 +56,7 @@ export default function MissionsPage() {
       setCompleted((p) => [...p, id]);
       setSelectedMission(null);
       setReflection("");
+      refreshUser(); // Sync points across app
     }
   };
 
@@ -80,11 +83,11 @@ export default function MissionsPage() {
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
               <span>✝️</span>
-              <span className="text-white text-xs font-semibold">0 / 730 GP earned today</span>
+              <span className="text-white text-xs font-semibold">{user?.xp || 0} Total GP</span>
             </div>
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
               <span>👑</span>
-              <span className="text-white text-xs font-semibold">23 Completed</span>
+              <span className="text-white text-xs font-semibold">{completed.length} Completed</span>
             </div>
           </div>
         </div>

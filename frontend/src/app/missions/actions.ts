@@ -30,8 +30,9 @@ export async function getMissions() {
     });
     logs.forEach(log => {
       const title = log.reason.replace("Completed Mission: ", "");
-      const m = missions.find(x => x.title === title);
-      if (m) completedIds.push(m.id);
+      // Match by startsWith because we append the reflection to the title now
+      const m = missions.find(x => title.startsWith(x.title));
+      if (m && !completedIds.includes(m.id)) completedIds.push(m.id);
     });
   }
 

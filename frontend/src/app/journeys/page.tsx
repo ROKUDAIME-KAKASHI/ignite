@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { getJourneys, enrollCourse, completeNode } from "./actions";
+import { useAuth } from "@/context/AuthContext";
 
 export default function JourneysPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function JourneysPage() {
   const [selectedNode, setSelectedNode] = useState<any | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+  const { refreshUser } = useAuth();
 
   const fetchJourneys = async () => {
     const data = await getJourneys();
@@ -49,6 +51,7 @@ export default function JourneysPage() {
     await fetchJourneys();
     setSelectedNode(null);
     setIsProcessing(false);
+    refreshUser(); // Sync points across app
   };
 
   if (isLoading) {
@@ -249,13 +252,28 @@ export default function JourneysPage() {
                 <CheckCircle2 className="w-5 h-5" /> Completed
               </div>
             ) : (
-              <Button 
-                onClick={handleCompleteNode} 
-                disabled={isProcessing}
-                className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
-              >
-                {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Step"}
-              </Button>
+              <div className="space-y-3">
+                {selectedNode.type === "read" && (
+                  <Button 
+                    onClick={() => {
+                      // Basic heuristic to jump to the bible (e.g. Genesis 1)
+                      // This links generally to the bible browse page, but encourages reading
+                      router.push("/bible");
+                    }} 
+                    variant="outline"
+                    className="w-full h-12 rounded-xl text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 font-bold text-base"
+                  >
+                    <BookOpen className="w-4 h-4 mr-2" /> Open Scripture
+                  </Button>
+                )}
+                <Button 
+                  onClick={handleCompleteNode} 
+                  disabled={isProcessing}
+                  className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
+                >
+                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Step"}
+                </Button>
+              </div>
             )}
           </motion.div>
         </div>

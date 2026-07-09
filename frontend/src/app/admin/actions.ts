@@ -269,3 +269,29 @@ export async function getUpcomingEvents() {
     attendees: e.attendances.length,
   }));
 }
+
+export async function getAppointments() {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+
+  const appointments = await prisma.appointment.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: {
+        select: { firstName: true, lastName: true, email: true }
+      }
+    }
+  });
+
+  return { success: true, appointments };
+}
+
+export async function updateAppointmentStatus(id: string, status: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+
+  const appointment = await prisma.appointment.update({
+    where: { id },
+    data: { status }
+  });
+
+  return { success: true, appointment };
+}

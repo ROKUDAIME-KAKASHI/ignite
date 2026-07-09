@@ -37,8 +37,9 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setPermission(Notification.permission);
-      if (!("Notification" in window)) {
+      if ("Notification" in window) {
+        setPermission(Notification.permission);
+      } else {
         setSupported(false);
       }
     }
