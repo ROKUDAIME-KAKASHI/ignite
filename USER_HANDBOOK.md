@@ -49,6 +49,22 @@ A little friendly competition to encourage everyone to stay engaged!
 *   **Individual Rank:** See how your Grace Points stack up against the global Ignite community.
 *   **Parish Rank:** Work together with your local church to boost your Parish's total score and climb the parish leaderboards.
 
+### 7. Notifications
+Stay instantly updated with everything happening in your spiritual community!
+*   **Announcements:** Receive alerts when your church posts an important update.
+*   **Reminders:** Get gentle reminders to complete your daily journey or check-in.
+*   *Note: You must enable notifications in your device settings for the best experience.*
+
+---
+
+## 📲 Installing the App on Your Phone
+
+You don't need to go to the App Store to download Ignite! It is built to be installed directly from your browser.
+1. Open the Ignite website on your mobile phone (Safari for iPhone, Chrome for Android).
+2. Tap on the **Profile** icon in the bottom navigation bar.
+3. Scroll down and tap **"Install App"**.
+4. Follow the prompt to add it to your Home Screen. Now you can open Ignite just like a regular app!
+
 ---
 
 ## ⚙️ Getting Started
