@@ -62,10 +62,15 @@ function CrossIcon({ className }: { className?: string }) {
 
 export function Navigation() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-  // Hide on public / hero pages / admin
-  if (PUBLIC_ROUTES.some((r) => pathname === r) || pathname.startsWith("/admin")) return null;
+  // Hide on public / hero pages / admin or if unauthenticated
+  if (
+    PUBLIC_ROUTES.some((r) => pathname === r) ||
+    pathname.startsWith("/admin") ||
+    (!loading && !user)
+  )
+    return null;
 
   const dailyVerse = getDailyVerse(user?.id);
 

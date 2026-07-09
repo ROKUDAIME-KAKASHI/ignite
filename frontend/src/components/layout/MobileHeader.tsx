@@ -3,12 +3,14 @@
 import { useRouter, usePathname } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const PUBLIC_ROUTES = ["/", "/login"];
 
 export function MobileHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user, loading } = useAuth();
 
   // Handle physical back button closing the app
   // By pushing a history state when the app mounts, we ensure there's a history stack
@@ -30,7 +32,7 @@ export function MobileHeader() {
     }
   }, [pathname]);
 
-  if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/admin")) return null;
+  if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/admin") || (!loading && !user)) return null;
 
   const isHome = pathname === "/dashboard";
 

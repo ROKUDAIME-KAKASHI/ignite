@@ -21,14 +21,17 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [parishLeaderboard, setParishLeaderboard] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"individuals" | "parishes">("individuals");
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
     const load = async () => {
+      setIsLoading(true);
       const data = await getLeaderboardUsers();
       setLeaderboard(data);
       const parishData = await getParishLeaderboard();
       setParishLeaderboard(parishData);
+      setIsLoading(false);
     };
     load();
   }, []);
@@ -71,44 +74,52 @@ export default function LeaderboardPage() {
       </div>
 
       <div className="px-4 -mt-6 pb-8 space-y-3">
-        {(activeTab === "individuals" ? leaderboard : parishLeaderboard).length === 0 ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }} className="w-8 h-8 border-4 border-amber-500/30 border-t-amber-500 rounded-full mb-4" />
             <p className="font-serif font-semibold">Loading Standings...</p>
           </div>
+        ) : (activeTab === "individuals" ? leaderboard : parishLeaderboard).length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <p className="font-serif font-semibold">No standings yet.</p>
+          </div>
         ) : activeTab === "individuals" ? (
           <>
             {/* Top 3 Podium */}
-            {leaderboard.length >= 3 && (
-              <div className="flex items-end justify-center gap-3 mb-6 pt-4">
-                {/* 2nd Place */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col items-center">
-                  <div className="w-14 h-14 rounded-full bg-slate-200 border-4 border-white shadow-xl flex items-center justify-center text-xl font-bold text-slate-500 z-10">🥈</div>
-                  <div className="w-20 h-24 bg-gradient-to-t from-slate-200 to-slate-100 rounded-t-xl border border-slate-300 flex flex-col items-center justify-end pb-2">
-                    <p className="text-[10px] font-bold text-slate-500 truncate w-full text-center px-1">{leaderboard[1].name}</p>
-                    <p className="text-xs font-extrabold text-slate-700">{leaderboard[1].xp}</p>
+            <div className="flex items-end justify-center gap-3 mb-6 pt-4">
+              {/* 2nd Place */}
+              {leaderboard[1] && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col items-center w-24">
+                  <div className="w-14 h-14 rounded-full bg-slate-200 border-4 border-white dark:border-[#0f1229] shadow-xl flex items-center justify-center text-xl font-bold text-slate-500 z-10">🥈</div>
+                  <div className="w-full h-24 bg-gradient-to-t from-slate-200 to-slate-100 rounded-t-xl border border-slate-300 flex flex-col items-center justify-end pb-2">
+                    <p className="text-[10px] font-bold text-slate-600 truncate w-full text-center px-2">{leaderboard[1].name}</p>
+                    <p className="text-xs font-extrabold text-slate-800">{leaderboard[1].xp}</p>
                   </div>
                 </motion.div>
+              )}
 
-                {/* 1st Place */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-amber-400 border-4 border-white shadow-2xl flex items-center justify-center text-2xl font-bold text-amber-700 z-10 halo-glow">👑</div>
-                  <div className="w-24 h-32 bg-gradient-to-t from-amber-300 to-amber-200 rounded-t-xl border border-amber-400 flex flex-col items-center justify-end pb-3 shadow-lg">
-                    <p className="text-xs font-bold text-amber-700 truncate w-full text-center px-1">{leaderboard[0].name}</p>
-                    <p className="text-sm font-extrabold text-amber-900">{leaderboard[0].xp}</p>
+              {/* 1st Place */}
+              {leaderboard[0] && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center w-28">
+                  <div className="w-16 h-16 rounded-full bg-amber-400 border-4 border-white dark:border-[#0f1229] shadow-2xl flex items-center justify-center text-2xl font-bold text-amber-700 z-10 halo-glow">👑</div>
+                  <div className="w-full h-32 bg-gradient-to-t from-amber-300 to-amber-200 rounded-t-xl border border-amber-400 flex flex-col items-center justify-end pb-3 shadow-lg">
+                    <p className="text-xs font-bold text-amber-800 truncate w-full text-center px-2">{leaderboard[0].name}</p>
+                    <p className="text-sm font-extrabold text-amber-950">{leaderboard[0].xp}</p>
                   </div>
                 </motion.div>
+              )}
 
-                {/* 3rd Place */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col items-center">
-                  <div className="w-14 h-14 rounded-full bg-orange-200 border-4 border-white shadow-xl flex items-center justify-center text-xl font-bold text-orange-600 z-10">🥉</div>
-                  <div className="w-20 h-20 bg-gradient-to-t from-orange-200 to-orange-100 rounded-t-xl border border-orange-300 flex flex-col items-center justify-end pb-2">
-                    <p className="text-[10px] font-bold text-orange-600 truncate w-full text-center px-1">{leaderboard[2].name}</p>
-                    <p className="text-xs font-extrabold text-orange-800">{leaderboard[2].xp}</p>
+              {/* 3rd Place */}
+              {leaderboard[2] && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col items-center w-24">
+                  <div className="w-14 h-14 rounded-full bg-orange-200 border-4 border-white dark:border-[#0f1229] shadow-xl flex items-center justify-center text-xl font-bold text-orange-600 z-10">🥉</div>
+                  <div className="w-full h-20 bg-gradient-to-t from-orange-200 to-orange-100 rounded-t-xl border border-orange-300 flex flex-col items-center justify-end pb-2">
+                    <p className="text-[10px] font-bold text-orange-700 truncate w-full text-center px-2">{leaderboard[2].name}</p>
+                    <p className="text-xs font-extrabold text-orange-900">{leaderboard[2].xp}</p>
                   </div>
                 </motion.div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* List */}
             <div className="bg-card rounded-2xl border border-border/60 card-holy overflow-hidden">
@@ -117,7 +128,7 @@ export default function LeaderboardPage() {
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Grace Points</p>
               </div>
               <div className="divide-y divide-border/40">
-                {leaderboard.length >= 3 && leaderboard.slice(3).map((lUser, i) => {
+                {leaderboard.slice(3).map((lUser, i) => {
                   const isMe = lUser.id === user?.id;
                   return (
                   <motion.div
@@ -152,36 +163,40 @@ export default function LeaderboardPage() {
         ) : (
           <>
             {/* Parishes Podium */}
-            {parishLeaderboard.length >= 3 && (
-              <div className="flex items-end justify-center gap-3 mb-6 pt-4">
-                {/* 2nd Place */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col items-center">
-                  <div className="w-14 h-14 rounded-full bg-slate-200 border-4 border-white shadow-xl flex items-center justify-center text-xl font-bold text-slate-500 z-10">🥈</div>
-                  <div className="w-20 h-24 bg-gradient-to-t from-slate-200 to-slate-100 rounded-t-xl border border-slate-300 flex flex-col items-center justify-end pb-2">
-                    <p className="text-[10px] font-bold text-slate-500 truncate w-full text-center px-1">{parishLeaderboard[1].name}</p>
-                    <p className="text-xs font-extrabold text-slate-700">{parishLeaderboard[1].xp}</p>
+            <div className="flex items-end justify-center gap-3 mb-6 pt-4">
+              {/* 2nd Place */}
+              {parishLeaderboard[1] && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col items-center w-24">
+                  <div className="w-14 h-14 rounded-full bg-slate-200 border-4 border-white dark:border-[#0f1229] shadow-xl flex items-center justify-center text-xl font-bold text-slate-500 z-10">🥈</div>
+                  <div className="w-full h-24 bg-gradient-to-t from-slate-200 to-slate-100 rounded-t-xl border border-slate-300 flex flex-col items-center justify-end pb-2">
+                    <p className="text-[10px] font-bold text-slate-600 truncate w-full text-center px-2">{parishLeaderboard[1].name}</p>
+                    <p className="text-xs font-extrabold text-slate-800">{parishLeaderboard[1].xp}</p>
                   </div>
                 </motion.div>
+              )}
 
-                {/* 1st Place */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-amber-400 border-4 border-white shadow-2xl flex items-center justify-center text-2xl font-bold text-amber-700 z-10 halo-glow">👑</div>
-                  <div className="w-24 h-32 bg-gradient-to-t from-amber-300 to-amber-200 rounded-t-xl border border-amber-400 flex flex-col items-center justify-end pb-3 shadow-lg">
-                    <p className="text-xs font-bold text-amber-700 truncate w-full text-center px-1">{parishLeaderboard[0].name}</p>
-                    <p className="text-sm font-extrabold text-amber-900">{parishLeaderboard[0].xp}</p>
+              {/* 1st Place */}
+              {parishLeaderboard[0] && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center w-28">
+                  <div className="w-16 h-16 rounded-full bg-amber-400 border-4 border-white dark:border-[#0f1229] shadow-2xl flex items-center justify-center text-2xl font-bold text-amber-700 z-10 halo-glow">👑</div>
+                  <div className="w-full h-32 bg-gradient-to-t from-amber-300 to-amber-200 rounded-t-xl border border-amber-400 flex flex-col items-center justify-end pb-3 shadow-lg">
+                    <p className="text-xs font-bold text-amber-800 truncate w-full text-center px-2">{parishLeaderboard[0].name}</p>
+                    <p className="text-sm font-extrabold text-amber-950">{parishLeaderboard[0].xp}</p>
                   </div>
                 </motion.div>
+              )}
 
-                {/* 3rd Place */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col items-center">
-                  <div className="w-14 h-14 rounded-full bg-orange-200 border-4 border-white shadow-xl flex items-center justify-center text-xl font-bold text-orange-600 z-10">🥉</div>
-                  <div className="w-20 h-20 bg-gradient-to-t from-orange-200 to-orange-100 rounded-t-xl border border-orange-300 flex flex-col items-center justify-end pb-2">
-                    <p className="text-[10px] font-bold text-orange-600 truncate w-full text-center px-1">{parishLeaderboard[2].name}</p>
-                    <p className="text-xs font-extrabold text-orange-800">{parishLeaderboard[2].xp}</p>
+              {/* 3rd Place */}
+              {parishLeaderboard[2] && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col items-center w-24">
+                  <div className="w-14 h-14 rounded-full bg-orange-200 border-4 border-white dark:border-[#0f1229] shadow-xl flex items-center justify-center text-xl font-bold text-orange-600 z-10">🥉</div>
+                  <div className="w-full h-20 bg-gradient-to-t from-orange-200 to-orange-100 rounded-t-xl border border-orange-300 flex flex-col items-center justify-end pb-2">
+                    <p className="text-[10px] font-bold text-orange-700 truncate w-full text-center px-2">{parishLeaderboard[2].name}</p>
+                    <p className="text-xs font-extrabold text-orange-900">{parishLeaderboard[2].xp}</p>
                   </div>
                 </motion.div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* List */}
             <div className="bg-card rounded-2xl border border-border/60 card-holy overflow-hidden">
