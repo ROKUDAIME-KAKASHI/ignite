@@ -3,6 +3,62 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { awardXP } from "@/app/actions/gamification";
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "dummy" });
+
+async function verifyWithAI(userId: string, eventId: string, reflection: string, eventTitle: string, isMission: boolean) {
+  try {
+    if (!process.env.GEMINI_API_KEY) return; // Skip if no key
+
+    const prompt = `You are a strict validator for a church app. A user checked into ${isMission ? 'the mission' : 'the event'} "${eventTitle}" and left this reflection/note:
+"${reflection}"
+Your job is to determine if this is a genuine note/reflection, or if it is spam/gibberish (like "asdf", "hello world", "good very good", "test test test").
+If it is a genuine, thoughtful note related to the event, faith, or personal growth, reply with exactly "YES".
+If it is spam, gibberish, or completely irrelevant, reply with exactly "NO".
+Do not output any other text.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+
+    const answer = response.text?.trim().toUpperCase();
+    if (answer?.includes("NO")) {
+      // It's spam! Revoke points.
+      const reasonPrefix = isMission ? `Completed Mission: ${eventTitle}` : `Event Check-In & Notes: ${eventTitle}`;
+      
+      const xpLog = await prisma.xPLog.findFirst({
+         where: { userId, reason: { startsWith: reasonPrefix } },
+         orderBy: { awardedAt: 'desc' }
+      });
+      
+      if (xpLog) {
+         await prisma.user.update({
+            where: { id: userId },
+            data: { xp: { decrement: xpLog.amount } }
+         });
+         await prisma.xPLog.delete({ where: { id: xpLog.id } });
+      }
+
+      if (!isMission) {
+         await prisma.attendance.deleteMany({
+            where: { userId, eventId }
+         });
+      }
+
+      await prisma.notification.create({
+         data: {
+            userId,
+            title: "Check-in Rejected",
+            message: `Your check-in note for "${eventTitle}" was flagged as invalid by our automated system. The Grace Points have been revoked. Please write genuine reflections!`
+         }
+      });
+    }
+  } catch (error) {
+    console.error("AI Verification failed", error);
+  }
+}
 
 export async function validateEvent(id: string) {
   try {
@@ -65,6 +121,10 @@ export async function checkInToEvent(id: string, reflectionText: string, type: "
       if (existing) return { error: "Mission already completed today!" };
 
       const res = await awardXP(mission.xpReward, `Completed Mission: ${mission.title}`);
+      
+      // Fire and forget AI verification (Problem 2 Option A)
+      verifyWithAI(session.id, mission.id, reflectionText, mission.title, true).catch(console.error);
+
       return {
         success: true,
         eventTitle: mission.title,
@@ -103,6 +163,9 @@ export async function checkInToEvent(id: string, reflectionText: string, type: "
     // Award XP
     const shortReflect = reflectionText.substring(0, 30) + (reflectionText.length > 30 ? "..." : "");
     const res = await awardXP(150, `Event Check-In & Notes: ${event.title} - "${shortReflect}"`);
+
+    // Fire and forget AI verification (Problem 2 Option A)
+    verifyWithAI(session.id, event.id, reflectionText, event.title, false).catch(console.error);
 
     return { 
       success: true, 
