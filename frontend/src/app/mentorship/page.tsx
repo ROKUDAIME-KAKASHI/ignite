@@ -52,7 +52,7 @@ export default function MentorshipPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-slate-50">
+    <div className="flex-1 flex flex-col min-h-screen bg-background">
       
       {/* ── Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-10 bg-gradient-to-br from-indigo-900 to-slate-800 shadow-md sticky top-0 z-20">
@@ -76,12 +76,12 @@ export default function MentorshipPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-white p-1 m-4 rounded-xl shadow-sm border border-slate-200">
+      <div className="flex gap-1 bg-card p-1 m-4 rounded-xl shadow-sm border border-border/50">
         <button
           onClick={() => setActiveTab("all")}
           className={cn(
             "flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200",
-            activeTab === "all" ? "bg-indigo-50 text-indigo-700" : "text-slate-500"
+            activeTab === "all" ? "bg-primary/10 text-primary" : "text-muted-foreground"
           )}
         >
           Recent Answers
@@ -90,7 +90,7 @@ export default function MentorshipPage() {
           onClick={() => setActiveTab("my")}
           className={cn(
             "flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200",
-            activeTab === "my" ? "bg-indigo-50 text-indigo-700" : "text-slate-500"
+            activeTab === "my" ? "bg-primary/10 text-primary" : "text-muted-foreground"
           )}
         >
           My Questions
@@ -107,22 +107,22 @@ export default function MentorshipPage() {
                 key={q.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
+                className="bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm"
               >
                 {/* Question */}
-                <div className="p-4 bg-slate-50 border-b border-slate-100">
+                <div className="p-4 bg-muted/50 border-b border-border/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center">
-                      <User className="w-3 h-3 text-slate-500" />
+                    <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                      <User className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                     </div>
-                    <span className="text-xs font-bold text-slate-500">
+                    <span className="text-xs font-bold text-muted-foreground">
                       {q.askedBy}
                     </span>
-                    <span className="text-[10px] text-slate-400 ml-auto">
+                    <span className="text-[10px] text-muted-foreground ml-auto">
                       {new Date(q.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-sm font-semibold text-slate-900 leading-relaxed">{q.text}</p>
+                  <p className="text-sm font-semibold text-foreground leading-relaxed">{q.text}</p>
                 </div>
 
                 {/* Answer */}
@@ -130,15 +130,15 @@ export default function MentorshipPage() {
                   {q.answer ? (
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <ShieldCheck className="w-4 h-4 text-indigo-600" />
-                        <span className="text-xs font-bold text-indigo-700 uppercase tracking-wide">
+                        <ShieldCheck className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-bold text-primary uppercase tracking-wide">
                           Answered by {q.answeredBy}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-700 leading-relaxed">{q.answer}</p>
+                      <p className="text-sm text-foreground/90 leading-relaxed">{q.answer}</p>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-amber-600">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
                       <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                       <span className="text-xs font-bold uppercase tracking-wide">Awaiting Response</span>
                     </div>
@@ -151,7 +151,7 @@ export default function MentorshipPage() {
       </div>
 
       {/* Input Box */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-[5.5rem] md:pb-safe z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border/50 p-4 pb-[5.5rem] md:pb-safe z-30">
         <div className="max-w-3xl mx-auto flex flex-col gap-2">
           <div className="flex items-center gap-2 px-2">
             <input 
@@ -159,16 +159,16 @@ export default function MentorshipPage() {
               id="anon" 
               checked={isAnonymous} 
               onChange={e => setIsAnonymous(e.target.checked)}
-              className="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 border-slate-300"
+              className="rounded text-primary focus:ring-primary w-3.5 h-3.5 border-border/50 bg-background"
             />
-            <label htmlFor="anon" className="text-xs font-semibold text-slate-500 cursor-pointer">Ask anonymously</label>
+            <label htmlFor="anon" className="text-xs font-semibold text-muted-foreground cursor-pointer">Ask anonymously</label>
           </div>
           <div className="flex items-end gap-2">
             <textarea
               value={newQuestion}
               onChange={e => setNewQuestion(e.target.value)}
               placeholder="Ask a question about faith, scripture, or struggles..."
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 resize-none"
+              className="flex-1 bg-background border border-border/60 rounded-2xl p-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none text-foreground placeholder:text-muted-foreground"
               rows={2}
             />
             <Button 

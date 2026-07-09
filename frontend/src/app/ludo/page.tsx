@@ -414,8 +414,8 @@ export default function BibleLudoPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7]">
-      <div className="px-4 pt-6 pb-4 border-b border-border flex items-center justify-between bg-white shadow-sm z-10">
+    <div className="flex-1 flex flex-col min-h-screen bg-background">
+      <div className="px-4 pt-6 pb-4 border-b border-border flex items-center justify-between bg-card shadow-sm z-10">
         <Button onClick={() => gameMode === "setup" ? router.push('/quizzes') : setGameMode("setup")} variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-5 h-5" />
         </Button>
@@ -543,7 +543,7 @@ export default function BibleLudoPage() {
         <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center pb-32">
           
           {/* Status Bar */}
-          <div className="w-full max-w-[400px] mb-4 flex items-center justify-between bg-white rounded-2xl p-3 border shadow-sm">
+          <div className="w-full max-w-[400px] mb-4 flex items-center justify-between bg-card rounded-2xl p-3 border shadow-sm">
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full ${BG_COLORS[turn]} shadow-inner border-2 border-black/10`} />
               <div>
@@ -579,7 +579,7 @@ export default function BibleLudoPage() {
 
         {/* Board */}
         <div 
-          className="bg-white p-2 rounded-2xl shadow-xl border-4 border-amber-800/20 relative"
+          className="bg-card p-2 rounded-2xl shadow-xl border-4 border-amber-800/20 relative"
           style={{ width: "min(100%, 400px)", aspectRatio: "1/1" }}
         >
           <div className="w-full h-full grid" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)`, gridTemplateRows: `repeat(${BOARD_SIZE}, 1fr)` }}>
