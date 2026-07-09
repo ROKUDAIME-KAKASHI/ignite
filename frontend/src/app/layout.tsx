@@ -8,6 +8,7 @@ import { MobileHeader } from "@/components/layout/MobileHeader";
 import { GlobalChat } from "@/components/GlobalChat";
 import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { CustomGoogleOAuthProvider } from "@/components/providers/GoogleAuthProvider";
+import { InAppBrowserDetector } from "@/components/layout/InAppBrowserDetector";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </AuthProvider>
           </CustomGoogleOAuthProvider>
         </ThemeProvider>
+        <InAppBrowserDetector />
       </body>
     </html>
   );
