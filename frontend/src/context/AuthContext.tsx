@@ -1,8 +1,29 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { logout as logoutAction, updateProfile as updateProfileAction } from "@/app/actions/auth";
+
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/profile",
+  "/events",
+  "/missions",
+  "/journeys",
+  "/quizzes",
+  "/prayer",
+  "/memory-match",
+  "/wordle",
+  "/ludo",
+  "/bible",
+  "/guides",
+  "/appointments",
+  "/trivia",
+  "/scan",
+  "/mentorship",
+  "/lions-den",
+  "/noahs-ark"
+];
 
 interface AuthUser {
   id: string;
@@ -42,6 +63,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const isProtected = PROTECTED_ROUTES.some(r => pathname.startsWith(r));
+    if (!loading && !user && isProtected) {
+      router.replace("/");
+    }
+  }, [user, loading, pathname, router]);
 
   useEffect(() => {
     fetch("/api/auth/me")
