@@ -73,7 +73,7 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
-      <div className="px-4 -mt-6 pb-8 space-y-3">
+      <div className="px-4 -mt-6 pb-8 space-y-3 relative z-20">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }} className="w-8 h-8 border-4 border-amber-500/30 border-t-amber-500 rounded-full mb-4" />

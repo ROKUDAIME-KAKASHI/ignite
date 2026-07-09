@@ -125,8 +125,7 @@ export default function NotificationsPage() {
         </div>
       </div>
 
-      <div className="px-4 -mt-4 pb-8 space-y-4">
-
+      <div className="px-4 -mt-4 pb-8 space-y-4 relative z-20">
         {/* ── Parish Notices (from Admin) ── */}
         <div>
           <div className="flex items-center gap-2 mb-3 px-1 pt-2">
