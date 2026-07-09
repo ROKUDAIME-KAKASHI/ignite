@@ -7,6 +7,7 @@ import { Navigation } from "@/components/layout/Navigation";
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { GlobalChat } from "@/components/GlobalChat";
 import { PushNotificationManager } from "@/components/PushNotificationManager";
+import { CustomGoogleOAuthProvider } from "@/components/providers/GoogleAuthProvider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -48,15 +49,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     >
       <body className="min-h-full flex flex-col bg-background text-foreground md:flex-row">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <AuthProvider>
-            <Navigation />
-            <MobileHeader />
-            <main className="flex-1 flex flex-col w-full overflow-hidden relative pb-20 md:pb-0">
-              {children}
-              <GlobalChat />
-              <PushNotificationManager />
-            </main>
-          </AuthProvider>
+          <CustomGoogleOAuthProvider>
+            <AuthProvider>
+              <Navigation />
+              <MobileHeader />
+              <main className="flex-1 flex flex-col w-full overflow-hidden relative pb-20 md:pb-0">
+                {children}
+                <GlobalChat />
+                <PushNotificationManager />
+              </main>
+            </AuthProvider>
+          </CustomGoogleOAuthProvider>
         </ThemeProvider>
       </body>
     </html>

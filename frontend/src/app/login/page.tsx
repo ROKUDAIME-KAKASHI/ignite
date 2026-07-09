@@ -8,8 +8,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
-import { login, signup } from "@/app/actions/auth";
+import { login, signup, googleAuth } from "@/app/actions/auth";
 import { useAuth } from "@/context/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 function Cross({ className }: { className?: string }) {
   return (
@@ -67,6 +68,28 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    if (!credentialResponse.credential) return;
+    setError("");
+    setLoading(true);
+    try {
+      const res = await googleAuth(credentialResponse.credential);
+      if (res.error) {
+        setError(res.error);
+      } else if (res.success && res.user) {
+        setUser({
+          ...res.user,
+          displayName: `${res.user.firstName} ${res.user.lastName}`
+        });
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      setError("Failed to sign in with Google.");
     } finally {
       setLoading(false);
     }
@@ -205,6 +228,18 @@ export default function LoginPage() {
           </form>
 
           <div className="divider-cross my-4" />
+
+          {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+            <div className="flex justify-center mb-4">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Google Sign-In Failed")}
+                theme="outline"
+                shape="pill"
+                text={isRegistering ? "signup_with" : "signin_with"}
+              />
+            </div>
+          )}
 
           <div className="text-center">
             <button
