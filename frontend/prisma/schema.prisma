@@ -38,6 +38,7 @@ model User {
   notifications Notification[]
   mentorshipQuestions MentorshipQuestion[]
   journeyNodes  UserJourneyNode[]
+  pendingValidations PendingValidation[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -359,5 +360,18 @@ model MentorshipQuestion {
   answer      String?
   answeredBy  String?
   isAnonymous Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model PendingValidation {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  eventId     String
+  isMission   Boolean  @default(false)
+  reflection  String
+  eventTitle  String
+  xpAmount    Int
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt   DateTime @default(now())
 }
