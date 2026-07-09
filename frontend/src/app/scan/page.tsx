@@ -15,6 +15,7 @@ export default function ScanPage() {
   const [message, setMessage] = useState("");
   const [eventTitle, setEventTitle] = useState("");
   const [eventIdStr, setEventIdStr] = useState("");
+  const [scanType, setScanType] = useState<"event" | "mission">("event");
   const [reflection, setReflection] = useState("");
 
   const handleScan = async (data: string) => {
@@ -44,6 +45,7 @@ export default function ScanPage() {
       } else if (res.success) {
         setEventTitle(res.eventTitle || "Event");
         setEventIdStr(res.eventId || eventId);
+        setScanType(res.type || "event");
         setStatus("reflection");
       }
     } catch (error) {
@@ -54,7 +56,7 @@ export default function ScanPage() {
 
   const submitReflection = async () => {
     setStatus("processing");
-    const res = await checkInToEvent(eventIdStr, reflection);
+    const res = await checkInToEvent(eventIdStr, reflection, scanType);
     if (res.error) {
       setMessage(res.error);
       setStatus("error");
@@ -62,7 +64,7 @@ export default function ScanPage() {
       if (user) {
         setUser({ ...user, xp: res.xp, level: res.level });
       }
-      setMessage("+150 Grace Points Earned!");
+      setMessage(`+${scanType === "mission" ? "Mission" : "150"} Grace Points Earned!`);
       setStatus("success");
     }
   };

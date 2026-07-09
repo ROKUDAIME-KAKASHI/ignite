@@ -72,14 +72,6 @@ export function Navigation() {
     <>
       {/* ── Mobile Bottom Navigation ── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe">
-        <motion.div 
-          drag
-          dragMomentum={false}
-          dragElastic={0.1}
-          className="fixed top-24 right-4 z-[60] cursor-grab active:cursor-grabbing md:hidden"
-        >
-          <ThemeToggle />
-        </motion.div>
         <div className="bg-white dark:bg-[#0f1229] border-t border-amber-200/50 dark:border-amber-900/20 shadow-2xl">
 
           <ul className="flex overflow-x-auto items-center h-16 px-4 gap-2 snap-x [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

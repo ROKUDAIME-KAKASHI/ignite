@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, CheckCircle2 } from "lucide-react";
 import { HeroNav } from "@/components/layout/HeroNav";
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   return (
@@ -42,6 +44,15 @@ const testimonials = [
 ];
 
 export default function HeroPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
   return (
     <div className="flex-1 bg-[#fdfbf7] text-gray-900 font-sans min-h-screen overflow-hidden">
       <HeroNav />

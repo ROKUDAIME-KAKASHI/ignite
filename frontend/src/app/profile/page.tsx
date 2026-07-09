@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { getProfileStats, joinParish } from "@/app/actions/profile";
 import { requestNotificationPermission } from "@/lib/firebase";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /* ─── Static data ──────────────────────────────────────────────────────────── */
 
@@ -384,6 +385,14 @@ export default function ProfilePage() {
 
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Account</h3>
         <div className="rounded-2xl border border-border/60 card-holy overflow-hidden bg-card divide-y divide-border/50">
+          {/* Theme Toggle */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Appearance</p>
+              <p className="text-sm font-medium text-foreground mt-0.5">Toggle Dark Mode</p>
+            </div>
+            <ThemeToggle />
+          </div>
           {/* Email (read-only) */}
           <div className="flex items-center justify-between px-4 py-3">
             <div>

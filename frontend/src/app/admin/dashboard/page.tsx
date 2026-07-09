@@ -11,12 +11,13 @@ import { createAnnouncement, createEvent, getChurches, createChurch } from "../a
 import QRCode from "react-qr-code";
 
 import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge } from "../actions";
+import { getMissions } from "@/app/missions/actions";
 import { useRouter } from "next/navigation";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events" | "parishes" | "content">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events" | "parishes" | "content" | "qrcodes">("overview");
 
   // Real data state
   const [stats, setStats] = useState({
@@ -32,6 +33,7 @@ export default function AdminDashboardPage() {
   const [existingEvents, setExistingEvents] = useState<any[]>([]);
   const [existingAnnouncements, setExistingAnnouncements] = useState<any[]>([]);
   const [churches, setChurches] = useState<any[]>([]);
+  const [missions, setMissions] = useState<any[]>([]);
 
   const [quotes, setQuotes] = useState<any[]>([]);
   const [chatSuggestions, setChatSuggestions] = useState<any[]>([]);
@@ -107,6 +109,7 @@ export default function AdminDashboardPage() {
       fetchEventsAndNotices();
       fetchChurches();
       fetchContent();
+      getMissions().then(m => setMissions(m.missions));
     }
     fetchData();
   }, []);
@@ -211,7 +214,7 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["overview", "prayers", "notices", "events", "parishes", "content"] as const).map(t => (
+          {(["overview", "prayers", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition-all whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -654,6 +657,29 @@ export default function AdminDashboardPage() {
                     </button>
                   </div>
                 ))}
+              </div>
+            </div>
+
+          </motion.div>
+        )}
+
+        {activeTab === "qrcodes" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <h2 className="text-lg font-bold text-foreground mb-4 font-serif">Event QR Codes</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {existingEvents.map(ev => (
+                  <div key={ev.id} className="p-4 border rounded-xl flex flex-col items-center text-center bg-slate-50 dark:bg-slate-950">
+                    <p className="font-bold text-sm mb-2">{ev.title}</p>
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
+                      <QRCode value={`${baseUrl}/scan?eventId=${ev.id}`} size={120} level="H" />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-3 uppercase tracking-widest">{ev.date ? new Date(ev.date).toLocaleDateString() : ""}</p>
+                  </div>
+                ))}
+                {existingEvents.length === 0 && (
+                  <p className="text-sm text-muted-foreground col-span-2">No upcoming events found.</p>
+                )}
               </div>
             </div>
 

@@ -2,8 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-
 import { awardXP } from "@/app/actions/gamification";
+import { GoogleGenAI, Type } from "@google/genai";
 
 export async function getMissions() {
   let missions = await prisma.mission.findMany();
@@ -38,7 +38,47 @@ export async function getMissions() {
   return { missions, completedIds };
 }
 
-export async function completeMission(missionId: string | number, xpReward: number, title: string) {
+export async function completeMission(missionId: string | number, xpReward: number, title: string, reflection?: string) {
+  if (reflection) {
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const prompt = `You are validating a user's completion of a religious mission in a youth ministry app.
+Mission Title: ${title.split(" - ")[0]}
+User's Reflection: "${reflection}"
+
+Evaluate if the reflection reasonably indicates they completed the mission or if it is just random spam/gibberish (like "asdf" or "test").
+Respond strictly in JSON format with two fields:
+{
+  "valid": boolean, // true if it looks like a genuine attempt, false if spam/irrelevant
+  "reason": string // A short, kind message explaining why it was accepted or rejected (max 1 sentence)
+}`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              valid: { type: Type.BOOLEAN },
+              reason: { type: Type.STRING },
+            },
+            required: ["valid", "reason"],
+          }
+        }
+      });
+      
+      const result = JSON.parse(response.text || "{}");
+      if (result.valid === false) {
+        return { success: false, error: result.reason || "Your reflection was not accepted. Please provide a genuine response." };
+      }
+    } catch (e) {
+      console.error("AI Verification failed, allowing fallback", e);
+      // If AI fails for some reason (rate limit, etc), allow it through rather than blocking the user
+    }
+  }
+
   const res = await awardXP(xpReward, `Completed Mission: ${title}`);
   return { success: res.success };
 }

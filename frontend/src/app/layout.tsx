@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/layout/Navigation";
-import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthProvider } from "@/context/AuthContext";
+import { Navigation } from "@/components/layout/Navigation";
+import { MobileHeader } from "@/components/layout/MobileHeader";
 import { GlobalChat } from "@/components/GlobalChat";
 import { PushNotificationManager } from "@/components/PushNotificationManager";
 
@@ -49,7 +50,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <Navigation />
-            <main className="flex-1 flex flex-col w-full overflow-hidden relative">
+            <MobileHeader />
+            <main className="flex-1 flex flex-col w-full overflow-hidden relative pb-20 md:pb-0">
               {children}
               <GlobalChat />
               <PushNotificationManager />

@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Clock } from "lucide-react";
+import { CheckCircle2, Clock, Send, PenTool } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 const tabs = ["Active", "Completed", "All"];
 
@@ -25,6 +26,9 @@ export default function MissionsPage() {
   const [missions, setMissions] = useState<{ id: string, title: string, description: string, xpReward: number }[]>([]);
   const [completed, setCompleted] = useState<string[]>([]);
   const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [errorMsg, setErrorMsg] = useState<Record<string, string>>({});
+  const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  const [reflection, setReflection] = useState("");
 
   useEffect(() => {
     getMissions().then(data => {
@@ -34,11 +38,23 @@ export default function MissionsPage() {
   }, []);
 
   const toggle = async (id: string, xpReward: number, title: string) => {
-    if (completed.includes(id)) return;
+    if (completed.includes(id) || !reflection.trim()) return;
     setLoading(prev => ({ ...prev, [id]: true }));
-    await completeMission(id, xpReward, title);
-    setCompleted((p) => [...p, id]);
+    setErrorMsg(prev => ({ ...prev, [id]: "" }));
+    
+    // We append the reflection to the title so it gets recorded in the XP log
+    const shortReflect = reflection.substring(0, 30) + (reflection.length > 30 ? "..." : "");
+    const res = await completeMission(id, xpReward, `${title} - "${shortReflect}"`, reflection);
+    
     setLoading(prev => ({ ...prev, [id]: false }));
+    
+    if (res.error) {
+      setErrorMsg(prev => ({ ...prev, [id]: res.error || "Failed to submit" }));
+    } else {
+      setCompleted((p) => [...p, id]);
+      setSelectedMission(null);
+      setReflection("");
+    }
   };
 
   return (
@@ -132,23 +148,60 @@ export default function MissionsPage() {
                   </div>
                 </div>
 
-                {/* Card body */}
                 <div className="px-5 py-4 bg-card space-y-3">
                   <p className="text-sm text-muted-foreground leading-relaxed">{m.description}</p>
-                  <Button
-                    onClick={() => toggle(m.id, m.xpReward, m.title)}
-                    disabled={loading[m.id] || done}
-                    className={cn(
-                      "w-full h-10 rounded-xl font-bold transition-all",
-                      done
-                        ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
-                        : "gradient-gold text-white shadow-md"
-                    )}
-                    variant={done ? "outline" : "default"}
-                  >
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    {loading[m.id] ? "Completing..." : done ? "✓ Mission Complete — Deo Gratias!" : "Mark as Complete"}
-                  </Button>
+                  
+                  {done ? (
+                    <Button
+                      disabled
+                      className="w-full h-10 rounded-xl font-bold transition-all bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                      variant="outline"
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      ✓ Mission Complete — Deo Gratias!
+                    </Button>
+                  ) : selectedMission === m.id ? (
+                    <div className="space-y-3 mt-4 pt-4 border-t border-border/50">
+                      <p className="text-xs font-bold text-foreground">Reflection</p>
+                      <Textarea 
+                        placeholder="How did you complete this mission today? Share a brief note or thought."
+                        value={reflection}
+                        onChange={(e) => setReflection(e.target.value)}
+                        className="bg-slate-50 dark:bg-slate-900 border-border/60 min-h-[80px]"
+                      />
+                      {errorMsg[m.id] && (
+                        <p className="text-xs text-red-500 font-medium">⚠️ {errorMsg[m.id]}</p>
+                      )}
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setSelectedMission(null)}
+                          className="flex-1 rounded-xl"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={() => toggle(m.id, m.xpReward, m.title)}
+                          disabled={loading[m.id] || reflection.trim().length < 5}
+                          className="flex-1 rounded-xl gradient-gold text-white font-bold"
+                        >
+                          {loading[m.id] ? "Submitting..." : (
+                            <>
+                              <Send className="w-4 h-4 mr-2" /> Submit
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => setSelectedMission(m.id)}
+                      className="w-full h-10 rounded-xl font-bold transition-all gradient-gold text-white shadow-md"
+                    >
+                      <PenTool className="w-4 h-4 mr-2" />
+                      Write Reflection to Complete
+                    </Button>
+                  )}
                 </div>
               </motion.div>
             );

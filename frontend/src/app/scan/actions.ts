@@ -4,34 +4,69 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { awardXP } from "@/app/actions/gamification";
 
-export async function validateEvent(eventId: string) {
+export async function validateEvent(id: string) {
   try {
     const session = await getSession();
     if (!session || !session.id) return { error: "Not logged in" };
 
-    const event = await prisma.event.findUnique({ where: { id: eventId } });
-    if (!event) return { error: "Event not found" };
+    // Check if it's an event
+    const event = await prisma.event.findUnique({ where: { id: id } });
+    if (event) {
+      const existing = await prisma.attendance.findFirst({
+        where: { userId: session.id, eventId: id }
+      });
+      if (existing) return { error: "Already checked in" };
+      return { success: true, eventTitle: event.title, eventId: event.id, type: "event" as const };
+    }
 
-    const existing = await prisma.attendance.findFirst({
-      where: { userId: session.id, eventId }
-    });
-    if (existing) return { error: "Already checked in" };
+    // Check if it's a mission
+    const mission = await prisma.mission.findUnique({ where: { id: id } });
+    if (mission) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const existing = await prisma.xPLog.findFirst({
+        where: { userId: session.id, awardedAt: { gte: today }, reason: `Completed Mission: ${mission.title}` }
+      });
+      if (existing) return { error: "Mission already completed today" };
+      return { success: true, eventTitle: mission.title, eventId: mission.id, type: "mission" as const };
+    }
 
-    return { success: true, eventTitle: event.title, eventId: event.id };
+    return { error: "Event or Mission not found" };
   } catch (error) {
     return { error: "Invalid QR code" };
   }
 }
 
-export async function checkInToEvent(eventId: string, reflectionText: string) {
+export async function checkInToEvent(id: string, reflectionText: string, type: "event" | "mission" = "event") {
   try {
     const session = await getSession();
     if (!session || !session.id) {
-      return { error: "You must be logged in to check in." };
+      return { error: "You must be logged in." };
     }
 
+    if (type === "mission") {
+      const mission = await prisma.mission.findUnique({ where: { id } });
+      if (!mission) return { error: "Mission not found." };
+      
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const existing = await prisma.xPLog.findFirst({
+        where: { userId: session.id, awardedAt: { gte: today }, reason: `Completed Mission: ${mission.title}` }
+      });
+      if (existing) return { error: "Mission already completed today!" };
+
+      const res = await awardXP(mission.xpReward, `Completed Mission: ${mission.title}`);
+      return {
+        success: true,
+        eventTitle: mission.title,
+        xp: res.xp,
+        level: res.level
+      };
+    }
+
+    // Event logic
     const event = await prisma.event.findUnique({
-      where: { id: eventId }
+      where: { id: id }
     });
 
     if (!event) {
@@ -40,7 +75,7 @@ export async function checkInToEvent(eventId: string, reflectionText: string) {
 
     // Check if already checked in
     const existing = await prisma.attendance.findFirst({
-      where: { userId: session.id, eventId }
+      where: { userId: session.id, eventId: id }
     });
 
     if (existing) {
