@@ -56,7 +56,7 @@ export default function JourneysPage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7] items-center justify-center">
+      <div className="flex-1 flex flex-col min-h-screen bg-background items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-emerald-700" />
       </div>
     );
@@ -67,7 +67,7 @@ export default function JourneysPage() {
   const maxStars = activeCourse?.totalNodes * 3 || 0;
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7]">
+    <div className="flex-1 flex flex-col min-h-screen bg-background">
       {/* ── Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-10 bg-gradient-to-br from-emerald-800 to-green-700 shadow-md">
         <svg viewBox="0 0 200 200" className="absolute right-0 top-0 w-48 h-48 opacity-10 text-white" fill="none" stroke="currentColor" strokeWidth="6">
@@ -256,23 +256,25 @@ export default function JourneysPage() {
                 {selectedNode.type === "read" && (
                   <Button 
                     onClick={() => {
-                      // Basic heuristic to jump to the bible (e.g. Genesis 1)
-                      // This links generally to the bible browse page, but encourages reading
+                      handleCompleteNode();
+                      // Basic heuristic to jump to the bible
                       router.push("/bible");
                     }} 
                     variant="outline"
                     className="w-full h-12 rounded-xl text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 font-bold text-base"
                   >
-                    <BookOpen className="w-4 h-4 mr-2" /> Open Scripture
+                    <BookOpen className="w-4 h-4 mr-2" /> Start Reading
                   </Button>
                 )}
-                <Button 
-                  onClick={handleCompleteNode} 
-                  disabled={isProcessing}
-                  className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
-                >
-                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Step"}
-                </Button>
+                {selectedNode.type !== "read" && (
+                  <Button 
+                    onClick={handleCompleteNode} 
+                    disabled={isProcessing}
+                    className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
+                  >
+                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Step"}
+                  </Button>
+                )}
               </div>
             )}
           </motion.div>

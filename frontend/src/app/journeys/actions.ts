@@ -185,10 +185,13 @@ export async function completeNode(nodeId: string) {
       });
     }
 
-    // Award XP
+    // Award XP and Stars
     await prisma.user.update({
       where: { id: session.id },
-      data: { xp: { increment: 50 } }
+      data: { 
+        xp: { increment: 50 },
+        stars: { increment: 3 }
+      }
     });
 
     await prisma.xPLog.create({

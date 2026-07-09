@@ -126,6 +126,9 @@ export default function BibleReaderPage() {
     try {
       const data = await fetchChapter(book.apiName, chapter, translation);
       setVerses(data.verses);
+      // Calculate dynamic reading time: 3 seconds per verse, between 15s and 3 mins.
+      const dynamicTime = Math.min(180, Math.max(15, data.verses.length * 3));
+      setTimeLeft(dynamicTime);
     } catch {
       setError("Could not load scripture. Please check your connection and try again.");
     } finally {
@@ -135,7 +138,6 @@ export default function BibleReaderPage() {
 
   useEffect(() => { 
     setMarkedRead(false);
-    setTimeLeft(60); // Reset timer on new chapter
     void load(); 
     if (book) {
       localStorage.setItem("last_read", `${book.slug}:${chapter}`);

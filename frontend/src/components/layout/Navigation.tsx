@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map } from "lucide-react";
+import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
@@ -44,6 +44,7 @@ const navItems = [
   { name: "Games",     href: "/quizzes",   icon: Gamepad2 },
   { name: "Events",    href: "/events",    icon: Calendar   },
   { name: "Notices",   href: "/notifications", icon: Bell   },
+  { name: "Ranks",     href: "/leaderboard", icon: Trophy   },
   { name: "Profile",   href: "/profile",   icon: UserIcon   },
 ];
 
