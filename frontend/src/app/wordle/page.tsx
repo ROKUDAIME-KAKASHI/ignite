@@ -9,17 +9,37 @@ import { awardXP } from "@/app/actions/gamification";
 import { useAuth } from "@/context/AuthContext";
 
 const BIBLICAL_WORDS = [
-  "GRACE", "FAITH", "JESUS", "DAVID", "MOSES", "PEACE", "CROSS", 
-  "GLORY", "MERCY", "ANGEL", "ALTAR", "BIBLE", "PETER", "MARYS",
-  "SPIRIT", "BLOOD", "BREAD", "WATER", "LIGHT", "TRUTH" 
-].filter(w => w.length === 5);
+  { word: "GRACE", clue: "Unmerited favor from God" },
+  { word: "FAITH", clue: "Confidence in what we hope for" },
+  { word: "JESUS", clue: "The Son of God" },
+  { word: "DAVID", clue: "A man after God's own heart" },
+  { word: "MOSES", clue: "Led the Israelites out of Egypt" },
+  { word: "PEACE", clue: "A fruit of the Spirit, beyond understanding" },
+  { word: "CROSS", clue: "Symbol of Jesus' sacrifice" },
+  { word: "GLORY", clue: "Magnificence and great beauty of God" },
+  { word: "MERCY", clue: "Compassion or forgiveness shown" },
+  { word: "ANGEL", clue: "Heavenly messenger" },
+  { word: "ALTAR", clue: "Structure for offering sacrifices" },
+  { word: "BIBLE", clue: "The Holy Scriptures" },
+  { word: "PETER", clue: "The rock upon which the church was built" },
+  { word: "MARYS", clue: "The mother of Jesus (plural/possessive variant)" },
+  { word: "SPIRIT", clue: "The Holy ____" },
+  { word: "BLOOD", clue: "Shed for the remission of sins" },
+  { word: "BREAD", clue: "Jesus is the ____ of life" },
+  { word: "WATER", clue: "Used in baptism" },
+  { word: "LIGHT", clue: "Let there be ____" },
+  { word: "TRUTH", clue: "The way, the ____, and the life" },
+  { word: "RESURRECTION", clue: "Rising from the dead" },
+  { word: "COMMANDMENT", clue: "Divine rule" },
+  { word: "REVELATION", clue: "The last book of the Bible" },
+  { word: "BETHLEHEM", clue: "Birthplace of Jesus" }
+];
 
-let initialWord = "GRACE";
+let initialWord = { word: "GRACE", clue: "Unmerited favor from God" };
 if (typeof window !== "undefined") {
   initialWord = BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)];
 }
 const MAX_GUESSES = 6;
-const WORD_LENGTH = 5;
 
 const KEYBOARD_ROWS = [
   ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -33,16 +53,18 @@ export default function WordlePage() {
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const { user, setUser } = useAuth();
-  const [targetWord, setTargetWord] = useState(initialWord);
+  const [targetWordObj, setTargetWordObj] = useState(initialWord);
+  const targetWord = targetWordObj.word;
+  const wordLength = targetWord.length;
   const [awarded, setAwarded] = useState(false);
 
   useEffect(() => {
     // Select randomly on client mount to avoid hydration mismatch
-    setTargetWord(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
+    setTargetWordObj(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
   }, []);
 
   const resetGame = () => {
-    setTargetWord(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
+    setTargetWordObj(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
     setGuesses([]);
     setCurrentGuess("");
     setGameOver(false);
@@ -51,7 +73,7 @@ export default function WordlePage() {
   };
 
   const submitGuess = useCallback(async () => {
-    if (currentGuess.length !== WORD_LENGTH) return;
+    if (currentGuess.length !== wordLength) return;
     
     const newGuesses = [...guesses, currentGuess];
     setGuesses(newGuesses);
@@ -77,13 +99,13 @@ export default function WordlePage() {
         submitGuess();
       } else if (e.key === "Backspace") {
         setCurrentGuess(prev => prev.slice(0, -1));
-      } else if (/^[A-Za-z]$/.test(e.key) && currentGuess.length < WORD_LENGTH) {
+      } else if (/^[A-Za-z]$/.test(e.key) && currentGuess.length < wordLength) {
         setCurrentGuess(prev => (prev + e.key).toUpperCase());
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentGuess, gameOver, submitGuess]);
+  }, [currentGuess, gameOver, submitGuess, wordLength]);
 
   const onKeyPress = (key: string) => {
     if (gameOver) return;
@@ -91,7 +113,7 @@ export default function WordlePage() {
       submitGuess();
     } else if (key === "BACKSPACE") {
       setCurrentGuess(prev => prev.slice(0, -1));
-    } else if (currentGuess.length < WORD_LENGTH) {
+    } else if (currentGuess.length < wordLength) {
       setCurrentGuess(prev => (prev + key).toUpperCase());
     }
   };
@@ -125,6 +147,10 @@ export default function WordlePage() {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="text-center mb-6 max-w-md w-full">
+          <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Clue</p>
+          <p className="text-lg font-serif text-foreground font-semibold bg-card border border-border p-3 rounded-xl shadow-sm">{targetWordObj.clue}</p>
+        </div>
         <div className="grid gap-2 mb-8">
           {Array.from({ length: MAX_GUESSES }).map((_, rowIndex) => {
             const guess = guesses[rowIndex];
@@ -133,7 +159,7 @@ export default function WordlePage() {
 
             return (
               <div key={rowIndex} className="flex gap-2">
-                {Array.from({ length: WORD_LENGTH }).map((_, colIndex) => {
+                {Array.from({ length: wordLength }).map((_, colIndex) => {
                   const letter = rowStr[colIndex] || "";
                   let status = "empty";
                   if (guess) status = getLetterStatus(letter, colIndex, guess);
@@ -145,7 +171,9 @@ export default function WordlePage() {
                       initial={guess ? { rotateX: 90 } : false}
                       animate={guess ? { rotateX: 0 } : { scale: letter ? 1.05 : 1 }}
                       transition={{ delay: guess ? colIndex * 0.1 : 0 }}
-                      className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center text-2xl font-bold font-serif rounded-xl border-2 transition-colors ${
+                      className={`flex items-center justify-center font-bold font-serif rounded-xl border-2 transition-colors ${
+                        wordLength > 7 ? "w-10 h-10 md:w-12 md:h-12 text-xl" : "w-14 h-14 md:w-16 md:h-16 text-2xl"
+                      } ${
                         status === "correct" ? "bg-green-500 border-green-600 text-white shadow-lg" :
                         status === "present" ? "bg-yellow-500 border-yellow-600 text-white shadow-lg" :
                         status === "absent" ? "bg-stone-500 border-stone-600 text-white" :

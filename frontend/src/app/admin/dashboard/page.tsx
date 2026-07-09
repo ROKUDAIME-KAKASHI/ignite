@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { createAnnouncement, createEvent, getChurches, createChurch } from "../actions";
 import QRCode from "react-qr-code";
 
-import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge, getAppointments, updateAppointmentStatus } from "../actions";
+import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge, getAppointments, updateAppointmentStatus, deleteUser, loginAsUser } from "../actions";
 import { getMissions } from "@/app/missions/actions";
 import { useRouter } from "next/navigation";
 
@@ -100,13 +100,17 @@ export default function AdminDashboardPage() {
     if (res.success && res.churches) setChurches(res.churches);
   };
 
+  const fetchDashboardData = async () => {
+    const res = await getAdminDashboardData();
+    if (res.success && res.stats && res.recentUsers) {
+      setStats(res.stats);
+      setRecentUsers(res.recentUsers);
+    }
+  };
+
   useEffect(() => {
     async function fetchData() {
-      const res = await getAdminDashboardData();
-      if (res.success && res.stats && res.recentUsers) {
-        setStats(res.stats);
-        setRecentUsers(res.recentUsers);
-      }
+      await fetchDashboardData();
       fetchPrayers();
       fetchEventsAndNotices();
       fetchChurches();
@@ -284,11 +288,43 @@ export default function AdminDashboardPage() {
                           <p className="text-[11px] text-muted-foreground mt-1">{user.email}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <Badge className={cn("text-[10px] border-0 mb-1", user.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400")}>
+                      <div className="text-right flex flex-col items-end gap-2">
+                        <Badge className={cn("text-[10px] border-0", user.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400")}>
                           {user.status}
                         </Badge>
                         <p className="text-[10px] text-muted-foreground block">{user.joined}</p>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={async () => {
+                              if (confirm("Log in as " + user.name + "?")) {
+                                const res = await loginAsUser(user.id);
+                                if (res.success) {
+                                  window.location.href = "/dashboard";
+                                } else {
+                                  alert(res.error);
+                                }
+                              }
+                            }}
+                            className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors"
+                          >
+                            Login As
+                          </button>
+                          <button 
+                            onClick={async () => {
+                              if (confirm("Delete " + user.name + " completely? This cannot be undone.")) {
+                                const res = await deleteUser(user.id);
+                                if (res.success) {
+                                  await fetchDashboardData();
+                                } else {
+                                  alert(res.error);
+                                }
+                              }
+                            }}
+                            className="text-[10px] bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded text-red-700 dark:text-red-400 font-bold hover:bg-red-200 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

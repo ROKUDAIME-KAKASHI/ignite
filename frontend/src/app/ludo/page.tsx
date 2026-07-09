@@ -88,6 +88,7 @@ export default function BibleLudoPage() {
     blue: [-1, -1, -1, -1]
   });
   const [winner, setWinner] = useState<Color | null>(null);
+  const [triviaResult, setTriviaResult] = useState<"correct" | "wrong" | null>(null);
 
   useEffect(() => {
     if (user && (gameMode === "setup" || gameMode === "lobby")) {
@@ -344,15 +345,21 @@ export default function BibleLudoPage() {
   };
 
   const handleTrivia = (opt: string) => {
-    if (!trivia) return;
+    if (!trivia || triviaResult) return;
     if (opt === trivia.a) {
-      // Correct! Can now roll.
-      setTrivia(null);
-      executeRoll(true);
+      setTriviaResult("correct");
+      setTimeout(() => {
+        setTriviaResult(null);
+        setTrivia(null);
+        executeRoll(true);
+      }, 1500);
     } else {
-      // Wrong. Lose turn.
-      setTrivia(null);
-      nextTurn();
+      setTriviaResult("wrong");
+      setTimeout(() => {
+        setTriviaResult(null);
+        setTrivia(null);
+        nextTurn();
+      }, 2500);
     }
   };
 
@@ -655,16 +662,29 @@ export default function BibleLudoPage() {
               </div>
 
               <div className="space-y-2">
-                {trivia.options.map(opt => (
-                  <Button 
-                    key={opt}
-                    onClick={() => handleTrivia(opt)}
-                    variant="outline"
-                    className="w-full h-11 justify-start font-semibold text-sm"
-                  >
-                    {opt}
-                  </Button>
-                ))}
+                {triviaResult ? (
+                   <div className="text-center py-4 bg-muted/50 rounded-xl border">
+                     {triviaResult === "correct" ? (
+                       <p className="text-green-500 font-bold text-xl">Correct!</p>
+                     ) : (
+                       <div>
+                         <p className="text-red-500 font-bold text-xl mb-2">Incorrect!</p>
+                         <p className="text-sm text-foreground">The correct answer is: <span className="font-bold text-green-500">{trivia.a}</span></p>
+                       </div>
+                     )}
+                   </div>
+                ) : (
+                  trivia.options.map(opt => (
+                    <Button 
+                      key={opt}
+                      onClick={() => handleTrivia(opt)}
+                      variant="outline"
+                      className="w-full h-11 justify-start font-semibold text-sm"
+                    >
+                      {opt}
+                    </Button>
+                  ))
+                )}
               </div>
             </motion.div>
           </motion.div>

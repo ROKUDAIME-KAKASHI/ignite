@@ -144,6 +144,49 @@ export async function deleteEvent(id: string) {
   return { success: true };
 }
 
+export async function deleteUser(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  
+  await prisma.$transaction([
+    prisma.userGroup.deleteMany({ where: { userId: id } }),
+    prisma.attendance.deleteMany({ where: { userId: id } }),
+    prisma.prayerRequest.deleteMany({ where: { userId: id } }),
+    prisma.userBadge.deleteMany({ where: { userId: id } }),
+    prisma.xPLog.deleteMany({ where: { userId: id } }),
+    prisma.quizAttempt.deleteMany({ where: { userId: id } }),
+    prisma.appointment.deleteMany({ where: { userId: id } }),
+    prisma.pushSubscription.deleteMany({ where: { userId: id } }),
+    prisma.mentorshipQuestion.deleteMany({ where: { userId: id } }),
+    prisma.userJourneyNode.deleteMany({ where: { userId: id } }),
+    prisma.user.delete({ where: { id } })
+  ]);
+  
+  return { success: true };
+}
+
+export async function loginAsUser(id: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) return { error: "User not found" };
+
+  const sessionData = {
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+  };
+
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const session = await encrypt(sessionData);
+
+  const cookieStore = await cookies();
+  cookieStore.set("session", session, { expires, httpOnly: true, secure: process.env.NODE_ENV === "production" });
+
+  return { success: true };
+}
+
 export async function getChurches() {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
   const churches = await prisma.church.findMany({

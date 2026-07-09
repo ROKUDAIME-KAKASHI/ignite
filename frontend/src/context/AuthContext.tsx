@@ -68,8 +68,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     await logoutAction();
     setUser(null);
-    router.push("/");
-  }, [router]);
+    window.location.replace("/");
+  }, []);
 
   const refreshUser = useCallback(async () => {
     try {
