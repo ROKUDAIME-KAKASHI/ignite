@@ -112,6 +112,7 @@ export default function ProfilePage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any, weekDays?: string[], quoteOfTheDay?: {quote: string, author: string} }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [], weekDays: defaultWeekDays, quoteOfTheDay: defaultQuote });
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [showIOSPrompt, setShowIOSPrompt] = useState(false);
   
   const [inviteCode, setInviteCode] = useState("");
   const [joiningParish, setJoiningParish] = useState(false);
@@ -149,7 +150,7 @@ export default function ProfilePage() {
     if (!installPrompt) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
       if (isIOS) {
-        alert("To install on iOS:\n1. Tap the Share icon (square with arrow) at the bottom of Safari\n2. Scroll down and tap 'Add to Home Screen'");
+        setShowIOSPrompt(true);
       } else {
         alert("App is either already installed, or your browser requires manual installation.\n\nTry opening your browser menu (usually three dots in the top right) and look for 'Install app' or 'Add to Home Screen'.");
       }
@@ -444,6 +445,57 @@ export default function ProfilePage() {
         </motion.div>
         <p className="text-center text-[10px] text-muted-foreground mt-4 tracking-[0.25em] uppercase">✝ Soli Deo Gloria ✝</p>
       </div>
+
+      {/* ── iOS Install Prompt Modal ── */}
+      <AnimatePresence>
+        {showIOSPrompt && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowIOSPrompt(false)}
+              className="fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="fixed bottom-0 left-0 right-0 z-[101] bg-background rounded-t-3xl p-6 shadow-2xl border-t border-border/50 max-w-md mx-auto"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-foreground font-serif">Install on iPhone</h3>
+                <button onClick={() => setShowIOSPrompt(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center gap-4 bg-muted/30 p-4 rounded-2xl border border-border/50">
+                  <div className="w-10 h-10 shrink-0 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">1. Tap the Share button</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">It's located at the bottom of your Safari browser.</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 bg-muted/30 p-4 rounded-2xl border border-border/50">
+                  <div className="w-10 h-10 shrink-0 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="4" ry="4"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">2. Add to Home Screen</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Scroll down the share menu and tap this option.</p>
+                  </div>
+                </div>
+              </div>
+              <Button onClick={() => setShowIOSPrompt(false)} className="w-full mt-5 h-12 rounded-xl font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20">
+                Got it
+              </Button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
