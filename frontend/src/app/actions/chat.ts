@@ -1,6 +1,6 @@
 "use server";
 
-import { GoogleGenAI } from "@google/genai";
+import { getAIClient } from "@/lib/ai";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -8,7 +8,7 @@ export async function askAbba(prompt: string, history: {role: string, content: s
   try {
     const session = await getSession();
     
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = getAIClient();
     
     const systemPrompt = `You are "Abba", a spiritual guide and theological companion for Jacobite Orthodox Christian youth. You are integrated into the "Ignite" app.
 Your goal is to answer questions about faith, theology, the Bible, and life from an Orthodox Christian perspective.

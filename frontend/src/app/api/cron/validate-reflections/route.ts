@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "dummy" });
+import { getAIClient } from "@/lib/ai";
 
 export const maxDuration = 300; // Allows cron job to run longer on Vercel
 
 export async function GET(req: Request) {
   try {
+    const ai = getAIClient();
+    
     // 1. Fetch up to 100 pending validations to avoid payload size issues
     const pending = await prisma.pendingValidation.findMany({
       where: { status: "PENDING" },
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "No pending validations." });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEYS) {
       return NextResponse.json({ error: "Missing GEMINI_API_KEY." }, { status: 500 });
     }
 
