@@ -44,6 +44,15 @@ export async function checkInToEvent(id: string, reflectionText: string, type: "
       return { error: "You must be logged in." };
     }
 
+    const words = reflectionText.trim().split(/\s+/).filter(w => w.length > 0);
+    if (words.length < 3 || reflectionText.trim().length < 10) {
+      return { error: "Please provide a more detailed reflection (at least 3 words)." };
+    }
+    const hasLongGibberish = words.some(w => w.length > 25);
+    if (hasLongGibberish) {
+      return { error: "Please write a genuine reflection." };
+    }
+
     if (type === "mission") {
       const mission = await prisma.mission.findUnique({ where: { id } });
       if (!mission) return { error: "Mission not found." };
