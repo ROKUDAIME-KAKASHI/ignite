@@ -41,6 +41,9 @@ export default function LeaderboardPage() {
       {/* ── Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-12 gradient-gold">
         <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
+        <div className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-36 sm:h-36 z-0 pointer-events-none drop-shadow-2xl">
+          <img src="/header-image.png" className="w-full h-full object-contain opacity-90" alt="Church full view" />
+        </div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl shadow-inner">🏆</div>

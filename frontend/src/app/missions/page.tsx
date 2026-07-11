@@ -66,6 +66,9 @@ export default function MissionsPage() {
       {/* ── Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-10 gradient-crimson">
         <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
+        <div className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-36 sm:h-36 z-0 pointer-events-none drop-shadow-2xl">
+          <img src="/header-image.png" className="w-full h-full object-contain opacity-90" alt="Church full view" />
+        </div>
         <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
