@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-import { getProfileStats, joinParish } from "@/app/actions/profile";
+import { getProfileStats, joinParish, saveFCMToken } from "@/app/actions/profile";
 import { getUserAwardsProgress } from "@/app/actions/gamificationAwards";
 import { requestNotificationPermission } from "@/lib/firebase";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -198,7 +198,12 @@ export default function ProfilePage() {
     try {
       const token = await requestNotificationPermission();
       if (token) {
-        alert("Push notifications enabled successfully!");
+        const res = await saveFCMToken(token);
+        if (res.success) {
+          alert("Push notifications enabled successfully!");
+        } else {
+          alert("Enabled in browser, but failed to save to server.");
+        }
       } else {
         alert("Permission denied. You may need to enable notifications in your browser settings.");
       }

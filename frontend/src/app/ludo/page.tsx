@@ -488,6 +488,8 @@ export default function BibleLudoPage() {
                 const gChannel = supabase.channel(`ludo_room_${user?.id}`);
                 gChannel.on('broadcast', { event: 'join' }, () => {
                   setLobbyPlayers(prev => [...prev, {id: 'temp', name: 'Player'}]);
+                  setActiveRoom((prev: any) => prev ? { ...prev, players: prev.players + 1 } : prev);
+                  if (lobbyChannel) lobbyChannel.track({ isHost: true, roomName: roomData.name, players: roomData.players + lobbyPlayers.length + 1 });
                 }).subscribe();
                 setGameChannel(gChannel);
               }} className="w-full h-12 rounded-xl gradient-gold text-white font-bold shadow-md halo-glow">

@@ -127,3 +127,25 @@ export async function joinParish(inviteCode: string) {
     return { success: false, error: `Error Name: ${name} | Code: ${code} | Meta: ${meta}` };
   }
 }
+
+export async function saveFCMToken(token: string) {
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not authenticated" };
+
+  try {
+    await prisma.pushSubscription.upsert({
+      where: { endpoint: token },
+      update: { userId: session.id },
+      create: {
+        userId: session.id,
+        endpoint: token,
+        p256dh: "fcm",
+        auth: "fcm"
+      }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to save FCM token:", error);
+    return { success: false, error: "Database error" };
+  }
+}

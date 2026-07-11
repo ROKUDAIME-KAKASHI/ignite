@@ -52,7 +52,21 @@ export function GlobalChat() {
   const speak = (textToSay: string) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(textToSay);
+      const cleanText = textToSay.replace(/[*_~\[\]]/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      const voices = window.speechSynthesis.getVoices();
+      
+      let preferredVoice = 
+        voices.find(v => v.name.includes('Google UK English Male')) || 
+        voices.find(v => v.name.includes('David') || v.name.includes('Male')) || 
+        voices.find(v => v.lang === 'en-GB' && v.name.includes('Male'));
+        
+      utterance.rate = 0.75; // Slower, calmer pace
+      utterance.pitch = 0.6; // Deeper, resonant, heavenly voice
+      
+      if (!preferredVoice) preferredVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+      if (preferredVoice) utterance.voice = preferredVoice;
+
       window.speechSynthesis.speak(utterance);
     }
   };

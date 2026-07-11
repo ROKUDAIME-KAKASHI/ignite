@@ -38,7 +38,6 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
-  const [voiceGender, setVoiceGender] = useState<"male" | "female">("male");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,22 +63,13 @@ export default function ChatPage() {
       const utterance = new SpeechSynthesisUtterance(cleanText);
       const voices = window.speechSynthesis.getVoices();
       
-      let preferredVoice;
-      if (voiceGender === "male") {
-        preferredVoice = 
-          voices.find(v => v.name.includes('Google UK English Male')) || 
-          voices.find(v => v.name.includes('David') || v.name.includes('Male')) || 
-          voices.find(v => v.lang === 'en-GB' && v.name.includes('Male'));
-        utterance.rate = 0.82; // Slower, calmer pace
-        utterance.pitch = 0.85; // Deeper, resonant voice
-      } else {
-        preferredVoice = 
-          voices.find(v => v.name.includes('Google UK English Female')) || 
-          voices.find(v => v.name.includes('Zira') || v.name.includes('Female')) || 
-          voices.find(v => v.lang === 'en-GB' && v.name.includes('Female'));
-        utterance.rate = 0.85; // Calm, gentle pace
-        utterance.pitch = 1.1; // Softer, ethereal voice
-      }
+      let preferredVoice = 
+        voices.find(v => v.name.includes('Google UK English Male')) || 
+        voices.find(v => v.name.includes('David') || v.name.includes('Male')) || 
+        voices.find(v => v.lang === 'en-GB' && v.name.includes('Male'));
+        
+      utterance.rate = 0.75; // Slower, calmer pace
+      utterance.pitch = 0.6; // Deeper, resonant, heavenly voice
       
       // Fallback
       if (!preferredVoice) preferredVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
@@ -151,14 +141,6 @@ export default function ChatPage() {
           </div>
         </div>
         
-        <button 
-          onClick={() => setVoiceGender(prev => prev === "male" ? "female" : "male")}
-          className="flex flex-col items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors border border-white/20 backdrop-blur-sm shadow-sm"
-          title={`Switch to ${voiceGender === "male" ? "Female" : "Male"} Voice`}
-        >
-          <span className="text-[10px] font-bold text-white uppercase tracking-wider mb-0.5 mt-0.5">Voice</span>
-          <span className="text-xs text-white leading-none pb-1">{voiceGender === "male" ? "M" : "F"}</span>
-        </button>
       </div>
 
       {/* Chat Area */}
