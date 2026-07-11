@@ -5,11 +5,19 @@ import Link from "next/link";
 
 function Cross({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 40 40" className={className} fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
-      <line x1="20" y1="4" x2="20" y2="36" />
-      <line x1="14" y1="10" x2="26" y2="10" />
-      <line x1="6" y1="16" x2="34" y2="16" />
-      <line x1="14" y1="26" x2="26" y2="30" />
+    <svg viewBox="0 0 40 40" className={className} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="20" y1="8" x2="20" y2="34" />
+      <line x1="8" y1="18" x2="32" y2="18" />
+      <circle cx="20" cy="5" r="2" />
+      <circle cx="16" cy="8" r="2" />
+      <circle cx="24" cy="8" r="2" />
+      <circle cx="5" cy="18" r="2" />
+      <circle cx="8" cy="14" r="2" />
+      <circle cx="8" cy="22" r="2" />
+      <circle cx="35" cy="18" r="2" />
+      <circle cx="32" cy="14" r="2" />
+      <circle cx="32" cy="22" r="2" />
+      <path d="M15 34h10M12 38h16" />
     </svg>
   );
 }

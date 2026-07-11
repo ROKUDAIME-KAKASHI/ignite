@@ -4,6 +4,96 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { Chess } from "chess.js";
 
+export async function getAvailableChessGames() {
+  const session = await getSession();
+  if (!session) return [];
+
+  const waitingGames = await prisma.chessGame.findMany({
+    where: {
+      status: "active",
+      blackPlayerId: null,
+      NOT: { whitePlayerId: session.id }
+    },
+    include: {
+      whitePlayer: {
+        select: { firstName: true, lastName: true }
+      }
+    },
+    orderBy: { createdAt: "asc" }
+  });
+
+  return waitingGames.map(g => ({
+    id: g.id,
+    playerName: `${g.whitePlayer.firstName} ${g.whitePlayer.lastName}`
+  }));
+}
+
+export async function getMyActiveChessGames() {
+  const session = await getSession();
+  if (!session) return [];
+
+  const activeGames = await prisma.chessGame.findMany({
+    where: {
+      status: "active",
+      OR: [
+        { whitePlayerId: session.id },
+        { blackPlayerId: session.id }
+      ]
+    },
+    include: {
+      whitePlayer: { select: { firstName: true, lastName: true } },
+      blackPlayer: { select: { firstName: true, lastName: true } }
+    },
+    orderBy: { lastMoveAt: "desc" }
+  });
+
+  return activeGames.map(g => {
+    const isWhite = g.whitePlayerId === session.id;
+    const opponent = isWhite ? g.blackPlayer : g.whitePlayer;
+    const opponentName = opponent ? `${opponent.firstName} ${opponent.lastName}` : "Waiting...";
+    const isMyTurn = (g.turn === 'w' && isWhite) || (g.turn === 'b' && !isWhite);
+    
+    return {
+      id: g.id,
+      opponentName,
+      isMyTurn,
+      color: isWhite ? "White" : "Black"
+    };
+  });
+}
+
+export async function createNewChessGame() {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const newGame = await prisma.chessGame.create({
+    data: {
+      whitePlayerId: session.id,
+      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      history: "[]",
+      turn: "w",
+      status: "active"
+    }
+  });
+
+  return { success: true, gameId: newGame.id };
+}
+
+export async function joinChessGame(gameId: string) {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const game = await prisma.chessGame.findUnique({ where: { id: gameId } });
+  if (!game || game.blackPlayerId) return { success: false, error: "Game not available" };
+
+  const updated = await prisma.chessGame.update({
+    where: { id: gameId },
+    data: { blackPlayerId: session.id }
+  });
+
+  return { success: true, gameId: updated.id };
+}
+
 export async function createOrJoinChessGame() {
   const session = await getSession();
   if (!session) return { success: false, error: "Unauthorized" };
