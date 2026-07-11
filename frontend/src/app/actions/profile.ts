@@ -100,18 +100,23 @@ export async function joinParish(inviteCode: string) {
   const session = await getSession();
   if (!session?.id) return { success: false, error: "Not authenticated" };
 
-  const church = await prisma.church.findUnique({
-    where: { inviteCode }
-  });
+  try {
+    const church = await prisma.church.findUnique({
+      where: { inviteCode }
+    });
 
-  if (!church) {
-    return { success: false, error: "Invalid invite code" };
+    if (!church) {
+      return { success: false, error: "Invalid invite code" };
+    }
+
+    await prisma.user.update({
+      where: { id: session.id },
+      data: { churchId: church.id }
+    });
+
+    return { success: true, churchName: church.name };
+  } catch (error: any) {
+    console.error("Failed to join parish:", error);
+    return { success: false, error: "An unexpected error occurred while joining." };
   }
-
-  await prisma.user.update({
-    where: { id: session.id },
-    data: { churchId: church.id }
-  });
-
-  return { success: true, churchName: church.name };
 }

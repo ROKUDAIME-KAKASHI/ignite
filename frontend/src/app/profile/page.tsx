@@ -114,6 +114,7 @@ export default function ProfilePage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any, weekDays?: string[], quoteOfTheDay?: {quote: string, author: string} }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [], weekDays: defaultWeekDays, quoteOfTheDay: defaultQuote });
   const [awards, setAwards] = useState<any[]>([]);
+  const [awardsError, setAwardsError] = useState("");
   const [loadingAwards, setLoadingAwards] = useState(true);
   const [showAllAwards, setShowAllAwards] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
@@ -127,15 +128,20 @@ export default function ProfilePage() {
     if (!inviteCode.trim()) return;
     setJoiningParish(true);
     setJoinError("");
-    const res = await joinParish(inviteCode.trim().toUpperCase());
-    if (res.success) {
-      setInviteCode("");
-      const updated = await getProfileStats();
-      if (updated) setStats(updated);
-    } else {
-      setJoinError(res.error || "Failed to join");
+    try {
+      const res = await joinParish(inviteCode.trim().toUpperCase());
+      if (res.success) {
+        setInviteCode("");
+        const updated = await getProfileStats();
+        if (updated) setStats(updated);
+      } else {
+        setJoinError(res.error || "Failed to join");
+      }
+    } catch (e: any) {
+      setJoinError(e.message || "Something went wrong.");
+    } finally {
+      setJoiningParish(false);
     }
-    setJoiningParish(false);
   };
 
   useEffect(() => {
@@ -146,8 +152,18 @@ export default function ProfilePage() {
     if (user?.id) {
       setLoadingAwards(true);
       getUserAwardsProgress(user.id)
-        .then(a => setAwards(a))
-        .catch(() => setAwards([]))
+        .then(a => {
+          if (a.error) {
+            setAwardsError(a.error);
+            setAwards([]);
+          } else {
+            setAwards(a);
+          }
+        })
+        .catch((e) => {
+          setAwardsError(e.message || "Unknown error");
+          setAwards([]);
+        })
         .finally(() => setLoadingAwards(false));
     }
 
@@ -387,7 +403,7 @@ export default function ProfilePage() {
               )})
             })() : (
               <div className="col-span-2 text-center py-8 text-muted-foreground text-sm flex flex-col items-center bg-card rounded-2xl border border-dashed">
-                 <p className="text-red-400 mb-2 text-xs">Failed to load awards.</p>
+                 <p className="text-red-400 mb-2 text-xs">Failed to load awards: {awardsError}</p>
                  <Button onClick={() => window.location.reload()} variant="outline" size="sm">Retry</Button>
               </div>
             )}

@@ -68,8 +68,8 @@ export async function getUserAwardsProgress(userId: string) {
         isMaxed: currentLevel === 8
       };
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to load user gamification awards:", error);
-    return [];
+    return { error: error.message || "Database error" } as any;
   }
 }
