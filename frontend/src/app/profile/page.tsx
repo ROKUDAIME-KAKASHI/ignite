@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { getProfileStats, joinParish } from "@/app/actions/profile";
+import { getUserAwardsProgress } from "@/app/actions/gamificationAwards";
 import { requestNotificationPermission } from "@/lib/firebase";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLiturgicalSeason } from "@/lib/liturgy";
@@ -112,6 +113,7 @@ export default function ProfilePage() {
   const { user, updateDisplayName, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any, weekDays?: string[], quoteOfTheDay?: {quote: string, author: string} }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [], weekDays: defaultWeekDays, quoteOfTheDay: defaultQuote });
+  const [awards, setAwards] = useState<any[]>([]);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
   
@@ -138,6 +140,10 @@ export default function ProfilePage() {
     getProfileStats().then(s => {
       if (s) setStats(s);
     });
+
+    if (user?.id) {
+      getUserAwardsProgress(user.id).then(a => setAwards(a));
+    }
 
     const handler = (e: any) => {
       e.preventDefault();
@@ -312,26 +318,39 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ── Spiritual Badges ── */}
+      {/* ── 10-Tier Gamification Showcase ── */}
       <div className="px-4 mb-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-foreground font-serif flex items-center gap-2">🏅 Spiritual Achievements</h3>
-          <button className="text-xs text-primary font-semibold flex items-center gap-1">
-            View All <ChevronRight className="w-3 h-3" />
-          </button>
+          <h3 className="font-bold text-foreground font-serif flex items-center gap-2">🏅 Medals Showcase</h3>
+          <span className="text-xs text-muted-foreground font-bold">{awards.filter(a => a.currentLevel > 0).length}/10 Earned</span>
         </div>
-        <div className="grid grid-cols-2 gap-2 mt-4">
-            {stats.badgeList.length > 0 ? stats.badgeList.map((b) => (
-              <div key={b.label} className={cn("p-3 rounded-xl border flex items-center gap-3", b.color)}>
-                <span className="text-2xl drop-shadow-sm">{b.emoji}</span>
-                <div>
-                  <p className="text-[11px] font-bold text-foreground font-serif leading-tight">{b.label}</p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">{b.desc}</p>
+        <div className="grid grid-cols-2 gap-3 mt-4">
+            {awards.length > 0 ? awards.map((award) => {
+              const earned = award.currentLevel > 0;
+              return (
+              <div key={award.id} className={cn("p-3 rounded-2xl border flex flex-col items-center text-center shadow-sm relative overflow-hidden transition-all", earned ? "bg-gradient-to-b from-white to-amber-50/30 dark:from-gray-800 dark:to-amber-900/10 border-amber-200/60 dark:border-amber-800/50 card-holy" : "bg-muted/50 border-border/40 grayscale opacity-60")}>
+                {earned && award.isMaxed && <div className="absolute top-0 right-0 p-1 px-2 bg-amber-500 text-white text-[7px] font-bold rounded-bl-xl">MAX</div>}
+                
+                <div className="relative mb-2 mt-2">
+                  <span className="text-3xl drop-shadow-md">{award.icon}</span>
+                  <div className="absolute -bottom-2 -right-2 w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-[10px] font-extrabold shadow-sm border border-white dark:border-gray-800">
+                    {award.currentLevel}
+                  </div>
+                </div>
+
+                <p className="text-[11px] font-extrabold text-foreground font-serif leading-tight mt-2">{award.title}</p>
+                
+                <div className="w-full mt-3">
+                  <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+                    <span>{award.isMaxed ? 'MAX LVL' : `LVL ${award.currentLevel}`}</span>
+                    <span>{award.isMaxed ? 'COMPLETED' : `${award.currentValue} / ${award.nextTierValue}`}</span>
+                  </div>
+                  <Progress value={award.isMaxed ? 100 : (award.currentValue / award.nextTierValue) * 100} className="h-1.5 [&>div]:bg-amber-500" />
                 </div>
               </div>
-            )) : (
-              <div className="col-span-2 text-center text-muted-foreground text-sm py-4">
-                No badges earned yet. Start a journey!
+            )}) : (
+              <div className="col-span-2 text-center py-8 text-muted-foreground text-sm flex flex-col items-center bg-card rounded-2xl border border-dashed">
+                 <Loader2 className="w-5 h-5 animate-spin mb-2" /> Loading awards...
               </div>
             )}
           </div>
