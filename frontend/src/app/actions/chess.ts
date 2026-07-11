@@ -14,17 +14,20 @@ export async function getAvailableChessGames() {
       blackPlayerId: null,
       NOT: { whitePlayerId: session.id }
     },
-    include: {
-      whitePlayer: {
-        select: { firstName: true, lastName: true }
-      }
-    },
     orderBy: { createdAt: "asc" }
   });
 
+  // Fetch white player names
+  const userIds = waitingGames.map(g => g.whitePlayerId).filter(Boolean) as string[];
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, firstName: true, lastName: true }
+  });
+  const userMap = Object.fromEntries(users.map(u => [u.id, `${u.firstName} ${u.lastName}`]));
+
   return waitingGames.map(g => ({
     id: g.id,
-    playerName: `${g.whitePlayer.firstName} ${g.whitePlayer.lastName}`
+    playerName: g.whitePlayerId ? userMap[g.whitePlayerId] || "Unknown" : "Unknown"
   }));
 }
 
@@ -40,17 +43,20 @@ export async function getMyActiveChessGames() {
         { blackPlayerId: session.id }
       ]
     },
-    include: {
-      whitePlayer: { select: { firstName: true, lastName: true } },
-      blackPlayer: { select: { firstName: true, lastName: true } }
-    },
     orderBy: { lastMoveAt: "desc" }
   });
 
+  const allUserIds = Array.from(new Set(activeGames.flatMap(g => [g.whitePlayerId, g.blackPlayerId]).filter(Boolean))) as string[];
+  const users = await prisma.user.findMany({
+    where: { id: { in: allUserIds } },
+    select: { id: true, firstName: true, lastName: true }
+  });
+  const userMap = Object.fromEntries(users.map(u => [u.id, `${u.firstName} ${u.lastName}`]));
+
   return activeGames.map(g => {
     const isWhite = g.whitePlayerId === session.id;
-    const opponent = isWhite ? g.blackPlayer : g.whitePlayer;
-    const opponentName = opponent ? `${opponent.firstName} ${opponent.lastName}` : "Waiting...";
+    const opponentId = isWhite ? g.blackPlayerId : g.whitePlayerId;
+    const opponentName = opponentId ? userMap[opponentId] || "Unknown" : "Waiting...";
     const isMyTurn = (g.turn === 'w' && isWhite) || (g.turn === 'b' && !isWhite);
     
     return {
