@@ -140,9 +140,7 @@ export default async function DashboardPage() {
 
       {/* ── Hero ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-12 gradient-dawn">
-        <svg viewBox="0 0 200 200" className="absolute right-0 top-0 w-56 h-56 opacity-10 text-white" fill="none" stroke="currentColor" strokeWidth="6">
-          <line x1="100" y1="10" x2="100" y2="190" /><line x1="20" y1="70" x2="180" y2="70" />
-        </svg>
+        <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
         <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-yellow-300/20 blur-3xl" />
         <div className="relative z-10">
           <p className="text-amber-200/80 text-xs font-bold uppercase tracking-[0.2em] mb-1">{greeting} · Hour of Prayer</p>

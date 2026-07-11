@@ -65,9 +65,7 @@ export default function MissionsPage() {
 
       {/* ── Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-10 gradient-crimson">
-        <svg viewBox="0 0 200 200" className="absolute right-0 top-0 w-48 h-48 opacity-10 text-white" fill="none" stroke="currentColor" strokeWidth="6">
-          <line x1="100" y1="10" x2="100" y2="190" /><line x1="20" y1="70" x2="180" y2="70" />
-        </svg>
+        <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
         <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">

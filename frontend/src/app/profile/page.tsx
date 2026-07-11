@@ -202,9 +202,7 @@ export default function ProfilePage() {
       {/* ── Hero Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-20 gradient-dawn">
         {/* Cross watermark */}
-        <svg viewBox="0 0 200 200" className="absolute right-0 top-0 w-48 h-48 opacity-10 text-white" fill="none" stroke="currentColor" strokeWidth="6">
-          <line x1="100" y1="10" x2="100" y2="190" /><line x1="20" y1="70" x2="180" y2="70" />
-        </svg>
+        <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
         {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-background to-transparent" />
 

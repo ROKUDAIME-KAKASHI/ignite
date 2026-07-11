@@ -51,22 +51,14 @@ export function MobileHeader() {
   };
 
   return (
-    <div 
-      className="md:hidden sticky top-0 left-0 right-0 z-40 h-16 flex items-center px-4 shrink-0 shadow-sm border-b border-amber-900/30"
-      style={{
-        backgroundImage: `linear-gradient(to right, rgba(15, 18, 41, 0.85), rgba(15, 18, 41, 0.6)), url('/header-image.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        color: 'white'
-      }}
-    >
+    <div className="md:hidden sticky top-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#0f1229]/90 backdrop-blur-md border-b border-border/50 h-14 flex items-center px-4 shrink-0">
       {!isHome ? (
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors"
+          className="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
           aria-label="Go back"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
       ) : (
         <div className="w-8 h-8 rounded-lg bg-amber-700 flex items-center justify-center shadow-md mr-3">
@@ -87,7 +79,7 @@ export function MobileHeader() {
         </div>
       )}
       
-      <h1 className="text-lg font-bold font-serif text-white ml-2 drop-shadow-md">
+      <h1 className="text-lg font-bold font-serif text-foreground ml-1">
         {getTitle()}
       </h1>
     </div>
