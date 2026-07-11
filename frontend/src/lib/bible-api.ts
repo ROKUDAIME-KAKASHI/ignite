@@ -27,6 +27,14 @@ export async function fetchChapter(
   chapter: number,
   translation: Translation = "nrsvue"
 ): Promise<BibleChapterResponse> {
+  // Use our internal proxy scraper for NRSVUE because it's not freely available in public APIs
+  if (translation === "nrsvue") {
+    const url = `/api/bible?book=${encodeURIComponent(apiName)}&chapter=${chapter}&version=NRSVUE`;
+    const res = await fetch(url, { next: { revalidate: 86400 } });
+    if (!res.ok) throw new Error(`Failed to fetch ${apiName} ${chapter} (NRSVUE)`);
+    return res.json();
+  }
+
   const ref = `${apiName}+${chapter}`;
   const url = `${BASE_URL}/${ref}?translation=${translation}`;
   const res = await fetch(url, { next: { revalidate: 86400 } }); // cache 24h
@@ -44,6 +52,16 @@ export async function fetchVerse(
   verse: number,
   translation: Translation = "nrsvue"
 ): Promise<BibleChapterResponse> {
+  if (translation === "nrsvue") {
+    // For a single verse, we fetch the chapter and filter (because scraping a single verse works similarly)
+    const chapData = await fetchChapter(apiName, chapter, translation);
+    return {
+      ...chapData,
+      reference: `${apiName} ${chapter}:${verse}`,
+      verses: chapData.verses.filter((v: any) => v.verse === verse)
+    };
+  }
+
   const ref = `${apiName}+${chapter}:${verse}`;
   const url = `${BASE_URL}/${ref}?translation=${translation}`;
   const res = await fetch(url, { next: { revalidate: 86400 } });
