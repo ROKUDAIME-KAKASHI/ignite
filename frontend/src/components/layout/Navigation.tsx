@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLiturgicalSeason } from "@/lib/liturgy";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";

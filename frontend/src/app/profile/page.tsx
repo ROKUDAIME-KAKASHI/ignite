@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { getProfileStats, joinParish } from "@/app/actions/profile";
 import { requestNotificationPermission } from "@/lib/firebase";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { getLiturgicalSeason } from "@/lib/liturgy";
 
 /* ─── Static data ──────────────────────────────────────────────────────────── */
 

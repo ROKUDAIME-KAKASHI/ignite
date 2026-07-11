@@ -82,7 +82,7 @@ export default function ChessGamePage() {
 
       <div className="w-full max-w-md aspect-square rounded-lg shadow-2xl overflow-hidden ring-4 ring-border/50">
         <Chessboard 
-          position={game.fen} 
+          {...{ position: game.fen } as any}
           onPieceDrop={onDrop}
           boardOrientation={game.myColor === 'b' ? 'black' : 'white'}
           arePiecesDraggable={game.status === 'active' && game.isMyTurn}

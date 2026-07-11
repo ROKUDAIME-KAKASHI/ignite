@@ -57,7 +57,9 @@ export default function ChatPage() {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel(); // Stop any current speech
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voiceURI = 'Google UK English Male'; // Just a preferred voice, fallback to default if not found
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(v => v.voiceURI === 'Google UK English Male' || v.name === 'Google UK English Male') || voices.find(v => v.lang === 'en-GB') || voices[0];
+      if (preferredVoice) utterance.voice = preferredVoice;
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
