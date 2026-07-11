@@ -19,7 +19,8 @@ const protectedRoutes = [
   "/scan",
   "/mentorship",
   "/lions-den",
-  "/noahs-ark"
+  "/noahs-ark",
+  "/chess"
 ];
 
 export function middleware(request: NextRequest) {

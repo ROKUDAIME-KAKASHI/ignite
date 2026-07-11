@@ -230,7 +230,7 @@ export default function ProfilePage() {
               🛡️ Disciple · Level {level}
             </Badge>
             <Badge className="bg-white/20 text-white border border-white/30 backdrop-blur-sm text-xs font-bold px-3 py-1">
-              🕊️ Ordinary Time
+              🕊️ {getLiturgicalSeason()}
             </Badge>
           </div>
         </div>

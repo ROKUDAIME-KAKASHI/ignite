@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Send, User as UserIcon, Loader2, BookOpen, MessageSquare, X } from "lucide-react";
+import { Sparkles, Send, User as UserIcon, Loader2, BookOpen, MessageSquare, X, Volume2, VolumeX } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -44,9 +44,18 @@ export function GlobalChat() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const scrollRef = useRef<HTMLDivElement>(null);
   const constraintsRef = useRef<HTMLDivElement>(null);
+
+  const speak = (textToSay: string) => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(textToSay);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   useEffect(() => {
     getPublicChatSuggestions().then(res => {
@@ -66,6 +75,13 @@ export function GlobalChat() {
       setTimeout(() => setIsOpen(false), 0);
     }
   }, [isHidden]);
+
+  // Stop speaking when chat is closed
+  useEffect(() => {
+    if (!isOpen && typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  }, [isOpen]);
 
   if (isHidden) return null;
 
@@ -96,6 +112,10 @@ export function GlobalChat() {
     
     setMessages(prev => [...prev, aiResponse]);
     setIsTyping(false);
+
+    if (isVoiceEnabled && response.success && response.text) {
+      speak(response.text);
+    }
   };
 
   return (
@@ -144,14 +164,30 @@ export function GlobalChat() {
                   <p className="text-orange-100 text-[10px] font-bold uppercase tracking-wider">Spiritual Guide</p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
-              >
-                <X className="w-5 h-5" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setIsVoiceEnabled(!isVoiceEnabled);
+                    if (isVoiceEnabled && typeof window !== "undefined" && "speechSynthesis" in window) {
+                      window.speechSynthesis.cancel();
+                    }
+                  }}
+                  className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
+                  title={isVoiceEnabled ? "Mute Voice" : "Enable Voice"}
+                >
+                  {isVoiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(false)}
+                  className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
 
             {/* Chat Area */}

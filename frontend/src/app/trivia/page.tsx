@@ -70,7 +70,7 @@ export default function LiveTriviaPage() {
           if (currentQuestionIndex >= 4) {
              gameChannel?.send({ type: 'broadcast', event: 'end_game' });
           } else {
-             gameChannel?.send({ type: 'broadcast', event: 'next_question', payload: { index: currentQuestionIndex + 1 } });
+             gameChannel?.send({ type: 'broadcast', event: 'next_question', payload: { index: Math.floor(Math.random() * TRIVIA_QUESTIONS.length) } });
           }
         }
       }, 1000);
@@ -113,10 +113,10 @@ export default function LiveTriviaPage() {
     const gChannel = supabase.channel(`trivia_room_${room.id}`);
     gChannel.on('broadcast', { event: 'sync_players' }, ({ payload }: any) => {
       setPlayers(payload.players);
-    }).on('broadcast', { event: 'start_game' }, () => {
+    }).on('broadcast', { event: 'start_game' }, ({ payload }: any) => {
       setMode("playing");
       setQuestionStartTime(Date.now());
-      setCurrentQuestionIndex(0);
+      setCurrentQuestionIndex(payload?.index || 0);
       setHasAnswered(false);
     }).on('broadcast', { event: 'next_question' }, ({ payload }: any) => {
       setCurrentQuestionIndex(payload.index);
@@ -140,10 +140,11 @@ export default function LiveTriviaPage() {
 
   const startGame = () => {
     if (!gameChannel) return;
-    gameChannel.send({ type: 'broadcast', event: 'start_game' });
+    const startIndex = Math.floor(Math.random() * TRIVIA_QUESTIONS.length);
+    gameChannel.send({ type: 'broadcast', event: 'start_game', payload: { index: startIndex } });
     setMode("playing");
     setQuestionStartTime(Date.now());
-    setCurrentQuestionIndex(0);
+    setCurrentQuestionIndex(startIndex);
     setHasAnswered(false);
   };
 

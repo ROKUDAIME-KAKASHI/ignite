@@ -1,50 +1,59 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { requestNotificationPermission, onMessageListener } from "@/lib/firebase";
+
+function urlB64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, "+")
+    .replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 
 export function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
-  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
       const dismissed = localStorage.getItem("push-notifications-dismissed");
       if (dismissed === "true") {
         setTimeout(() => setPermission("denied"), 0);
-      } else if ("Notification" in window) {
+      } else {
         setTimeout(() => setIsSupported(true), 0);
         setTimeout(() => setPermission(Notification.permission), 0);
       }
     }
-    
-    // Listen for incoming messages while app is in foreground
-    const setupListener = async () => {
-      try {
-        const payload: any = await onMessageListener();
-        if (payload?.notification) {
-          // You could replace this with a toast notification
-          console.log("Foreground push notification received:", payload);
-        }
-      } catch (err) {
-        console.error("Failed to listen for messages:", err);
-      }
-    };
-    
-    setupListener();
   }, []);
 
   const handleEnableNotifications = async () => {
-    const fcmToken = await requestNotificationPermission();
-    if (fcmToken) {
-      setToken(fcmToken);
-      setPermission("granted");
-      // Here you would typically send the token to your backend API
-      // await fetch('/api/user/push-token', { method: 'POST', body: JSON.stringify({ token: fcmToken }) });
-    } else {
-      localStorage.setItem("push-notifications-dismissed", "true");
-      setPermission("denied");
+    try {
+      const permissionResult = await Notification.requestPermission();
+      if (permissionResult === "granted") {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlB64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDyepqRQ58A1Qggk37R4tM_L407V2Q2r21Xb_kR33-Rk")
+        });
+
+        await fetch('/api/notifications/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subscription })
+        });
+        
+        setPermission("granted");
+      } else {
+        localStorage.setItem("push-notifications-dismissed", "true");
+        setPermission("denied");
+      }
+    } catch (err) {
+      console.error("Failed to subscribe:", err);
     }
   };
 
@@ -68,7 +77,7 @@ export function PushNotificationManager() {
             Not Now
           </button>
           <button 
-            className="text-xs px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+            className="text-xs px-3 py-1.5 rounded-md bg-amber-700 text-white hover:bg-amber-800"
             onClick={handleEnableNotifications}
           >
             Enable

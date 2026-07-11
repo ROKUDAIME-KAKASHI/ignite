@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Send, User as UserIcon, Loader2, BookOpen } from "lucide-react";
+import { Sparkles, Send, User as UserIcon, Loader2, BookOpen, Volume2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -52,6 +52,16 @@ export default function ChatPage() {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isTyping]);
+
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Stop any current speech
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voiceURI = 'Google UK English Male'; // Just a preferred voice, fallback to default if not found
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   const generateAIResponse = (userText: string): string => {
     const text = userText.toLowerCase();
@@ -146,12 +156,23 @@ export default function ChatPage() {
                       : "gradient-gold text-white shadow-md rounded-tr-sm"
                   )}>
                     <p className={cn(isAi && "font-serif text-[15px]")}>{msg.content}</p>
-                    <span className={cn(
-                      "text-[9px] font-bold uppercase tracking-wider mt-2 block",
-                      isAi ? "text-muted-foreground" : "text-white/70 text-right"
-                    )}>
-                      {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className={cn(
+                        "text-[9px] font-bold uppercase tracking-wider",
+                        isAi ? "text-muted-foreground" : "text-white/70"
+                      )}>
+                        {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      {isAi && (
+                        <button 
+                          onClick={() => speakText(msg.content)}
+                          className="text-muted-foreground hover:text-primary transition-colors p-1 rounded-full hover:bg-primary/10"
+                          title="Listen to response"
+                        >
+                          <Volume2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               );

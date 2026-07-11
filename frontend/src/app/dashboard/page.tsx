@@ -101,6 +101,8 @@ async function getNextEvents() {
   }
 }
 
+import { getLiturgicalSeason } from "@/lib/liturgy";
+
 function getLiturgicalGreeting() {
   const day = new Date().toLocaleDateString("en-US", { weekday: "long" });
   const hour = new Date().getHours();
@@ -149,7 +151,7 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
               <span>✝️</span>
-              <span className="text-white text-xs font-semibold">Ordinary Time</span>
+              <span className="text-white text-xs font-semibold">{getLiturgicalSeason()}</span>
             </div>
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
               <span className="candle-flicker">🕯️</span>

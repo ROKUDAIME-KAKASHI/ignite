@@ -9,6 +9,7 @@ import { GlobalChat } from "@/components/GlobalChat";
 import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { CustomGoogleOAuthProvider } from "@/components/providers/GoogleAuthProvider";
 import { InAppBrowserDetector } from "@/components/layout/InAppBrowserDetector";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <AuthProvider>
               <Navigation />
               <MobileHeader />
+              <InstallPrompt />
               <main className="flex-1 flex flex-col w-full overflow-hidden relative pb-20 md:pb-0">
                 {children}
                 <GlobalChat />

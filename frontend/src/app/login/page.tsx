@@ -16,7 +16,9 @@ function Cross({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" className={className} fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
       <line x1="20" y1="4" x2="20" y2="36" />
-      <line x1="6" y1="14" x2="34" y2="14" />
+      <line x1="14" y1="10" x2="26" y2="10" />
+      <line x1="6" y1="16" x2="34" y2="16" />
+      <line x1="14" y1="26" x2="26" y2="30" />
     </svg>
   );
 }

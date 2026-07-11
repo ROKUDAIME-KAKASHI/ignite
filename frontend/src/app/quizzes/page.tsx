@@ -351,6 +351,22 @@ export default function QuizzesPage() {
 
                   <div className="bg-card rounded-2xl border border-border/60 card-holy card-holy-hover overflow-hidden mb-4">
                     <div className="p-5 flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl gradient-dawn flex items-center justify-center text-3xl shadow-lg shrink-0">♟️</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                          <h3 className="font-bold text-foreground font-serif text-base">Classic Chess</h3>
+                          <Badge className="text-[10px] border-0 px-2 gradient-dawn text-white">Multiplayer</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">Play classic chess against other users. Games are saved automatically for turn-based play!</p>
+                        <Link href="/chess" className="inline-flex items-center justify-center w-full h-9 rounded-xl font-bold text-sm text-white gradient-dawn shadow-md hover:opacity-90">
+                          Play Chess <ChevronRight className="w-4 h-4 ml-1" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-card rounded-2xl border border-border/60 card-holy card-holy-hover overflow-hidden mb-4">
+                    <div className="p-5 flex items-start gap-4">
                       <div className="w-14 h-14 rounded-2xl gradient-royal flex items-center justify-center text-3xl shadow-lg shrink-0">🧩</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 flex-wrap mb-1">

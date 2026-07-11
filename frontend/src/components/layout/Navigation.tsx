@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { getLiturgicalSeason } from "@/lib/liturgy";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 
@@ -55,7 +56,9 @@ function CrossIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" className={className} fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
       <line x1="20" y1="4" x2="20" y2="36" />
-      <line x1="6" y1="14" x2="34" y2="14" />
+      <line x1="14" y1="10" x2="26" y2="10" />
+      <line x1="6" y1="16" x2="34" y2="16" />
+      <line x1="14" y1="26" x2="26" y2="30" />
     </svg>
   );
 }
@@ -68,7 +71,7 @@ export function Navigation() {
   if (
     PUBLIC_ROUTES.some((r) => pathname === r) ||
     pathname.startsWith("/admin") ||
-    (!loading && !user)
+    !user
   )
     return null;
 
@@ -110,14 +113,17 @@ export function Navigation() {
       <nav className="hidden md:flex flex-col w-72 h-screen sticky top-0 p-5 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0f1229] shrink-0">
         {/* Brand */}
         <div className="mb-8 px-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-700 flex items-center justify-center shadow-md">
-              <CrossIcon className="w-5 h-5 text-white" />
+          <div className="flex flex-col gap-3 w-full">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-700 flex items-center justify-center shadow-md">
+                <CrossIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none font-serif">Ignite</h1>
+                <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-widest mt-0.5">Youth Ministry</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none font-serif">Ignite</h1>
-              <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-widest mt-0.5">Youth Ministry</p>
-            </div>
+            <img src="/header-image.png" alt="Header Image" className="w-full h-auto rounded-xl object-cover shadow-sm border border-gray-100 dark:border-gray-800" />
           </div>
           <ThemeToggle />
         </div>
@@ -125,7 +131,7 @@ export function Navigation() {
         {/* Liturgical season */}
         <div className="mx-3 mb-6 rounded-xl px-3 py-2 bg-purple-50 dark:bg-purple-900/20">
           <p className="text-[10px] text-purple-700 dark:text-purple-400 font-bold uppercase tracking-widest">Liturgical Season</p>
-          <p className="text-sm font-bold text-purple-900 dark:text-purple-100 mt-0.5">Ordinary Time</p>
+          <p className="text-sm font-bold text-purple-900 dark:text-purple-100 mt-0.5">{getLiturgicalSeason()}</p>
         </div>
 
         {/* Nav links */}

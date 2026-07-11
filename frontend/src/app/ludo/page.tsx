@@ -120,8 +120,11 @@ export default function BibleLudoPage() {
     if (dice !== null && !trivia && !isRolling && !winner) {
       const hasMoves = tokens[turn].some((t, idx) => canMove(turn, idx, dice));
       
-      const isBotTurn = gameMode !== "local" && gameMode !== "live" &&
-        ((gameMode === "solo" && turn !== "red") || (gameMode === "team" && turn !== "red"));
+      const isBotTurn = gameMode !== "local" && (
+        (gameMode === "solo" && turn !== "red") || 
+        (gameMode === "team" && turn !== "red") ||
+        (gameMode === "live" && activeRoom && activeRoom.host && COLORS.indexOf(turn) >= activeRoom.players)
+      );
 
       if (!hasMoves) {
         setTimeout(() => nextTurn(), 1000);
@@ -138,8 +141,11 @@ export default function BibleLudoPage() {
       }
     } else if (dice === null && !winner) {
       // If it's a bot's turn to roll, do it automatically
-      const isBotTurn = gameMode !== "local" && gameMode !== "live" &&
-        ((gameMode === "solo" && turn !== "red") || (gameMode === "team" && turn !== "red"));
+      const isBotTurn = gameMode !== "local" && (
+        (gameMode === "solo" && turn !== "red") || 
+        (gameMode === "team" && turn !== "red") ||
+        (gameMode === "live" && activeRoom && activeRoom.host && COLORS.indexOf(turn) >= activeRoom.players)
+      );
         
       if (isBotTurn) {
         setTimeout(() => executeRoll(false), 800);

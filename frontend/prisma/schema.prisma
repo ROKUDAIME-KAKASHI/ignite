@@ -375,3 +375,16 @@ model PendingValidation {
   status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt   DateTime @default(now())
 }
+
+model ChessGame {
+  id            String   @id @default(uuid())
+  whitePlayerId String?
+  blackPlayerId String?
+  fen           String   @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+  turn          String   @default("w")
+  status        String   @default("active") // "active", "draw", "white_won", "black_won"
+  history       String   @default("[]") // JSON string of moves
+  lastMoveAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

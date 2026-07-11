@@ -1,4 +1,4 @@
-export type Translation = "kjv" | "web" | "asv" | "bbe";
+export type Translation = "kjv" | "web" | "asv" | "bbe" | "nrsvue";
 
 export interface BibleVerse {
   book_id: string;
@@ -25,7 +25,7 @@ const BASE_URL = "https://bible-api.com";
 export async function fetchChapter(
   apiName: string,
   chapter: number,
-  translation: Translation = "kjv"
+  translation: Translation = "nrsvue"
 ): Promise<BibleChapterResponse> {
   const ref = `${apiName}+${chapter}`;
   const url = `${BASE_URL}/${ref}?translation=${translation}`;
@@ -42,7 +42,7 @@ export async function fetchVerse(
   apiName: string,
   chapter: number,
   verse: number,
-  translation: Translation = "kjv"
+  translation: Translation = "nrsvue"
 ): Promise<BibleChapterResponse> {
   const ref = `${apiName}+${chapter}:${verse}`;
   const url = `${BASE_URL}/${ref}?translation=${translation}`;
@@ -52,6 +52,7 @@ export async function fetchVerse(
 }
 
 export const TRANSLATIONS: { id: Translation; name: string; full: string }[] = [
+  { id: "nrsvue", name: "NRSVUE", full: "New Revised Standard Version Updated Edition" },
   { id: "kjv", name: "KJV",  full: "King James Version" },
   { id: "web", name: "WEB",  full: "World English Bible" },
   { id: "asv", name: "ASV",  full: "American Standard Version" },
