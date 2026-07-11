@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchChapter, TRANSLATIONS, type Translation, type BibleVerse } from "@/lib/bible-api";
 import { getBookBySlug, getAdjacentBook } from "@/lib/bible-books";
-import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Clock as ClockIcon } from "lucide-react";
+import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Clock as ClockIcon, Volume2, VolumeX } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -65,6 +65,7 @@ export default function BibleReaderPage() {
   const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
   const [markingRead, setMarkingRead] = useState(false);
   const [markedRead, setMarkedRead] = useState(false);
+  const [isReading, setIsReading] = useState(false);
   
   // Timer state
   const [timeLeft, setTimeLeft] = useState(60);
@@ -185,6 +186,49 @@ export default function BibleReaderPage() {
     setMarkingRead(false);
   };
 
+  const toggleReading = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    
+    if (isReading) {
+      window.speechSynthesis.cancel();
+      setIsReading(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel(); // Cancel any existing speech
+    
+    const fullText = verses.map(v => v.text).join(" ");
+    const cleanText = fullText.replace(/[*_~\[\]]/g, ''); // Strip weird characters
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    
+    const voices = window.speechSynthesis.getVoices();
+    let preferredVoice = 
+      voices.find(v => v.name.includes('Google UK English Male')) || 
+      voices.find(v => v.name.includes('David') || v.name.includes('Male')) || 
+      voices.find(v => v.lang === 'en-GB' && v.name.includes('Male'));
+      
+    utterance.rate = 0.95; // Natural calm pace
+    utterance.pitch = 0.85; // Deep voice
+    
+    if (!preferredVoice) preferredVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+    if (preferredVoice) utterance.voice = preferredVoice;
+
+    utterance.onend = () => setIsReading(false);
+    utterance.onerror = () => setIsReading(false);
+
+    setIsReading(true);
+    window.speechSynthesis.speak(utterance);
+  };
+  
+  // Stop speaking when leaving page
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   const fontSizeClass = {
     sm: "text-sm leading-7",
     base: "text-[15px] leading-8",
@@ -208,6 +252,18 @@ export default function BibleReaderPage() {
             <p className="font-bold text-foreground font-serif text-base leading-tight">{book.name}</p>
             <p className="text-[10px] text-primary font-bold uppercase tracking-widest">Chapter {chapter} of {book.chapters}</p>
           </div>
+
+          {/* Audio Reading */}
+          <button
+            onClick={toggleReading}
+            className={cn(
+              "w-9 h-9 flex items-center justify-center rounded-xl transition-colors",
+              isReading ? "bg-primary/20 text-primary" : "hover:bg-muted text-muted-foreground"
+            )}
+            title={isReading ? "Stop Reading" : "Read Aloud"}
+          >
+            {isReading ? <VolumeX className="w-5 h-5 animate-pulse" /> : <Volume2 className="w-5 h-5" />}
+          </button>
 
           {/* Translation */}
           <div className="relative">

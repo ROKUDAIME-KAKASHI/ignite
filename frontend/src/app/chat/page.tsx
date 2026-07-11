@@ -68,8 +68,8 @@ export default function ChatPage() {
         voices.find(v => v.name.includes('David') || v.name.includes('Male')) || 
         voices.find(v => v.lang === 'en-GB' && v.name.includes('Male'));
         
-      utterance.rate = 0.75; // Slower, calmer pace
-      utterance.pitch = 0.6; // Deeper, resonant, heavenly voice
+      utterance.rate = 0.95; // Natural calm pace
+      utterance.pitch = 0.85; // Natural deep voice
       
       // Fallback
       if (!preferredVoice) preferredVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
