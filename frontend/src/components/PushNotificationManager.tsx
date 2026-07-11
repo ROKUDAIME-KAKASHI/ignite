@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 function urlB64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -18,6 +19,7 @@ function urlB64ToUint8Array(base64String: string) {
 export function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
+  const { user } = useAuth();
 
   useEffect(() => {
     if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
@@ -30,6 +32,28 @@ export function PushNotificationManager() {
       }
     }
   }, []);
+
+  // Silently re-subscribe if permission is already granted and a user is logged in
+  useEffect(() => {
+    if (permission === "granted" && user) {
+      (async () => {
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlB64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDyepqRQ58A1Qggk37R4tM_L407V2Q2r21Xb_kR33-Rk")
+          });
+          await fetch('/api/notifications/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription })
+          });
+        } catch (e) {
+          console.error("Silent resubscribe failed:", e);
+        }
+      })();
+    }
+  }, [permission, user]);
 
   const handleEnableNotifications = async () => {
     try {
