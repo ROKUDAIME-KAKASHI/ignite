@@ -1,7 +1,7 @@
 "use server";
 import prisma from "@/lib/prisma";
 
-export const AWARDS_CONFIG = [
+const AWARDS_CONFIG = [
   { id: "faithful_steward", title: "Faithful Steward", icon: "⛪", maxLevel: 8, tiers: [1, 4, 10, 20, 30, 40, 50, 52] },
   { id: "scripture_scholar", title: "Scripture Scholar", icon: "📖", maxLevel: 8, tiers: [1, 10, 50, 100, 250, 500, 800, 1189] },
   { id: "prayer_warrior", title: "Prayer Warrior", icon: "🙏", maxLevel: 8, tiers: [1, 5, 20, 50, 100, 200, 365, 500] },

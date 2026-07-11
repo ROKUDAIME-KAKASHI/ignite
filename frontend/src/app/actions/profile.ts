@@ -2,6 +2,10 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
+export async function debugEnv() {
+  return process.env.DATABASE_URL?.substring(0, 45) || "Missing DB URL";
+}
+
 export async function getProfileStats() {
   const session = await getSession();
   if (!session?.id) return { chapters: 0, badges: 0, streakDone: [false, false, false, false, false, false, false], badgeList: [], weekDays: ["S", "M", "T", "W", "T", "F", "S"], quoteOfTheDay: { quote: "Do small things with great love.", author: "St. Teresa of Calcutta" } };
