@@ -152,7 +152,7 @@ export default function ProfilePage() {
     };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+  }, [user?.id]);
 
   const handleInstallClick = () => {
     if (!installPrompt) {

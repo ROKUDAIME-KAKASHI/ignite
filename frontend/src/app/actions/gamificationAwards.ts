@@ -17,66 +17,71 @@ export const AWARDS_CONFIG = [
 export async function getUserAwardsProgress(userId: string) {
   if (!userId) return [];
 
-  // Fetch all necessary stats in parallel
-  const [
-    user,
-    attendances,
-    scriptureLogs,
-    prayerLogs,
-    missionLogs,
-    quizzes,
-    gameLogs,
-    journeyLogs,
-    chatLogs
-  ] = await Promise.all([
-    prisma.user.findUnique({ where: { id: userId }, select: { xp: true, streak: true } }),
-    prisma.attendance.count({ where: { userId } }),
-    prisma.xPLog.findMany({ where: { userId, reason: { startsWith: "Read Scripture:" } }, select: { reason: true } }),
-    prisma.xPLog.count({ where: { userId, reason: { contains: "prayer", mode: "insensitive" } } }),
-    prisma.xPLog.count({ where: { userId, reason: { contains: "mission", mode: "insensitive" } } }),
-    prisma.quizAttempt.count({ where: { userId } }),
-    prisma.xPLog.count({ where: { userId, reason: { contains: "game", mode: "insensitive" } } }),
-    prisma.userJourneyNode.count({ where: { userId, completedAt: { not: null } } }),
-    prisma.xPLog.count({ where: { userId, reason: { contains: "chat", mode: "insensitive" } } }) // fallback proxy for chat messages
-  ]);
+  try {
+    // Fetch all necessary stats in parallel
+    const [
+      user,
+      attendances,
+      scriptureLogs,
+      prayerLogs,
+      missionLogs,
+      quizzes,
+      gameLogs,
+      journeyLogs,
+      chatLogs
+    ] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId }, select: { xp: true, streak: true } }),
+      prisma.attendance.count({ where: { userId } }),
+      prisma.xPLog.findMany({ where: { userId, reason: { startsWith: "Read Scripture:" } }, select: { reason: true } }),
+      prisma.xPLog.count({ where: { userId, reason: { contains: "prayer", mode: "insensitive" } } }),
+      prisma.xPLog.count({ where: { userId, reason: { contains: "mission", mode: "insensitive" } } }),
+      prisma.quizAttempt.count({ where: { userId } }),
+      prisma.xPLog.count({ where: { userId, reason: { contains: "game", mode: "insensitive" } } }),
+      prisma.userJourneyNode.count({ where: { userId, completedAt: { not: null } } }),
+      prisma.xPLog.count({ where: { userId, reason: { contains: "chat", mode: "insensitive" } } }) // fallback proxy for chat messages
+    ]);
 
-  const uniqueChapters = new Set(scriptureLogs.map(l => l.reason)).size;
+    const uniqueChapters = new Set(scriptureLogs.map(l => l.reason)).size;
 
-  // Map progress values
-  const progressMap: Record<string, number> = {
-    faithful_steward: attendances,
-    scripture_scholar: uniqueChapters,
-    prayer_warrior: prayerLogs,
-    missionary_heart: missionLogs,
-    wisdom_seeker: quizzes,
-    vessel_of_grace: user?.xp || 0,
-    unbroken_devotion: user?.streak || 0,
-    digital_disciple: gameLogs,
-    voice_of_faithful: chatLogs,
-    liturgical_pilgrim: journeyLogs // Using completed journey nodes as proxy for seasonal engagement for now
-  };
-
-  // Construct award array with level info
-  return AWARDS_CONFIG.map(award => {
-    const value = progressMap[award.id] || 0;
-    let currentLevel = 0;
-    
-    for (let i = 0; i < award.tiers.length; i++) {
-      if (value >= award.tiers[i]) {
-        currentLevel = i + 1;
-      } else {
-        break;
-      }
-    }
-
-    const nextTierValue = currentLevel < 8 ? award.tiers[currentLevel] : award.tiers[7];
-
-    return {
-      ...award,
-      currentValue: value,
-      currentLevel,
-      nextTierValue,
-      isMaxed: currentLevel === 8
+    // Map progress values
+    const progressMap: Record<string, number> = {
+      faithful_steward: attendances,
+      scripture_scholar: uniqueChapters,
+      prayer_warrior: prayerLogs,
+      missionary_heart: missionLogs,
+      wisdom_seeker: quizzes,
+      vessel_of_grace: user?.xp || 0,
+      unbroken_devotion: user?.streak || 0,
+      digital_disciple: gameLogs,
+      voice_of_faithful: chatLogs,
+      liturgical_pilgrim: journeyLogs // Using completed journey nodes as proxy for seasonal engagement for now
     };
-  });
+
+    // Construct award array with level info
+    return AWARDS_CONFIG.map(award => {
+      const value = progressMap[award.id] || 0;
+      let currentLevel = 0;
+      
+      for (let i = 0; i < award.tiers.length; i++) {
+        if (value >= award.tiers[i]) {
+          currentLevel = i + 1;
+        } else {
+          break;
+        }
+      }
+
+      const nextTierValue = currentLevel < 8 ? award.tiers[currentLevel] : award.tiers[7];
+
+      return {
+        ...award,
+        currentValue: value,
+        currentLevel,
+        nextTierValue,
+        isMaxed: currentLevel === 8
+      };
+    });
+  } catch (error) {
+    console.error("Failed to load user gamification awards:", error);
+    return [];
+  }
 }
