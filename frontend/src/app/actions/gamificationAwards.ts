@@ -70,6 +70,12 @@ export async function getUserAwardsProgress(userId: string) {
     });
   } catch (error: any) {
     console.error("Failed to load user gamification awards:", error);
-    return { error: error.message || "Database error" } as any;
+    const code = error?.code || 'NoCode';
+    const name = error?.name || 'UnknownName';
+    const meta = error?.meta ? JSON.stringify(error.meta) : '';
+    
+    return { 
+      error: `Error Name: ${name} | Code: ${code} | Meta: ${meta} | Msg: ${error?.message || 'none'}`
+    } as any;
   }
 }

@@ -117,6 +117,9 @@ export async function joinParish(inviteCode: string) {
     return { success: true, churchName: church.name };
   } catch (error: any) {
     console.error("Failed to join parish:", error);
-    return { success: false, error: "An unexpected error occurred while joining." };
+    const code = error?.code || 'NoCode';
+    const name = error?.name || 'UnknownName';
+    const meta = error?.meta ? JSON.stringify(error.meta) : '';
+    return { success: false, error: `Error Name: ${name} | Code: ${code} | Meta: ${meta}` };
   }
 }
