@@ -1,5 +1,31 @@
 "use server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+
+export async function getBibleProgress() {
+  try {
+    const session = await getSession();
+    if (!session?.id) return { read: 0, total: 1189 };
+
+    const logs = await prisma.xPLog.findMany({
+      where: {
+        userId: session.id,
+        reason: { startsWith: "Read Scripture:" }
+      },
+      select: { reason: true }
+    });
+
+    const uniqueChapters = new Set(logs.map(log => log.reason));
+    
+    return {
+      read: uniqueChapters.size,
+      total: 1189
+    };
+  } catch (error) {
+    console.error(error);
+    return { read: 0, total: 1189 };
+  }
+}
 
 export async function getBibleContent() {
   let [plans, featured] = await Promise.all([

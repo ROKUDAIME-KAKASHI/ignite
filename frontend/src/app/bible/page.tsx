@@ -12,7 +12,7 @@ import { useEffect } from "react";
 
 const tabs = ["Browse", "Plans", "Bookmarks"];
 
-import { getBibleContent } from "./actions";
+import { getBibleContent, getBibleProgress } from "./actions";
 
 const otGroups = groupBooksByCategory("OT");
 const ntGroups = groupBooksByCategory("NT");
@@ -23,6 +23,7 @@ export default function BiblePage() {
   const [testament, setTestament] = useState<"OT" | "NT">("NT");
   const [bookmarks, setBookmarks] = useState<{ bookSlug: string, ch: string, v: string, name: string }[]>([]);
   const [lastRead, setLastRead] = useState<{ slug: string, ch: string, name: string, total: number } | null>(null);
+  const [progress, setProgress] = useState<{ read: number, total: number }>({ read: 0, total: 1189 });
 
   const [featured, setFeatured] = useState<any[]>([]);
   const [readingPlans, setReadingPlans] = useState<any[]>([]);
@@ -36,6 +37,10 @@ export default function BiblePage() {
         emoji: f.theme
       })));
       setReadingPlans(res.plans);
+    });
+
+    getBibleProgress().then((res) => {
+      setProgress(res);
     });
 
     // Load last read
@@ -95,6 +100,32 @@ export default function BiblePage() {
       </div>
 
       <div className="px-4 pt-4 pb-8 space-y-4">
+
+        {/* ── Global Bible Progress ── */}
+        <div className="bg-gradient-to-br from-white to-blue-50/50 dark:from-gray-900 dark:to-blue-900/10 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl p-4 card-holy shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+             <BookOpen className="w-16 h-16" />
+          </div>
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-sm font-bold text-foreground font-serif flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Bible Reading Progress
+              </h2>
+              <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                {progress.read} / {progress.total}
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-blue-100 dark:bg-blue-950 overflow-hidden relative">
+              <div 
+                className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-1000 ease-out" 
+                style={{ width: `${Math.max(1, (progress.read / progress.total) * 100)}%` }} 
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2 text-right uppercase tracking-widest font-semibold">
+              {((progress.read / progress.total) * 100).toFixed(1)}% Complete
+            </p>
+          </div>
+        </div>
 
         {/* ── Search ── */}
         <div className="relative">
