@@ -203,8 +203,8 @@ export default function ProfilePage() {
       <div className="relative overflow-hidden px-5 pt-8 pb-20 gradient-dawn">
         {/* Cross watermark */}
         <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
-        <div className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-36 sm:h-36 z-0 pointer-events-none drop-shadow-2xl">
-          <img src="/header-image.png" className="w-full h-full object-contain opacity-90" alt="Church full view" />
+        <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-0 pointer-events-none">
+          <img src="/header-image.png" className="h-20 sm:h-28 w-auto rounded-2xl shadow-2xl border-[3px] border-white/20 opacity-95 object-contain rotate-3 drop-shadow-xl" alt="Church emblem" />
         </div>
         {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-background to-transparent" />

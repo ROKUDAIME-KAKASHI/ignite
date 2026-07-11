@@ -131,7 +131,6 @@ export function Navigation() {
                 <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-widest mt-0.5">Youth Ministry</p>
               </div>
             </div>
-            <img src="/header-image.png" alt="Header Image" className="w-full h-auto rounded-xl object-cover shadow-sm border border-gray-100 dark:border-gray-800" />
           </div>
           <ThemeToggle />
         </div>
