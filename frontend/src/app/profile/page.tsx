@@ -114,6 +114,7 @@ export default function ProfilePage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any, weekDays?: string[], quoteOfTheDay?: {quote: string, author: string} }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [], weekDays: defaultWeekDays, quoteOfTheDay: defaultQuote });
   const [awards, setAwards] = useState<any[]>([]);
+  const [loadingAwards, setLoadingAwards] = useState(true);
   const [showAllAwards, setShowAllAwards] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
@@ -143,7 +144,11 @@ export default function ProfilePage() {
     });
 
     if (user?.id) {
-      getUserAwardsProgress(user.id).then(a => setAwards(a));
+      setLoadingAwards(true);
+      getUserAwardsProgress(user.id)
+        .then(a => setAwards(a))
+        .catch(() => setAwards([]))
+        .finally(() => setLoadingAwards(false));
     }
 
     const handler = (e: any) => {
@@ -334,7 +339,11 @@ export default function ProfilePage() {
         </div>
         
         <div className="grid grid-cols-2 gap-3 mt-4">
-            {awards.length > 0 ? (() => {
+            {loadingAwards ? (
+              <div className="col-span-2 text-center py-8 text-muted-foreground text-sm flex flex-col items-center bg-card rounded-2xl border border-dashed">
+                 <Loader2 className="w-5 h-5 animate-spin mb-2" /> Loading awards...
+              </div>
+            ) : awards.length > 0 ? (() => {
               const earnedAwards = awards.filter(a => a.currentLevel > 0);
               
               if (earnedAwards.length === 0 && !showAllAwards) {
@@ -378,7 +387,8 @@ export default function ProfilePage() {
               )})
             })() : (
               <div className="col-span-2 text-center py-8 text-muted-foreground text-sm flex flex-col items-center bg-card rounded-2xl border border-dashed">
-                 <Loader2 className="w-5 h-5 animate-spin mb-2" /> Loading awards...
+                 <p className="text-red-400 mb-2 text-xs">Failed to load awards.</p>
+                 <Button onClick={() => window.location.reload()} variant="outline" size="sm">Retry</Button>
               </div>
             )}
           </div>

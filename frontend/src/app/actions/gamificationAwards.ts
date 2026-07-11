@@ -18,28 +18,16 @@ export async function getUserAwardsProgress(userId: string) {
   if (!userId) return [];
 
   try {
-    // Fetch all necessary stats in parallel
-    const [
-      user,
-      attendances,
-      scriptureLogs,
-      prayerLogs,
-      missionLogs,
-      quizzes,
-      gameLogs,
-      journeyLogs,
-      chatLogs
-    ] = await Promise.all([
-      prisma.user.findUnique({ where: { id: userId }, select: { xp: true, streak: true } }),
-      prisma.attendance.count({ where: { userId } }),
-      prisma.xPLog.findMany({ where: { userId, reason: { startsWith: "Read Scripture:" } }, select: { reason: true } }),
-      prisma.xPLog.count({ where: { userId, reason: { contains: "prayer", mode: "insensitive" } } }),
-      prisma.xPLog.count({ where: { userId, reason: { contains: "mission", mode: "insensitive" } } }),
-      prisma.quizAttempt.count({ where: { userId } }),
-      prisma.xPLog.count({ where: { userId, reason: { contains: "game", mode: "insensitive" } } }),
-      prisma.userJourneyNode.count({ where: { userId, completedAt: { not: null } } }),
-      prisma.xPLog.count({ where: { userId, reason: { contains: "chat", mode: "insensitive" } } }) // fallback proxy for chat messages
-    ]);
+    // Fetch stats sequentially to prevent connection pool exhaustion on serverless
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { xp: true, streak: true } });
+    const attendances = await prisma.attendance.count({ where: { userId } });
+    const scriptureLogs = await prisma.xPLog.findMany({ where: { userId, reason: { startsWith: "Read Scripture:" } }, select: { reason: true } });
+    const prayerLogs = await prisma.xPLog.count({ where: { userId, reason: { contains: "prayer", mode: "insensitive" } } });
+    const missionLogs = await prisma.xPLog.count({ where: { userId, reason: { contains: "mission", mode: "insensitive" } } });
+    const quizzes = await prisma.quizAttempt.count({ where: { userId } });
+    const gameLogs = await prisma.xPLog.count({ where: { userId, reason: { contains: "game", mode: "insensitive" } } });
+    const journeyLogs = await prisma.userJourneyNode.count({ where: { userId, completedAt: { not: null } } });
+    const chatLogs = await prisma.xPLog.count({ where: { userId, reason: { contains: "chat", mode: "insensitive" } } });
 
     const uniqueChapters = new Set(scriptureLogs.map(l => l.reason)).size;
 
