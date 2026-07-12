@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle, Send, CalendarPlus, Loader2, CheckCircle2 } from "lucide-react";
+import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle, Send, CalendarPlus, Loader2, CheckCircle2, BellRing } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createAnnouncement, createEvent, getChurches, createChurch } from "../actions";
+import { createAnnouncement, createEvent, getChurches, createChurch, sendDirectPushNotification } from "../actions";
 import QRCode from "react-qr-code";
 
 import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge, getAppointments, updateAppointmentStatus, deleteUser, loginAsUser, updateUserRole } from "../actions";
@@ -153,6 +153,10 @@ export default function AdminDashboardPage() {
   const [noticeContent, setNoticeContent] = useState("");
   const [noticeStatus, setNoticeStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
+  const [directTitle, setDirectTitle] = useState("");
+  const [directMessage, setDirectMessage] = useState("");
+  const [directStatus, setDirectStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
   const [evTitle, setEvTitle] = useState("");
   const [evDesc, setEvDesc] = useState("");
   const [evDate, setEvDate] = useState("");
@@ -172,55 +176,114 @@ export default function AdminDashboardPage() {
   const handlePostNotice = async () => {
     if (!noticeTitle || !noticeContent) return;
     setNoticeStatus("loading");
-    const res = await createAnnouncement(noticeTitle, noticeContent);
-    if (res.success) {
-      setNoticeStatus("success");
-      setNoticeTitle(""); setNoticeContent("");
-      await fetchEventsAndNotices();
+    try {
+      const res = await createAnnouncement(noticeTitle, noticeContent);
+      if (res && 'success' in res && res.success) {
+        setNoticeStatus("success");
+        setNoticeTitle(""); setNoticeContent("");
+        await fetchEventsAndNotices();
+        setTimeout(() => setNoticeStatus("idle"), 2000);
+      } else {
+        setNoticeStatus("error");
+        setTimeout(() => setNoticeStatus("idle"), 2000);
+      }
+    } catch (err) {
+      console.error("Error posting notice:", err);
+      setNoticeStatus("error");
       setTimeout(() => setNoticeStatus("idle"), 2000);
-    } else setNoticeStatus("error");
+    }
+  };
+
+  const handleSendDirectPush = async () => {
+    if (!directTitle || !directMessage) return;
+    setDirectStatus("loading");
+    try {
+      const res = await sendDirectPushNotification(directTitle, directMessage);
+      if (res && 'success' in res && res.success) {
+        setDirectStatus("success");
+        setDirectTitle(""); setDirectMessage("");
+        setTimeout(() => setDirectStatus("idle"), 2000);
+      } else {
+        setDirectStatus("error");
+        setTimeout(() => setDirectStatus("idle"), 2000);
+      }
+    } catch (err) {
+      console.error("Error sending push alert:", err);
+      setDirectStatus("error");
+      setTimeout(() => setDirectStatus("idle"), 2000);
+    }
   };
 
   const handleCreateEvent = async () => {
     if (!evTitle || !evDate) return;
     setEvStatus("loading");
-    const res = await createEvent(evTitle, evDesc, evDate, evLoc);
-    if (res.success && res.event) {
-      setCreatedEventId(res.event.id);
-      setEvStatus("success");
-      setEvTitle(""); setEvDesc(""); setEvDate(""); setEvLoc("");
-      await fetchEventsAndNotices();
-    } else setEvStatus("error");
+    try {
+      const res = await createEvent(evTitle, evDesc, evDate, evLoc);
+      if (res && 'success' in res && res.success && res.event) {
+        setCreatedEventId(res.event.id);
+        setEvStatus("success");
+        setEvTitle(""); setEvDesc(""); setEvDate(""); setEvLoc("");
+        await fetchEventsAndNotices();
+      } else {
+        setEvStatus("error");
+        setTimeout(() => setEvStatus("idle"), 2000);
+      }
+    } catch (err) {
+      console.error("Error creating event:", err);
+      setEvStatus("error");
+      setTimeout(() => setEvStatus("idle"), 2000);
+    }
   };
 
   const handleCreateChurch = async () => {
     if (!churchName) return;
     setChurchStatus("loading");
-    const res = await createChurch(churchName, churchLoc);
-    if (res.success) {
-      setChurchStatus("success");
-      setChurchName(""); setChurchLoc("");
-      await fetchChurches();
+    try {
+      const res = await createChurch(churchName, churchLoc);
+      if (res && 'success' in res && res.success) {
+        setChurchStatus("success");
+        setChurchName(""); setChurchLoc("");
+        await fetchChurches();
+        setTimeout(() => setChurchStatus("idle"), 2000);
+      } else {
+        setChurchStatus("error");
+        setTimeout(() => setChurchStatus("idle"), 2000);
+      }
+    } catch (err) {
+      console.error("Error creating church:", err);
+      setChurchStatus("error");
       setTimeout(() => setChurchStatus("idle"), 2000);
-    } else setChurchStatus("error");
+    }
   };
 
   const handleDeletePrayer = async (id: string) => {
     if (!confirm("Delete this prayer from the wall?")) return;
-    await deletePrayer(id);
-    await fetchPrayers();
+    try {
+      await deletePrayer(id);
+      await fetchPrayers();
+    } catch (err) {
+      console.error("Error deleting prayer:", err);
+    }
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
     if (!confirm("Delete this announcement?")) return;
-    await deleteAnnouncement(id);
-    await fetchEventsAndNotices();
+    try {
+      await deleteAnnouncement(id);
+      await fetchEventsAndNotices();
+    } catch (err) {
+      console.error("Error deleting announcement:", err);
+    }
   };
 
   const handleDeleteEvent = async (id: string) => {
     if (!confirm("Delete this event? This will also remove all RSVPs.")) return;
-    await deleteEvent(id);
-    await fetchEventsAndNotices();
+    try {
+      await deleteEvent(id);
+      await fetchEventsAndNotices();
+    } catch (err) {
+      console.error("Error deleting event:", err);
+    }
   };
 
   return (
@@ -441,36 +504,79 @@ export default function AdminDashboardPage() {
         )}
 
         {activeTab === "notices" && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl gradient-royal text-white flex items-center justify-center shadow-md">
-                  <Send className="w-5 h-5" />
-                </div>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* ── Post Notice Board Announcement Panel ── */}
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between">
                 <div>
-                  <h2 className="font-bold font-serif text-lg">Post Notice</h2>
-                  <p className="text-xs text-muted-foreground">Broadcast an announcement to all youth.</p>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl gradient-royal text-white flex items-center justify-center shadow-md">
+                      <Send className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="font-bold font-serif text-lg">Post Notice Board</h2>
+                      <p className="text-xs text-muted-foreground">Broadcast an announcement to the Notice Board and send push alert.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Title</label>
+                      <Input value={noticeTitle} onChange={e => setNoticeTitle(e.target.value)} placeholder="e.g. Sunday Youth Meeting Update" className="bg-slate-50 dark:bg-slate-950" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Message Content</label>
+                      <Textarea value={noticeContent} onChange={e => setNoticeContent(e.target.value)} placeholder="Type your announcement here..." className="bg-slate-50 dark:bg-slate-950 min-h-[120px]" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Title</label>
-                  <Input value={noticeTitle} onChange={e => setNoticeTitle(e.target.value)} placeholder="e.g. Sunday Youth Meeting Update" className="bg-slate-50 dark:bg-slate-950" />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Message Content</label>
-                  <Textarea value={noticeContent} onChange={e => setNoticeContent(e.target.value)} placeholder="Type your announcement here..." className="bg-slate-50 dark:bg-slate-950 min-h-[120px]" />
-                </div>
+                
                 <button 
                   onClick={handlePostNotice}
                   disabled={noticeStatus === "loading" || !noticeTitle || !noticeContent}
-                  className="w-full h-12 rounded-xl gradient-royal text-white font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="w-full h-12 rounded-xl gradient-royal text-white font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-opacity disabled:opacity-50 mt-4"
                 >
                   {noticeStatus === "loading" ? <Loader2 className="w-5 h-5 animate-spin" /> : 
                    noticeStatus === "success" ? <CheckCircle2 className="w-5 h-5" /> :
                    <Send className="w-4 h-4" />}
                   {noticeStatus === "success" ? "Posted Successfully!" : "Broadcast Notice"}
+                </button>
+              </div>
+
+              {/* ── Send Direct Push Notification Panel ── */}
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-md">
+                      <BellRing className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="font-bold font-serif text-lg">Send Direct Push Alert</h2>
+                      <p className="text-xs text-muted-foreground">Send a direct lockscreen alert. This will NOT be saved to the Notice Board.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Alert Title</label>
+                      <Input value={directTitle} onChange={e => setDirectTitle(e.target.value)} placeholder="e.g. Daily Devotion Ready!" className="bg-slate-50 dark:bg-slate-950" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Alert Message</label>
+                      <Textarea value={directMessage} onChange={e => setDirectMessage(e.target.value)} placeholder="e.g. Today's scripture reading is now live. Check it out!" className="bg-slate-50 dark:bg-slate-950 min-h-[120px]" />
+                    </div>
+                  </div>
+                </div>
+                
+                <button 
+                  onClick={handleSendDirectPush}
+                  disabled={directStatus === "loading" || !directTitle || !directMessage}
+                  className="w-full h-12 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-opacity disabled:opacity-50 mt-4"
+                >
+                  {directStatus === "loading" ? <Loader2 className="w-5 h-5 animate-spin" /> : 
+                   directStatus === "success" ? <CheckCircle2 className="w-5 h-5" /> :
+                   <BellRing className="w-4 h-4" />}
+                  {directStatus === "success" ? "Sent Successfully!" : "Send Direct Push"}
                 </button>
               </div>
             </div>

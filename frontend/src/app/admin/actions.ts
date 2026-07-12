@@ -444,3 +444,51 @@ export async function updateAppointmentStatus(id: string, status: string) {
 
   return { success: true, appointment };
 }
+
+export async function sendDirectPushNotification(title: string, message: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+
+  try {
+    webpush.setVapidDetails(
+      'mailto:admin@ignite.com',
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
+    );
+
+    const subscriptions = await prisma.pushSubscription.findMany();
+    
+    const payload = JSON.stringify({
+      title: title,
+      body: message,
+      icon: "/icon-192x192.png"
+    });
+
+    const sendPromises = subscriptions.map(sub => {
+      if (sub.p256dh !== "fcm") {
+        return webpush.sendNotification({
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth
+          }
+        }, payload).catch(err => {
+          if (err.statusCode === 404 || err.statusCode === 410) {
+            return prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
+          }
+          console.error('Error sending push to subscription ID:', sub.id, err);
+        });
+      } else {
+        console.log("FCM subscription token found:", sub.endpoint);
+        return Promise.resolve();
+      }
+    });
+
+    // Execute in the background and return immediately
+    Promise.all(sendPromises).catch(err => console.error("Error in sending custom push notifications:", err));
+    return { success: true };
+  } catch (error: any) {
+    console.error("Direct push notification failed:", error);
+    return { error: error.message || "Failed to broadcast notifications" };
+  }
+}
+
