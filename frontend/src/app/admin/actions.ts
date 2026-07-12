@@ -197,6 +197,39 @@ export async function getAdminDashboardData() {
   };
 }
 
+export async function getAllUsers() {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+
+  try {
+    const usersData = await prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        stars: true
+      }
+    });
+
+    const users = usersData.map(u => ({
+      id: u.id,
+      name: `${u.firstName} ${u.lastName}`,
+      email: u.email,
+      role: u.role,
+      stars: u.stars || 0,
+      joined: new Date(u.createdAt).toLocaleDateString(),
+      status: u.role === "ADMIN" ? "Admin" : u.role === "LEADER" ? "Leader" : "Member"
+    }));
+
+    return { success: true, users };
+  } catch (error: any) {
+    return { error: error.message || "Failed to fetch users" };
+  }
+}
+
 export async function updateUserRole(targetUserId: string, newRole: string) {
   if (!(await verifySuperAdmin())) return { error: "Unauthorized" };
   

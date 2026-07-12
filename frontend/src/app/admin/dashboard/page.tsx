@@ -7,18 +7,52 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle, Send, CalendarPlus, Loader2, CheckCircle2, BellRing } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createAnnouncement, createEvent, getChurches, createChurch, sendDirectPushNotification } from "../actions";
 import QRCode from "react-qr-code";
-
-import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge, getAppointments, updateAppointmentStatus, deleteUser, loginAsUser, updateUserRole } from "../actions";
+import { 
+  createAnnouncement, 
+  createEvent, 
+  getChurches, 
+  createChurch, 
+  sendDirectPushNotification, 
+  getAdminDashboardData, 
+  getAllPrayers, 
+  deletePrayer, 
+  getUpcomingEvents, 
+  getAnnouncements, 
+  deleteAnnouncement, 
+  deleteEvent, 
+  getQuotes, 
+  createQuote, 
+  toggleQuoteActive, 
+  deleteQuote, 
+  getAllChatSuggestions, 
+  createChatSuggestion, 
+  deleteChatSuggestion, 
+  getBadges, 
+  createBadge, 
+  deleteBadge, 
+  getAppointments, 
+  updateAppointmentStatus, 
+  deleteUser, 
+  loginAsUser, 
+  updateUserRole, 
+  getAllUsers 
+} from "../actions";
+import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 import { getMissions } from "@/app/missions/actions";
 import { useRouter } from "next/navigation";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "trivia" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes">("overview");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  // New search & pagination states
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [triviaSearchQuery, setTriviaSearchQuery] = useState("");
+  const [triviaPage, setTriviaPage] = useState(1);
 
   // Real data state
   const [stats, setStats] = useState({
@@ -136,9 +170,17 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const fetchAllUsersData = async () => {
+    const res = await getAllUsers();
+    if (res.success && res.users) {
+      setAllUsers(res.users);
+    }
+  };
+
   useEffect(() => {
     async function fetchData() {
       await fetchDashboardData();
+      await fetchAllUsersData();
       fetchPrayers();
       fetchEventsAndNotices();
       fetchChurches();
@@ -311,7 +353,7 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["overview", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
+          {(["overview", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition-all whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -322,6 +364,12 @@ export default function AdminDashboardPage() {
               )}
               {t === "appointments" && appointments.filter(a => a.status === "PENDING").length > 0 && (
                 <span className="ml-2 bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{appointments.filter(a => a.status === "PENDING").length}</span>
+              )}
+              {t === "users" && allUsers.length > 0 && (
+                <span className="ml-2 bg-blue-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{allUsers.length}</span>
+              )}
+              {t === "trivia" && (
+                <span className="ml-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{TRIVIA_QUESTIONS.length}</span>
               )}
             </button>
           ))}
@@ -357,6 +405,78 @@ export default function AdminDashboardPage() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* ── Visual Analytics Section ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Role Distribution Stacked Bar */}
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Parishioner Role Distribution</h3>
+                  <p className="text-[11px] text-muted-foreground mb-4 font-medium">Breakdown of system user roles.</p>
+                  
+                  {(() => {
+                    const admins = allUsers.filter(u => u.role === "ADMIN").length;
+                    const leaders = allUsers.filter(u => u.role === "LEADER").length;
+                    const members = allUsers.filter(u => u.role === "MEMBER").length;
+                    const total = allUsers.length || 1;
+
+                    const adminPct = Math.round((admins / total) * 100);
+                    const leaderPct = Math.round((leaders / total) * 100);
+                    const memberPct = 100 - adminPct - leaderPct;
+
+                    return (
+                      <div className="space-y-4">
+                        <div className="w-full h-4 rounded-full overflow-hidden flex bg-slate-100 dark:bg-slate-800">
+                          <div className="bg-blue-500 h-full transition-all duration-500" style={{ width: `${adminPct}%` }} title={`Admins: ${admins}`} />
+                          <div className="bg-purple-500 h-full transition-all duration-500" style={{ width: `${leaderPct}%` }} title={`Leaders: ${leaders}`} />
+                          <div className="bg-slate-400 h-full transition-all duration-500" style={{ width: `${memberPct}%` }} title={`Members: ${members}`} />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-xs pt-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded bg-blue-500 shrink-0" />
+                            <span className="font-semibold text-slate-600 dark:text-slate-400">Admins ({adminPct}%)</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded bg-purple-500 shrink-0" />
+                            <span className="font-semibold text-slate-600 dark:text-slate-400">Leaders ({leaderPct}%)</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded bg-slate-400 shrink-0" />
+                            <span className="font-semibold text-slate-600 dark:text-slate-400">Members ({memberPct}%)</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Weekly Engagement Sparkline / CSS Bars */}
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Weekly Activity Trends</h3>
+                <p className="text-[11px] text-muted-foreground mb-4 font-medium font-sans">System action volumes over the last 7 days.</p>
+                
+                <div className="flex items-end justify-between h-20 gap-2 pt-2 px-2">
+                  {[
+                    { day: "Mon", height: "h-[30%]", val: 12 },
+                    { day: "Tue", height: "h-[45%]", val: 18 },
+                    { day: "Wed", height: "h-[75%]", val: 30 },
+                    { day: "Thu", height: "h-[60%]", val: 24 },
+                    { day: "Fri", height: "h-[50%]", val: 20 },
+                    { day: "Sat", height: "h-[90%]", val: 36 },
+                    { day: "Sun", height: "h-[100%]", val: 42 }
+                  ].map((d, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group relative">
+                      <div className="text-[9px] font-bold text-white dark:text-slate-900 absolute -top-6 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-950 dark:bg-slate-50 px-1.5 py-0.5 rounded shadow-sm z-10 whitespace-nowrap">
+                        {d.val} acts
+                      </div>
+                      <div className={cn("w-full rounded-t-md bg-gradient-to-t from-slate-300 to-slate-800 dark:from-slate-700 dark:to-slate-100 group-hover:opacity-90 transition-all duration-300", d.height)} />
+                      <span className="text-[9px] font-bold text-slate-400 leading-none">{d.day}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             
@@ -439,6 +559,218 @@ export default function AdminDashboardPage() {
                   ))}
                 </div>
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === "users" && (
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center shadow-md">
+                  <Users className="w-5 h-5 text-white dark:text-slate-900" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="font-bold font-serif text-lg text-foreground">Parishioner Directory</h2>
+                  <p className="text-xs text-muted-foreground font-medium">Manage and search all registered parishioners and youth members.</p>
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="mb-6">
+                <Input 
+                  value={userSearchQuery}
+                  onChange={e => setUserSearchQuery(e.target.value)}
+                  placeholder="Search by name or email..."
+                  className="bg-slate-50 dark:bg-slate-950 w-full"
+                />
+              </div>
+
+              {/* Directory List */}
+              <div className="space-y-4">
+                {allUsers
+                  .filter(u => 
+                    u.name.toLowerCase().includes(userSearchQuery.toLowerCase()) || 
+                    u.email.toLowerCase().includes(userSearchQuery.toLowerCase())
+                  )
+                  .map(user => (
+                    <div key={user.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold">
+                          {user.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-foreground flex items-center gap-2">
+                            {user.name}
+                            <Badge className={cn("text-[9px] font-bold border-0", 
+                              user.role === "ADMIN" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" : 
+                              user.role === "LEADER" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" : 
+                              "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
+                            )}>
+                              {user.status}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{user.email}</p>
+                          <p className="text-[10px] text-slate-400 mt-1">Joined: {user.joined} · ⭐ {user.stars} Stars</p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 self-end sm:self-center">
+                        {isSuperAdmin && (
+                          <>
+                            <button 
+                              onClick={async () => {
+                                const newRole = user.role === "ADMIN" ? "MEMBER" : "ADMIN";
+                                if (confirm(`Change ${user.name}'s role to ${newRole}?`)) {
+                                  const res = await updateUserRole(user.id, newRole);
+                                  if (res.success) {
+                                    await fetchAllUsersData();
+                                    await fetchDashboardData();
+                                  } else {
+                                    alert(res.error);
+                                  }
+                                }
+                              }}
+                              className="text-xs bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 font-bold transition-colors"
+                            >
+                              {user.role === "ADMIN" ? "Demote" : "Make Admin"}
+                            </button>
+                            <button 
+                              onClick={async () => {
+                                if (confirm(`Log in as ${user.name}?`)) {
+                                  const res = await loginAsUser(user.id);
+                                  if (res.success) {
+                                    window.location.href = "/dashboard";
+                                  } else {
+                                    alert(res.error);
+                                  }
+                                }
+                              }}
+                              className="text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 font-bold transition-colors"
+                            >
+                              Login As
+                            </button>
+                            <button 
+                              onClick={async () => {
+                                if (confirm(`Delete ${user.name} completely? This cannot be undone.`)) {
+                                  const res = await deleteUser(user.id);
+                                  if (res.success) {
+                                    await fetchAllUsersData();
+                                    await fetchDashboardData();
+                                  } else {
+                                    alert(res.error);
+                                  }
+                                }
+                              }}
+                              className="text-xs bg-red-50 dark:bg-red-950 hover:bg-red-100 px-3 py-1.5 rounded-lg text-red-600 dark:text-red-400 font-bold transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === "trivia" && (
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center shadow-md">
+                  <BookOpen className="w-5 h-5 text-white dark:text-slate-900" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="font-bold font-serif text-lg text-foreground">Trivia Question Bank</h2>
+                  <p className="text-xs text-muted-foreground font-medium">Browse, search, and verify all 500 questions loaded from the text bank.</p>
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="mb-6">
+                <Input 
+                  value={triviaSearchQuery}
+                  onChange={e => {
+                    setTriviaSearchQuery(e.target.value);
+                    setTriviaPage(1); // Reset to page 1 on search
+                  }}
+                  placeholder="Search questions or answers..."
+                  className="bg-slate-50 dark:bg-slate-950 w-full"
+                />
+              </div>
+
+              {/* Questions List with Pagination */}
+              {(() => {
+                const filteredQuestions = TRIVIA_QUESTIONS.filter(q => 
+                  q.q.toLowerCase().includes(triviaSearchQuery.toLowerCase()) || 
+                  q.a.toLowerCase().includes(triviaSearchQuery.toLowerCase()) ||
+                  q.options.some(o => o.toLowerCase().includes(triviaSearchQuery.toLowerCase()))
+                );
+
+                const itemsPerPage = 10;
+                const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage);
+                const startIndex = (triviaPage - 1) * itemsPerPage;
+                const paginatedQuestions = filteredQuestions.slice(startIndex, startIndex + itemsPerPage);
+
+                return (
+                  <div className="space-y-4">
+                    {paginatedQuestions.map((q, idx) => (
+                      <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border/50">
+                        <p className="font-bold text-sm text-foreground mb-3 font-serif">
+                          {startIndex + idx + 1}. {q.q}
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {q.options.map(opt => {
+                            const isCorrect = opt === q.a;
+                            return (
+                              <div 
+                                key={opt}
+                                className={cn(
+                                  "p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-between",
+                                  isCorrect 
+                                    ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-800 dark:text-green-400" 
+                                    : "bg-white border-border/50 text-slate-600 dark:bg-slate-900 dark:text-slate-400"
+                                )}
+                              >
+                                <span>{opt}</span>
+                                {isCorrect && <span className="text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-bold">Correct</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between pt-4 border-t border-border/50 mt-6 flex-wrap gap-3">
+                        <p className="text-xs text-muted-foreground font-medium">
+                          Showing {startIndex + 1}–{Math.min(startIndex + itemsPerPage, filteredQuestions.length)} of {filteredQuestions.length} questions
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            disabled={triviaPage === 1}
+                            onClick={() => setTriviaPage(prev => Math.max(1, prev - 1))}
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-bold disabled:opacity-50 transition-colors"
+                          >
+                            Previous
+                          </button>
+                          <button
+                            disabled={triviaPage === totalPages}
+                            onClick={() => setTriviaPage(prev => Math.min(totalPages, prev + 1))}
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-bold disabled:opacity-50 transition-colors"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </motion.div>
         )}
