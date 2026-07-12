@@ -6,7 +6,8 @@ export async function POST(req: Request) {
   try {
     // 1. Authenticate the user securely from the server-side JWT cookie
     const session = await getSession();
-    if (!session || !session.userId) {
+    const userId = session?.id || session?.userId;
+    if (!session || !userId) {
       return NextResponse.json({ error: "Unauthorized: You must be logged in to subscribe to notifications" }, { status: 401 });
     }
 
@@ -20,12 +21,12 @@ export async function POST(req: Request) {
     await prisma.pushSubscription.upsert({
       where: { endpoint: subscription.endpoint },
       update: {
-        userId: session.userId,
+        userId: userId,
         p256dh: subscription.keys.p256dh,
         auth: subscription.keys.auth,
       },
       create: {
-        userId: session.userId,
+        userId: userId,
         endpoint: subscription.endpoint,
         p256dh: subscription.keys.p256dh,
         auth: subscription.keys.auth,
