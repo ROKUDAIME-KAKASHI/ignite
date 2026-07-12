@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Plus, ChevronLeft, Dices, Trophy, Users, ShieldAlert, Share2, Check } from "lucide-react";
@@ -714,32 +714,38 @@ export default function BibleLudoPage() {
     }
   };
 
-  // Render board cell tokens list helper
-  const getCellTokens = (r: number, c: number) => {
-    const res: {color: Color, idx: number}[] = [];
+  // Build a fast lookup map for token positions
+  const tokenCoordinatesMap = useMemo(() => {
+    const map = new Map<string, {color: Color, idx: number}[]>();
     
-    // Check path
-    const pathIdx = PATH.findIndex(p => p.r === r && p.c === c);
-    if (pathIdx !== -1) {
-      COLORS.forEach(color => {
-        tokens[color].forEach((t, i) => {
-          if (t === pathIdx) res.push({color, idx: i});
-        });
-      });
-    }
-
-    // Check home stretches
     COLORS.forEach(color => {
-      HOME_STRETCH[color].forEach((p, sIdx) => {
-        if (p.r === r && p.c === c) {
-          tokens[color].forEach((t, i) => {
-            if (t === 100 + sIdx) res.push({color, idx: i});
-          });
+      tokens[color].forEach((t, idx) => {
+        if (t === -1 || t === 200) return; // Ignore bases/finished here, they are handled separately
+        
+        let key = "";
+        if (t >= 0 && t < 52) {
+          // On path track
+          const coord = PATH[t];
+          if (coord) key = `${coord.r},${coord.c}`;
+        } else if (t >= 100 && t < 105) {
+          // In home stretch
+          const coord = HOME_STRETCH[color]?.[t - 100];
+          if (coord) key = `${coord.r},${coord.c}`;
+        }
+        
+        if (key) {
+          if (!map.has(key)) map.set(key, []);
+          map.get(key)!.push({color, idx});
         }
       });
     });
+    
+    return map;
+  }, [tokens]);
 
-    return res;
+  // Render board cell tokens list helper
+  const getCellTokens = (r: number, c: number) => {
+    return tokenCoordinatesMap.get(`${r},${c}`) || [];
   };
 
   return (
