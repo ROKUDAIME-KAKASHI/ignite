@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, BellRing, BellOff, CheckCircle2, Info, Megaphone, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, urlB64ToUint8Array } from "@/lib/utils";
 import { getAnnouncements } from "@/app/admin/actions";
 import { getNotifications, markAsRead, markAllAsRead } from "./actions";
 import { useAuth } from "@/context/AuthContext";
@@ -74,9 +74,10 @@ export default function NotificationsPage() {
       
       if (perm === "granted" && "serviceWorker" in navigator) {
         const registration = await navigator.serviceWorker.ready;
+        const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "BIr1RWyN87fiJWv_-co9Peyyo6tl3Xx51znoApIegoOQVxEGfC01BK-2qFLB5F4KBKWRPwDE_8zTAUA_2h-2MYc";
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+          applicationServerKey: urlB64ToUint8Array(vapidPublicKey)
         });
         
         await fetch("/api/notifications/subscribe", {
