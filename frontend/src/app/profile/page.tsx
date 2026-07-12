@@ -9,11 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { LogOut, ChevronRight, Edit3, Check, X, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, urlB64ToUint8Array } from "@/lib/utils";
 import { useEffect } from "react";
 import { getProfileStats, joinParish, saveFCMToken } from "@/app/actions/profile";
 import { getUserAwardsProgress } from "@/app/actions/gamificationAwards";
-import { requestNotificationPermission } from "@/lib/firebase";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLiturgicalSeason } from "@/lib/liturgy";
 
@@ -196,10 +195,22 @@ export default function ProfilePage() {
 
   const handleEnableNotifications = async () => {
     try {
-      const token = await requestNotificationPermission();
-      if (token) {
-        const res = await saveFCMToken(token);
-        if (res.success) {
+      const permissionResult = await Notification.requestPermission();
+      if (permissionResult === "granted" && "serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "BIr1RWyN87fiJWv_-co9Peyyo6tl3Xx51znoApIegoOQVxEGfC01BK-2qFLB5F4KBKWRPwDE_8zTAUA_2h-2MYc";
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlB64ToUint8Array(vapidPublicKey)
+        });
+
+        const res = await fetch('/api/notifications/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subscription })
+        });
+        
+        if (res.ok) {
           alert("Push notifications enabled successfully!");
         } else {
           alert("Enabled in browser, but failed to save to server.");
@@ -208,6 +219,7 @@ export default function ProfilePage() {
         alert("Permission denied. You may need to enable notifications in your browser settings.");
       }
     } catch (e) {
+      console.error("Failed to enable notifications:", e);
       alert("Failed to enable notifications. Please check your browser permissions.");
     }
   };
