@@ -19,12 +19,22 @@ export async function GET(req: Request) {
 
     const subscriptions = await prisma.pushSubscription.findMany();
     
-    // Pick a daily verse
-    const verse = "This is the day the Lord has made; let us rejoice and be glad in it. - Psalm 118:24";
+    // Generate today's date at midnight for querying
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Try to find today's journey in the database
+    let journey = await prisma.dailyJourney.findUnique({
+      where: { date: today }
+    });
+
+    const verseText = journey 
+      ? `"${journey.verse}" - ${journey.verseRef}`
+      : "This is the day the Lord has made; let us rejoice and be glad in it. - Psalm 118:24";
 
     const payload = JSON.stringify({
       title: "Daily Grace",
-      body: verse,
+      body: verseText,
       icon: "/icon-192x192.png"
     });
 
