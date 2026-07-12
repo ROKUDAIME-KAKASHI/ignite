@@ -23,14 +23,16 @@ export async function getMissions() {
   const session = await getSession();
   const completedIds: string[] = [];
   if (session?.id) {
+    // Robust calendar-day check covering all global timezone offsets
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setUTCHours(0,0,0,0);
+    const lookbackLimit = new Date(today.getTime() - 12 * 60 * 60 * 1000); // 12h overlap to catch early morning timezones
+    
     const logs = await prisma.xPLog.findMany({
-      where: { userId: session.id, awardedAt: { gte: today }, reason: { startsWith: "Completed Mission:" } }
+      where: { userId: session.id, awardedAt: { gte: lookbackLimit }, reason: { startsWith: "Completed Mission:" } }
     });
     logs.forEach(log => {
       const title = log.reason.replace("Completed Mission: ", "");
-      // Match by startsWith because we append the reflection to the title now
       const m = missions.find(x => title.startsWith(x.title));
       if (m && !completedIds.includes(m.id)) completedIds.push(m.id);
     });

@@ -23,7 +23,34 @@ export const TRIVIA_QUESTIONS = [
   { q: "Who is the mother of Jesus Christ, highly venerated in the Orthodox Church?", options: ["St. Mary (Theotokos)", "St. Elizabeth", "St. Anna", "St. Martha"], a: "St. Mary (Theotokos)" },
   { q: "What is the Syriac word for Holy Spirit?", options: ["Ruho Qadisho", "Sleebo", "Qurbono", "Thronos"], a: "Ruho Qadisho" },
   { q: "What is the traditional vestment worn by Orthodox priests during Qurbana called?", options: ["Kappa", "Phaino", "Kuthoono", "Zunoro"], a: "Phaino" },
-  { q: "Where was Jesus born?", options: ["Nazareth", "Jerusalem", "Bethlehem", "Galilee"], a: "Bethlehem" }
+  { q: "Where was Jesus born?", options: ["Nazareth", "Jerusalem", "Bethlehem", "Galilee"], a: "Bethlehem" },
+  
+  // Additional 25 high-quality questions connecting with the central question bank
+  { q: "Who was the father of King Solomon?", options: ["Saul", "David", "Jesse", "Samuel"], a: "David" },
+  { q: "Which book of the Bible contains the story of the parting of the Red Sea?", options: ["Genesis", "Exodus", "Leviticus", "Numbers"], a: "Exodus" },
+  { q: "What is the meaning of the Syriac word 'Sleeba'?", options: ["Cross", "Peace", "Light", "Faith"], a: "Cross" },
+  { q: "Who was the first Christian martyr?", options: ["St. Peter", "St. Paul", "St. Stephen", "St. James"], a: "St. Stephen" },
+  { q: "Which liturgical season begins the Church calendar in the Syrian Orthodox tradition?", options: ["Kudosh Edto", "Advent", "Great Lent", "Pentecost"], a: "Kudosh Edto" },
+  { q: "In the Parable of the Prodigal Son, what does the father give the returning son first?", options: ["A gold coin", "A robe and ring", "A staff", "A pair of oxen"], a: "A robe and ring" },
+  { q: "Which Old Testament book contains the prophecy of the suffering servant?", options: ["Jeremiah", "Ezekiel", "Isaiah", "Daniel"], a: "Isaiah" },
+  { q: "Which apostle replaced Judas Iscariot?", options: ["Matthias", "Barnabas", "Paul", "Silas"], a: "Matthias" },
+  { q: "What is the Syriac name for the altar table in the sanctuary?", options: ["Madbaha", "Thronos", "Phaino", "Bema"], a: "Thronos" },
+  { q: "Which book of the Bible comes after the Gospels and describes the early Church?", options: ["Romans", "Revelation", "Acts of the Apostles", "Hebrews"], a: "Acts of the Apostles" },
+  { q: "Which feast commemorates Christ's baptism in the Jordan River?", options: ["Denaha (Epiphany)", "Christmas", "Easter", "Ascension"], a: "Denaha (Epiphany)" },
+  { q: "Who was the father of John the Baptist?", options: ["Zechariah", "Simeon", "Eli", "Joseph"], a: "Zechariah" },
+  { q: "What is the name of the circular host of bread used for the Holy Qurbana?", options: ["Manna", "Phaino", "Buhro", "Baskomo"], a: "Buhro" },
+  { q: "Which book of the Bible is the longest by word count?", options: ["Psalms", "Genesis", "Jeremiah", "Isaiah"], a: "Jeremiah" },
+  { q: "How many days did Jesus fast in the wilderness?", options: ["3 days", "7 days", "40 days", "50 days"], a: "40 days" },
+  { q: "Which feast celebrates the descent of the Holy Spirit on the Apostles?", options: ["Pentecost", "Ascension", "Transfiguration", "Easter"], a: "Pentecost" },
+  { q: "What was the name of the garden where Jesus prayed before His crucifixion?", options: ["Eden", "Gethsemane", "Golgotha", "Sinai"], a: "Gethsemane" },
+  { q: "Who was the first king of Israel?", options: ["David", "Saul", "Solomon", "Rehoboth"], a: "Saul" },
+  { q: "What is the meaning of the name 'Emmanuel'?", options: ["God is great", "God with us", "God forgives", "God saves"], a: "God with us" },
+  { q: "Which Old Testament book tells the story of a Queen who saved her people?", options: ["Ruth", "Esther", "Judith", "Song of Solomon"], a: "Esther" },
+  { q: "What is the name of the prayer oil used for anointing in Baptism?", options: ["Myron", "Frankincense", "Olive oil", "Chrism"], a: "Myron" },
+  { q: "Which gospel writer was a physician by profession?", options: ["St. Matthew", "St. Mark", "St. Luke", "St. John"], a: "St. Luke" },
+  { q: "How many times does Jesus tell us to forgive our brother?", options: ["Seven times", "Seventy times", "Seventy times seven", "Always"], a: "Seventy times seven" },
+  { q: "What is the term for the vestment worn around the neck by priests, symbolizing the yoke of Christ?", options: ["Kappa", "Hamnikho", "Zunoro", "Phaino"], a: "Hamnikho" },
+  { q: "Which of these is the traditional Syriac title for the Virgin Mary meaning 'Mother of God'?", options: ["Theotokos", "Yoldath Aloho", "Shmuni", "Bath Qyama"], a: "Yoldath Aloho" }
 ];
 
 export function getRandomTrivia() {

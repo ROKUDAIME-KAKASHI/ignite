@@ -1,5 +1,6 @@
 "use server";
 import prisma from "@/lib/prisma";
+import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 
 export async function getQuizzes() {
   let quizzes = await prisma.quiz.findMany({
@@ -13,117 +14,57 @@ export async function getQuizzes() {
   });
 
   if (quizzes.length === 0) {
-    // Seed initial quizzes
-    const dailyQuiz = await prisma.quiz.create({
+    // Helper to map central TRIVIA_QUESTIONS to Prisma structure
+    const mapQuestion = (q: typeof TRIVIA_QUESTIONS[0]) => {
+      const isTrueFalse = q.options.length === 2 && q.options.includes("True") && q.options.includes("False");
+      return {
+        text: q.q,
+        type: isTrueFalse ? "truefalse" : "mcq",
+        explanation: `The correct answer is: ${q.a}`,
+        answers: {
+          create: q.options.map(opt => ({
+            text: opt,
+            isCorrect: opt === q.a
+          }))
+        }
+      };
+    };
+
+    // Seed "Daily Scripture Quiz" (First 5 questions)
+    await prisma.quiz.create({
       data: {
-        title: "Daily Quiz",
+        title: "Daily Scripture Quiz",
         description: "5 questions · Scripture & Faith",
         type: "DAILY",
         xpReward: 100,
         questions: {
-          create: [
-            {
-              text: "Which Gospel is the shortest in the New Testament?",
-              type: "mcq",
-              explanation: "The Gospel of Mark is the shortest of the four Gospels, with 16 chapters.",
-              verse: "Mark 1:1",
-              answers: {
-                create: [
-                  { text: "Matthew", isCorrect: false },
-                  { text: "Mark", isCorrect: true },
-                  { text: "Luke", isCorrect: false },
-                  { text: "John", isCorrect: false },
-                ]
-              }
-            },
-            {
-              text: "The Last Supper took place on a Thursday before the Jewish Passover.",
-              type: "truefalse",
-              explanation: "Jesus celebrated the Last Supper with His apostles on Holy Thursday, the night before His crucifixion.",
-              verse: "Luke 22:14-20",
-              answers: {
-                create: [
-                  { text: "True", isCorrect: true },
-                  { text: "False", isCorrect: false },
-                ]
-              }
-            },
-            {
-              text: "How many Books are in the Orthodox Old Testament?",
-              type: "mcq",
-              explanation: "The Orthodox Old Testament includes up to 51 books depending on the tradition, including books not found in the Protestant Bible.",
-              answers: {
-                create: [
-                  { text: "39", isCorrect: false },
-                  { text: "45", isCorrect: false },
-                  { text: "46", isCorrect: true },
-                  { text: "50", isCorrect: false },
-                ]
-              }
-            },
-            {
-              text: "St. Peter was crucified upside-down because he felt unworthy to die like Jesus.",
-              type: "truefalse",
-              explanation: "Tradition holds that St. Peter requested to be crucified upside-down, as he did not consider himself worthy to die in the same manner as Jesus Christ.",
-              answers: {
-                create: [
-                  { text: "True", isCorrect: true },
-                  { text: "False", isCorrect: false },
-                ]
-              }
-            },
-            {
-              text: "What does 'Agape' mean in Greek?",
-              type: "mcq",
-              explanation: "Agape refers to the highest form of love — unconditional, sacrificial, divine love. It is the love God has for humanity.",
-              verse: "John 3:16",
-              answers: {
-                create: [
-                  { text: "Friendship", isCorrect: false },
-                  { text: "Romantic love", isCorrect: false },
-                  { text: "Unconditional / Divine love", isCorrect: true },
-                  { text: "Brotherly love", isCorrect: false },
-                ]
-              }
-            }
-          ]
+          create: TRIVIA_QUESTIONS.slice(0, 5).map(mapQuestion)
         }
       }
     });
 
-    const catechismQuiz = await prisma.quiz.create({
+    // Seed "Orthodox Faith & Liturgy" (Questions 5-10)
+    await prisma.quiz.create({
       data: {
-        title: "Faith",
-        description: "2 questions · Orthodox Teaching",
+        title: "Orthodox Faith & Liturgy",
+        description: "5 questions · Orthodox Teaching",
         type: "TOPIC",
         xpReward: 80,
         questions: {
-          create: [
-            {
-              text: "How many Sacraments (Holy Mysteries) are there in the Orthodox Church?",
-              type: "mcq",
-              explanation: "The seven sacraments are: Baptism, Eucharist, Confirmation, Reconciliation, Anointing of the Sick, Holy Orders, and Matrimony.",
-              answers: {
-                create: [
-                  { text: "5", isCorrect: false },
-                  { text: "6", isCorrect: false },
-                  { text: "7", isCorrect: true },
-                  { text: "10", isCorrect: false },
-                ]
-              }
-            },
-            {
-              text: "The Immaculate Conception refers to the sinless conception of Jesus Christ.",
-              type: "truefalse",
-              explanation: "The Immaculate Conception refers to Mary being conceived without original sin — not to Jesus. Jesus's miraculous birth is called the Virgin Birth.",
-              answers: {
-                create: [
-                  { text: "True", isCorrect: false },
-                  { text: "False", isCorrect: true },
-                ]
-              }
-            }
-          ]
+          create: TRIVIA_QUESTIONS.slice(5, 10).map(mapQuestion)
+        }
+      }
+    });
+
+    // Seed "Biblical History & Trivia" (Questions 10-15)
+    await prisma.quiz.create({
+      data: {
+        title: "Biblical History & Trivia",
+        description: "5 questions · General Bible Knowledge",
+        type: "TOPIC",
+        xpReward: 90,
+        questions: {
+          create: TRIVIA_QUESTIONS.slice(10, 15).map(mapQuestion)
         }
       }
     });

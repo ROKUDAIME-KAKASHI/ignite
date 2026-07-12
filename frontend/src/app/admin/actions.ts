@@ -4,13 +4,45 @@ import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { encrypt, decrypt } from "@/lib/auth";
+import webpush from "web-push";
 
 async function verifyAdmin() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("admin_session")?.value;
-  if (!token) return false;
+  
+  // 1. Check admin_session cookie first (super admin credentials)
+  const adminToken = cookieStore.get("admin_session")?.value;
+  if (adminToken) {
+    try {
+      const payload = await decrypt(adminToken);
+      if (payload?.role === "SUPER_ADMIN") return true;
+    } catch {}
+  }
+
+  // 2. Check standard user session cookie
+  const sessionToken = cookieStore.get("session")?.value;
+  if (sessionToken) {
+    try {
+      const payload = await decrypt(sessionToken);
+      if (payload?.id) {
+        // Fetch user from DB to verify role
+        const user = await prisma.user.findUnique({
+          where: { id: payload.id },
+          select: { role: true }
+        });
+        if (user?.role === "ADMIN") return true;
+      }
+    } catch {}
+  }
+
+  return false;
+}
+
+async function verifySuperAdmin() {
+  const cookieStore = await cookies();
+  const adminToken = cookieStore.get("admin_session")?.value;
+  if (!adminToken) return false;
   try {
-    const payload = await decrypt(token);
+    const payload = await decrypt(adminToken);
     return payload?.role === "SUPER_ADMIN";
   } catch {
     return false;
@@ -35,9 +67,56 @@ export async function adminLogin(email: string, pass: string) {
 export async function createAnnouncement(title: string, content: string) {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
-  await prisma.announcement.create({
+  const announcement = await prisma.announcement.create({
     data: { title, content }
   });
+
+  // Broadcast Web Push notifications asynchronously
+  try {
+    webpush.setVapidDetails(
+      'mailto:admin@ignite.com',
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
+    );
+
+    const subscriptions = await prisma.pushSubscription.findMany();
+    
+    const payload = JSON.stringify({
+      title: title,
+      body: content,
+      icon: "/icon-192x192.png"
+    });
+
+    const sendPromises = subscriptions.map(sub => {
+      // If it's a standard webpush subscription
+      if (sub.p256dh !== "fcm") {
+        return webpush.sendNotification({
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth
+          }
+        }, payload).catch(err => {
+          if (err.statusCode === 404 || err.statusCode === 410) {
+            // Clean up expired subscriptions
+            return prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
+          }
+          console.error('Error sending push to subscription ID:', sub.id, err);
+        });
+      } else {
+        // FCM token fallback if someone registered through client Firebase getToken directly
+        // We log it or could trigger an HTTP POST request to Firebase FCM endpoint if key exists
+        console.log("FCM subscription token found (skipping direct webpush for FCM token):", sub.endpoint);
+        return Promise.resolve();
+      }
+    });
+
+    // Execute in the background without blocking the UI response
+    Promise.all(sendPromises).catch(err => console.error("Error in sending push notifications:", err));
+  } catch (pushError) {
+    console.error("Failed to broadcast push notifications:", pushError);
+  }
+
   revalidatePath("/dashboard");
   revalidatePath("/notifications");
   return { success: true };
@@ -72,13 +151,14 @@ export async function getAdminDashboardData() {
   ]);
 
   const recentUsersData = await prisma.user.findMany({
-    take: 5,
+    take: 10, // Increased limit to see more users
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
       firstName: true,
       lastName: true,
       email: true,
+      role: true,
       createdAt: true
     }
   });
@@ -87,12 +167,23 @@ export async function getAdminDashboardData() {
     id: u.id,
     name: `${u.firstName} ${u.lastName}`,
     email: u.email,
+    role: u.role,
     joined: new Date(u.createdAt).toLocaleDateString(),
-    status: "active"
+    status: u.role === "ADMIN" ? "Admin" : u.role === "LEADER" ? "Leader" : "Member"
   }));
+
+  const adminToken = cookieStore.get("admin_session")?.value;
+  let isSuperAdmin = false;
+  if (adminToken) {
+    try {
+      const payload = await decrypt(adminToken);
+      if (payload?.role === "SUPER_ADMIN") isSuperAdmin = true;
+    } catch {}
+  }
 
   return {
     success: true,
+    isSuperAdmin,
     stats: {
       totalUsers,
       prayersOffered,
@@ -103,6 +194,20 @@ export async function getAdminDashboardData() {
     },
     recentUsers
   };
+}
+
+export async function updateUserRole(targetUserId: string, newRole: string) {
+  if (!(await verifySuperAdmin())) return { error: "Unauthorized" };
+  
+  try {
+    const updated = await prisma.user.update({
+      where: { id: targetUserId },
+      data: { role: newRole }
+    });
+    return { success: true, role: updated.role };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update role" };
+  }
 }
 
 export async function getAllPrayers() {
@@ -145,7 +250,7 @@ export async function deleteEvent(id: string) {
 }
 
 export async function deleteUser(id: string) {
-  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  if (!(await verifySuperAdmin())) return { error: "Unauthorized" };
   
   await prisma.$transaction([
     prisma.userGroup.deleteMany({ where: { userId: id } }),
@@ -165,7 +270,7 @@ export async function deleteUser(id: string) {
 }
 
 export async function loginAsUser(id: string) {
-  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  if (!(await verifySuperAdmin())) return { error: "Unauthorized" };
 
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) return { error: "User not found" };

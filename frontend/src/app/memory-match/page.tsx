@@ -9,25 +9,18 @@ import { Loader2, RotateCcw, Trophy, Brain, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 import Link from "next/link";
+import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 
 type Card = {
   id: number;
   pairId: number;
   content: string;
+  fullText: string;
   isFlipped: boolean;
   isMatched: boolean;
 };
 
-const PAIRS = [
-  { id: 1, a: "David", b: "Goliath" },
-  { id: 2, a: "Moses", b: "Red Sea" },
-  { id: 3, a: "Noah", b: "The Ark" },
-  { id: 4, a: "Jonah", b: "Big Fish" },
-  { id: 5, a: "Adam", b: "Eve" },
-  { id: 6, a: "Jesus", b: "The Cross" },
-  { id: 7, a: "Daniel", b: "Lion's Den" },
-  { id: 8, a: "Mary", b: "Joseph" }
-];
+const NUM_PAIRS = 8;
 
 export default function MemoryMatchPage() {
   const { user, setUser } = useAuth();
@@ -37,17 +30,66 @@ export default function MemoryMatchPage() {
   const [matches, setMatches] = useState(0);
   const [gameState, setGameState] = useState<"playing" | "won">("playing");
   const [submitting, setSubmitting] = useState(false);
+  const [hoveredCardText, setHoveredCardText] = useState("");
 
+  // Load state on mount
   useEffect(() => {
+    const saved = localStorage.getItem("ignite_memory_match_state");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setCards(parsed.cards);
+        setMoves(parsed.moves);
+        setMatches(parsed.matches);
+        setGameState(parsed.gameState);
+        return;
+      } catch (e) {
+        console.error("Failed to parse saved state", e);
+      }
+    }
     startNewGame();
   }, []);
 
+  // Save state on change
+  useEffect(() => {
+    if (cards.length > 0) {
+      localStorage.setItem("ignite_memory_match_state", JSON.stringify({
+        cards,
+        moves,
+        matches,
+        gameState
+      }));
+    }
+  }, [cards, moves, matches, gameState]);
+
   const startNewGame = () => {
+    localStorage.removeItem("ignite_memory_match_state");
+    // Pick 8 random questions from the central trivia bank
+    const shuffledQuestions = [...TRIVIA_QUESTIONS]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, NUM_PAIRS);
+
     const deck: Card[] = [];
     let idCounter = 1;
-    PAIRS.forEach(pair => {
-      deck.push({ id: idCounter++, pairId: pair.id, content: pair.a, isFlipped: false, isMatched: false });
-      deck.push({ id: idCounter++, pairId: pair.id, content: pair.b, isFlipped: false, isMatched: false });
+    shuffledQuestions.forEach((qObj, index) => {
+      const pairId = index + 1;
+      // Pair the question with its correct answer
+      deck.push({ 
+        id: idCounter++, 
+        pairId, 
+        content: qObj.q.length > 40 ? qObj.q.slice(0, 37) + "..." : qObj.q, 
+        fullText: qObj.q,
+        isFlipped: false, 
+        isMatched: false 
+      });
+      deck.push({ 
+        id: idCounter++, 
+        pairId, 
+        content: qObj.a, 
+        fullText: qObj.a,
+        isFlipped: false, 
+        isMatched: false 
+      });
     });
     // Shuffle
     const shuffled = deck.sort(() => Math.random() - 0.5);
@@ -56,6 +98,7 @@ export default function MemoryMatchPage() {
     setMoves(0);
     setMatches(0);
     setGameState("playing");
+    setHoveredCardText("");
   };
 
   const handleCardClick = (index: number) => {
@@ -84,7 +127,7 @@ export default function MemoryMatchPage() {
           
           const newMatchCount = matches + 1;
           setMatches(newMatchCount);
-          if (newMatchCount === PAIRS.length) {
+          if (newMatchCount === NUM_PAIRS) {
             handleWin();
           }
         }, 500);
@@ -136,18 +179,25 @@ export default function MemoryMatchPage() {
           <p className="text-muted-foreground">Match the biblical figures with their famous stories.</p>
         </div>
 
-        <div className="flex items-center justify-between bg-card rounded-2xl p-4 border border-border/50 shadow-sm mb-8">
+        <div className="flex items-center justify-between bg-card rounded-2xl p-4 border border-border/50 shadow-sm mb-6">
           <div>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Moves</p>
             <p className="text-2xl font-bold font-serif">{moves}</p>
           </div>
           <div>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Matches</p>
-            <p className="text-2xl font-bold font-serif text-primary">{matches} / {PAIRS.length}</p>
+            <p className="text-2xl font-bold font-serif text-primary">{matches} / {NUM_PAIRS}</p>
           </div>
           <Button onClick={startNewGame} variant="outline" size="icon" className="rounded-xl">
             <RotateCcw className="w-4 h-4" />
           </Button>
+        </div>
+
+        {/* Display full text container for readability */}
+        <div className="min-h-[50px] bg-muted/40 rounded-xl p-3 border border-border/40 text-center mb-6 flex items-center justify-center">
+          <p className="text-xs font-medium text-muted-foreground font-serif">
+            {hoveredCardText || "Hover over or tap a card to read its full text."}
+          </p>
         </div>
 
         {gameState === "won" ? (
@@ -170,6 +220,8 @@ export default function MemoryMatchPage() {
               <div 
                 key={card.id} 
                 onClick={() => handleCardClick(index)}
+                onMouseEnter={() => setHoveredCardText(card.fullText)}
+                onMouseLeave={() => setHoveredCardText("")}
                 className="aspect-square perspective-1000 cursor-pointer"
               >
                 <div className={cn(

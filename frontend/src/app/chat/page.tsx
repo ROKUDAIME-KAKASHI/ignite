@@ -27,24 +27,63 @@ const DEFAULT_SUGGESTIONS = [
 
 export default function ChatPage() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "ai",
-      content: `Peace be with you${user ? `, ${user.firstName}` : ""}! I am Abba, your spiritual guide AI. I am here to help clarify ideas, theology, and concepts related to the Christian faith. What is on your heart today?`,
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Load chat history
+  useEffect(() => {
+    const saved = localStorage.getItem("ignite_abba_chat_messages");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const mapped = parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }));
+        setMessages(mapped);
+        return;
+      } catch (e) {
+        console.error("Failed to load chat history", e);
+      }
+    }
+    // Default welcome message
+    setMessages([
+      {
+        id: "welcome",
+        role: "ai",
+        content: `Peace be with you${user ? `, ${user.firstName}` : ""}! I am Abba, your spiritual guide AI. I am here to help clarify ideas, theology, and concepts related to the Christian faith. What is on your heart today?`,
+        timestamp: new Date()
+      }
+    ]);
+  }, [user]);
+
+  // Save chat history
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem("ignite_abba_chat_messages", JSON.stringify(messages));
+    }
+  }, [messages]);
 
   useEffect(() => {
     getPublicChatSuggestions().then(res => {
       if (res && res.length > 0) setSuggestions(res);
     });
   }, []);
+
+  const clearChatHistory = () => {
+    localStorage.removeItem("ignite_abba_chat_messages");
+    setMessages([
+      {
+        id: "welcome",
+        role: "ai",
+        content: `Peace be with you${user ? `, ${user.firstName}` : ""}! I am Abba, your spiritual guide AI. I am here to help clarify ideas, theology, and concepts related to the Christian faith. What is on your heart today?`,
+        timestamp: new Date()
+      }
+    ]);
+  };
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -140,7 +179,14 @@ export default function ChatPage() {
             <p className="text-orange-100 text-xs font-bold uppercase tracking-wider">Theological Guide & Companion</p>
           </div>
         </div>
-        
+        <Button 
+          onClick={clearChatHistory} 
+          variant="ghost" 
+          size="sm" 
+          className="text-white/80 hover:text-white hover:bg-white/10 text-xs font-bold h-8 px-2.5 rounded-lg border border-white/20"
+        >
+          Clear Chat
+        </Button>
       </div>
 
       {/* Chat Area */}

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { createAnnouncement, createEvent, getChurches, createChurch } from "../actions";
 import QRCode from "react-qr-code";
 
-import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge, getAppointments, updateAppointmentStatus, deleteUser, loginAsUser } from "../actions";
+import { getAdminDashboardData, getAllPrayers, deletePrayer, getUpcomingEvents, getAnnouncements, deleteAnnouncement, deleteEvent, getQuotes, createQuote, toggleQuoteActive, deleteQuote, getAllChatSuggestions, createChatSuggestion, deleteChatSuggestion, getBadges, createBadge, deleteBadge, getAppointments, updateAppointmentStatus, deleteUser, loginAsUser, updateUserRole } from "../actions";
 import { getMissions } from "@/app/missions/actions";
 import { useRouter } from "next/navigation";
 
@@ -18,6 +18,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<"overview" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes">("overview");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   // Real data state
   const [stats, setStats] = useState({
@@ -45,6 +46,28 @@ export default function AdminDashboardPage() {
   const [newSuggestionText, setNewSuggestionText] = useState("");
   const [creatingQuote, setCreatingQuote] = useState(false);
   const [creatingSuggestion, setCreatingSuggestion] = useState(false);
+
+  const [newBadgeName, setNewBadgeName] = useState("");
+  const [newBadgeDesc, setNewBadgeDesc] = useState("");
+  const [newBadgeUrl, setNewBadgeUrl] = useState("");
+  const [creatingBadge, setCreatingBadge] = useState(false);
+
+  const handleCreateBadge = async () => {
+    if (!newBadgeName.trim() || !newBadgeDesc.trim()) return;
+    setCreatingBadge(true);
+    await createBadge(newBadgeName.trim(), newBadgeDesc.trim(), newBadgeUrl.trim() || "🏅");
+    setNewBadgeName("");
+    setNewBadgeDesc("");
+    setNewBadgeUrl("");
+    await fetchContent();
+    setCreatingBadge(false);
+  };
+
+  const handleDeleteBadge = async (id: string) => {
+    if (!confirm("Delete this badge? This will unassign it from all users.")) return;
+    await deleteBadge(id);
+    await fetchContent();
+  };
 
   const handleCreateQuote = async () => {
     if (!newQuoteText.trim() || !newQuoteAuthor.trim()) return;
@@ -102,9 +125,14 @@ export default function AdminDashboardPage() {
 
   const fetchDashboardData = async () => {
     const res = await getAdminDashboardData();
+    if (res.error === "Unauthorized") {
+      router.push("/admin");
+      return;
+    }
     if (res.success && res.stats && res.recentUsers) {
       setStats(res.stats);
       setRecentUsers(res.recentUsers);
+      setIsSuperAdmin(!!res.isSuperAdmin);
     }
   };
 
@@ -289,42 +317,60 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                       <div className="text-right flex flex-col items-end gap-2">
-                        <Badge className={cn("text-[10px] border-0", user.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400")}>
+                        <Badge className={cn("text-[10px] border-0", user.status === "Admin" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" : user.status === "Leader" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400")}>
                           {user.status}
                         </Badge>
                         <p className="text-[10px] text-muted-foreground block">{user.joined}</p>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={async () => {
-                              if (confirm("Log in as " + user.name + "?")) {
-                                const res = await loginAsUser(user.id);
-                                if (res.success) {
-                                  window.location.href = "/dashboard";
-                                } else {
-                                  alert(res.error);
+                        {isSuperAdmin && (
+                          <div className="flex gap-2 mt-1">
+                            <button 
+                              onClick={async () => {
+                                const newRole = user.role === "ADMIN" ? "MEMBER" : "ADMIN";
+                                if (confirm(`Change ${user.name}'s role to ${newRole}?`)) {
+                                  const res = await updateUserRole(user.id, newRole);
+                                  if (res.success) {
+                                    await fetchDashboardData();
+                                  } else {
+                                    alert(res.error);
+                                  }
                                 }
-                              }
-                            }}
-                            className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors"
-                          >
-                            Login As
-                          </button>
-                          <button 
-                            onClick={async () => {
-                              if (confirm("Delete " + user.name + " completely? This cannot be undone.")) {
-                                const res = await deleteUser(user.id);
-                                if (res.success) {
-                                  await fetchDashboardData();
-                                } else {
-                                  alert(res.error);
+                              }}
+                              className="text-[10px] bg-indigo-100 dark:bg-indigo-900/30 px-2 py-1 rounded text-indigo-700 dark:text-indigo-400 font-bold hover:bg-indigo-200 transition-colors"
+                            >
+                              {user.role === "ADMIN" ? "Demote" : "Make Admin"}
+                            </button>
+                            <button 
+                              onClick={async () => {
+                                if (confirm("Log in as " + user.name + "?")) {
+                                  const res = await loginAsUser(user.id);
+                                  if (res.success) {
+                                    window.location.href = "/dashboard";
+                                  } else {
+                                    alert(res.error);
+                                  }
                                 }
-                              }
-                            }}
-                            className="text-[10px] bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded text-red-700 dark:text-red-400 font-bold hover:bg-red-200 transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                              }}
+                              className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors"
+                            >
+                              Login As
+                            </button>
+                            <button 
+                              onClick={async () => {
+                                if (confirm("Delete " + user.name + " completely? This cannot be undone.")) {
+                                  const res = await deleteUser(user.id);
+                                  if (res.success) {
+                                    await fetchDashboardData();
+                                  } else {
+                                    alert(res.error);
+                                  }
+                                }
+                              }}
+                              className="text-[10px] bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded text-red-700 dark:text-red-400 font-bold hover:bg-red-200 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -778,6 +824,57 @@ export default function AdminDashboardPage() {
                     <button onClick={() => handleDeleteSuggestion(s.id)} className="text-red-500 text-xs font-bold hover:underline">
                       Delete
                     </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Badges Management ── */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <h2 className="text-lg font-bold text-foreground mb-4">Badges & Medals</h2>
+              
+              <div className="space-y-4 mb-6">
+                <Input value={newBadgeName} onChange={e => setNewBadgeName(e.target.value)} placeholder="Badge Name (e.g. Gospel Pilgrim)" />
+                <Input value={newBadgeDesc} onChange={e => setNewBadgeDesc(e.target.value)} placeholder="Description (e.g. Read all Gospels)" />
+                <Input value={newBadgeUrl} onChange={e => setNewBadgeUrl(e.target.value)} placeholder="Emoji Icon or Image URL (defaults to 🏅)" />
+                <button onClick={handleCreateBadge} disabled={creatingBadge} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold w-full">
+                  {creatingBadge ? "Adding..." : "Add Badge"}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {badges.map(b => (
+                  <div key={b.id} className="p-4 border rounded-xl flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">{b.imageUrl && b.imageUrl.length < 5 ? b.imageUrl : "🏅"}</span>
+                      <div>
+                        <p className="text-sm font-bold">{b.name}</p>
+                        <p className="text-xs text-muted-foreground">{b.description}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => handleDeleteBadge(b.id)} className="text-red-500 text-xs font-bold hover:underline shrink-0 ml-2">
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Spiritual Missions View ── */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <h2 className="text-lg font-bold text-foreground mb-4">Active Spiritual Missions</h2>
+              <p className="text-xs text-muted-foreground mb-4">Active missions youth can complete to earn Grace Points.</p>
+              
+              <div className="space-y-3">
+                {missions.map(m => (
+                  <div key={m.id} className="p-4 border rounded-xl flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                    <div>
+                      <p className="font-bold text-sm text-foreground flex items-center gap-2">⚔️ {m.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{m.description}</p>
+                    </div>
+                    <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 font-bold shrink-0 ml-3 border-0">
+                      +{m.xpReward} GP
+                    </Badge>
                   </div>
                 ))}
               </div>

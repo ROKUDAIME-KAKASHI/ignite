@@ -26,13 +26,16 @@ export default function LiveTriviaPage() {
   
   // Game State
   const [players, setPlayers] = useState<{id: string, name: string, score: number}[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [roomQuestionIndices, setRoomQuestionIndices] = useState<number[]>([]);
+  const [currentRound, setCurrentRound] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(15);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [myScore, setMyScore] = useState(0);
   
-  const question = TRIVIA_QUESTIONS[currentQuestionIndex % TRIVIA_QUESTIONS.length];
+  const question = roomQuestionIndices.length > 0 && roomQuestionIndices[currentRound] !== undefined
+    ? TRIVIA_QUESTIONS[roomQuestionIndices[currentRound]]
+    : TRIVIA_QUESTIONS[0];
 
   useEffect(() => {
     if (user && mode === "lobby") {
@@ -67,16 +70,26 @@ export default function LiveTriviaPage() {
         
         if (remaining === 0 && activeRoom?.host) {
           // Host automatically advances or ends if time runs out
-          if (currentQuestionIndex >= 4) {
+          if (currentRound >= 4) {
              gameChannel?.send({ type: 'broadcast', event: 'end_game' });
+             setMode("results");
+             if (user) {
+               awardXP(myScore > 0 ? 50 : 10, "Participated in Live Trivia").then(res => {
+                 if (res.success && res.xp) setUser({...user, xp: res.xp, level: res.level});
+               });
+             }
           } else {
-             gameChannel?.send({ type: 'broadcast', event: 'next_question', payload: { index: Math.floor(Math.random() * TRIVIA_QUESTIONS.length) } });
+             const nextRound = currentRound + 1;
+             gameChannel?.send({ type: 'broadcast', event: 'next_question', payload: { round: nextRound } });
+             setCurrentRound(nextRound);
+             setQuestionStartTime(Date.now());
+             setHasAnswered(false);
           }
         }
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [mode, questionStartTime, currentQuestionIndex, activeRoom, gameChannel]);
+  }, [mode, questionStartTime, currentRound, activeRoom, gameChannel, myScore, user]);
 
   const handleCreateRoom = () => {
     if (!user) return;
@@ -116,10 +129,11 @@ export default function LiveTriviaPage() {
     }).on('broadcast', { event: 'start_game' }, ({ payload }: any) => {
       setMode("playing");
       setQuestionStartTime(Date.now());
-      setCurrentQuestionIndex(payload?.index || 0);
+      setRoomQuestionIndices(payload.indices || []);
+      setCurrentRound(0);
       setHasAnswered(false);
     }).on('broadcast', { event: 'next_question' }, ({ payload }: any) => {
-      setCurrentQuestionIndex(payload.index);
+      setCurrentRound(payload.round);
       setQuestionStartTime(Date.now());
       setHasAnswered(false);
     }).on('broadcast', { event: 'end_game' }, () => {
@@ -140,11 +154,18 @@ export default function LiveTriviaPage() {
 
   const startGame = () => {
     if (!gameChannel) return;
-    const startIndex = Math.floor(Math.random() * TRIVIA_QUESTIONS.length);
-    gameChannel.send({ type: 'broadcast', event: 'start_game', payload: { index: startIndex } });
+    const indices: number[] = [];
+    while (indices.length < 5) {
+      const idx = Math.floor(Math.random() * TRIVIA_QUESTIONS.length);
+      if (!indices.includes(idx)) {
+        indices.push(idx);
+      }
+    }
+    gameChannel.send({ type: 'broadcast', event: 'start_game', payload: { indices } });
+    setRoomQuestionIndices(indices);
+    setCurrentRound(0);
     setMode("playing");
     setQuestionStartTime(Date.now());
-    setCurrentQuestionIndex(startIndex);
     setHasAnswered(false);
   };
 
@@ -244,7 +265,7 @@ export default function LiveTriviaPage() {
         <div className="flex-1 p-6 flex flex-col max-w-md mx-auto w-full">
           <div className="flex justify-between items-center mb-6">
             <div className="bg-muted px-4 py-1.5 rounded-full text-sm font-bold border">
-              Question {currentQuestionIndex + 1} / 5
+              Question {currentRound + 1} / 5
             </div>
             <div className={cn("text-xl font-black font-serif", timeLeft <= 5 ? "text-red-500 animate-pulse" : "text-foreground")}>
               {timeLeft}s
@@ -252,7 +273,7 @@ export default function LiveTriviaPage() {
           </div>
 
           <motion.div 
-            key={currentQuestionIndex}
+            key={currentRound}
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
             className="bg-card rounded-3xl p-6 shadow-xl card-holy border border-primary/20 mb-8 min-h-[150px] flex items-center justify-center"
           >

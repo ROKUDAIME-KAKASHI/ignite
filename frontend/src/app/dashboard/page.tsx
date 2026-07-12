@@ -162,6 +162,12 @@ export default async function DashboardPage() {
               <span className="candle-flicker">🕯️</span>
               <span className="text-white text-xs font-semibold">{streak} Day Streak</span>
             </div>
+            {session?.role === "ADMIN" && (
+              <a href="/admin/dashboard" className="flex items-center gap-1.5 bg-red-600/80 hover:bg-red-700 text-white rounded-full px-3 py-1.5 border border-red-500 shadow-lg transition-all transform hover:scale-105 active:scale-95">
+                <span>🛡️</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Admin Console</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

@@ -8,34 +8,17 @@ import Link from "next/link";
 import { awardXP } from "@/app/actions/gamification";
 import { useAuth } from "@/context/AuthContext";
 
-const BIBLICAL_WORDS = [
-  { word: "GRACE", clue: "Unmerited favor from God" },
-  { word: "FAITH", clue: "Confidence in what we hope for" },
-  { word: "JESUS", clue: "The Son of God" },
-  { word: "DAVID", clue: "A man after God's own heart" },
-  { word: "MOSES", clue: "Led the Israelites out of Egypt" },
-  { word: "PEACE", clue: "A fruit of the Spirit, beyond understanding" },
-  { word: "CROSS", clue: "Symbol of Jesus' sacrifice" },
-  { word: "GLORY", clue: "Magnificence and great beauty of God" },
-  { word: "MERCY", clue: "Compassion or forgiveness shown" },
-  { word: "ANGEL", clue: "Heavenly messenger" },
-  { word: "ALTAR", clue: "Structure for offering sacrifices" },
-  { word: "BIBLE", clue: "The Holy Scriptures" },
-  { word: "PETER", clue: "The rock upon which the church was built" },
-  { word: "MARYS", clue: "The mother of Jesus (plural/possessive variant)" },
-  { word: "SPIRIT", clue: "The Holy ____" },
-  { word: "BLOOD", clue: "Shed for the remission of sins" },
-  { word: "BREAD", clue: "Jesus is the ____ of life" },
-  { word: "WATER", clue: "Used in baptism" },
-  { word: "LIGHT", clue: "Let there be ____" },
-  { word: "TRUTH", clue: "The way, the ____, and the life" },
-  { word: "RESURRECTION", clue: "Rising from the dead" },
-  { word: "COMMANDMENT", clue: "Divine rule" },
-  { word: "REVELATION", clue: "The last book of the Bible" },
-  { word: "BETHLEHEM", clue: "Birthplace of Jesus" }
-];
+import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 
-let initialWord = { word: "GRACE", clue: "Unmerited favor from God" };
+const BIBLICAL_WORDS = TRIVIA_QUESTIONS.filter(
+  q => /^[a-zA-Z]+$/.test(q.a) && q.a.length >= 4 && q.a.length <= 10
+).map(q => ({ word: q.a.toUpperCase(), clue: q.q }));
+
+if (BIBLICAL_WORDS.length === 0) {
+  BIBLICAL_WORDS.push({ word: "GRACE", clue: "Unmerited favor from God" });
+}
+
+let initialWord = BIBLICAL_WORDS[0];
 if (typeof window !== "undefined") {
   initialWord = BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)];
 }
@@ -58,12 +41,43 @@ export default function WordlePage() {
   const wordLength = targetWord.length;
   const [awarded, setAwarded] = useState(false);
 
+  // Load state
   useEffect(() => {
-    // Select randomly on client mount to avoid hydration mismatch
+    const saved = localStorage.getItem("ignite_wordle_state");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setGuesses(parsed.guesses);
+        setCurrentGuess(parsed.currentGuess);
+        setGameOver(parsed.gameOver);
+        setWon(parsed.won);
+        setTargetWordObj(parsed.targetWordObj);
+        setAwarded(parsed.awarded);
+        return;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    // Random select on client mount to avoid hydration mismatch
     setTargetWordObj(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
   }, []);
 
+  // Save state
+  useEffect(() => {
+    if (targetWordObj) {
+      localStorage.setItem("ignite_wordle_state", JSON.stringify({
+        guesses,
+        currentGuess,
+        gameOver,
+        won,
+        targetWordObj,
+        awarded
+      }));
+    }
+  }, [guesses, currentGuess, gameOver, won, targetWordObj, awarded]);
+
   const resetGame = () => {
+    localStorage.removeItem("ignite_wordle_state");
     setTargetWordObj(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
     setGuesses([]);
     setCurrentGuess("");

@@ -10,24 +10,11 @@ import { Loader2, Key, Skull, Trophy, RotateCcw, ChevronLeft } from "lucide-reac
 import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-
-const RIDDLES = [
-  {
-    question: "I was thrown into a pit, sold for silver, and eventually ruled over those who betrayed me. Who am I?",
-    answer: "Joseph"
-  },
-  {
-    question: "I stood tall and proud, a giant among men, but a single smooth stone brought me to my end. Who am I?",
-    answer: "Goliath"
-  },
-  {
-    question: "I was commanded to build a massive wooden box, though there was no rain in sight. Who am I?",
-    answer: "Noah"
-  }
-];
+import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 
 export default function LionsDenPage() {
   const { user, setUser } = useAuth();
+  const [activeRiddles, setActiveRiddles] = useState<{ question: string; answer: string }[]>([]);
   const [currentLevel, setCurrentLevel] = useState(0);
   const [guess, setGuess] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -35,11 +22,50 @@ export default function LionsDenPage() {
   const [gameState, setGameState] = useState<"playing" | "won" | "lost">("playing");
   const [submitting, setSubmitting] = useState(false);
 
+  // Load state
   useEffect(() => {
+    const saved = localStorage.getItem("ignite_lions_den_state");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setActiveRiddles(parsed.activeRiddles);
+        setCurrentLevel(parsed.currentLevel);
+        setGuess(parsed.guess);
+        setAttemptsLeft(parsed.attemptsLeft);
+        setGameState(parsed.gameState);
+        return;
+      } catch (e) {
+        console.error(e);
+      }
+    }
     startNewGame();
   }, []);
 
+  // Save state
+  useEffect(() => {
+    if (activeRiddles.length > 0) {
+      localStorage.setItem("ignite_lions_den_state", JSON.stringify({
+        activeRiddles,
+        currentLevel,
+        guess,
+        attemptsLeft,
+        gameState
+      }));
+    }
+  }, [activeRiddles, currentLevel, guess, attemptsLeft, gameState]);
+
   const startNewGame = () => {
+    localStorage.removeItem("ignite_lions_den_state");
+    // Pick 3 random questions from the central trivia bank
+    const shuffled = [...TRIVIA_QUESTIONS]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+      .map(qObj => ({
+        question: qObj.q,
+        answer: qObj.a
+      }));
+      
+    setActiveRiddles(shuffled);
     setCurrentLevel(0);
     setGuess("");
     setErrorMsg("");
@@ -50,12 +76,14 @@ export default function LionsDenPage() {
   const handleGuess = () => {
     if (gameState !== "playing" || !guess.trim()) return;
 
-    const currentRiddle = RIDDLES[currentLevel];
+    const currentRiddle = activeRiddles[currentLevel];
+    if (!currentRiddle) return;
+    
     if (guess.trim().toLowerCase() === currentRiddle.answer.toLowerCase()) {
       // Correct
       setErrorMsg("");
       setGuess("");
-      if (currentLevel + 1 >= RIDDLES.length) {
+      if (currentLevel + 1 >= activeRiddles.length) {
         handleWin();
       } else {
         setCurrentLevel(l => l + 1);
@@ -112,14 +140,14 @@ export default function LionsDenPage() {
           {gameState === "playing" ? (
             <div className="animate-in fade-in slide-in-from-bottom-4">
               <div className="flex justify-between items-center mb-8">
-                <Badge variant="outline" className="font-bold">Door {currentLevel + 1} of {RIDDLES.length}</Badge>
+                <Badge variant="outline" className="font-bold">Door {currentLevel + 1} of {activeRiddles.length}</Badge>
                 <div className="flex items-center gap-2 text-sm font-bold text-red-500">
                   <Skull className="w-4 h-4" /> {attemptsLeft} attempts left
                 </div>
               </div>
 
               <p className="text-xl md:text-2xl font-serif leading-relaxed mb-10 italic">
-                "{RIDDLES[currentLevel].question}"
+                "{activeRiddles[currentLevel]?.question || ""}"
               </p>
 
               <div className="max-w-xs mx-auto">

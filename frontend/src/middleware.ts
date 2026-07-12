@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { decrypt } from "@/lib/auth";
 
 const protectedRoutes = [
   "/dashboard",
@@ -23,9 +24,9 @@ const protectedRoutes = [
   "/chess"
 ];
 
-export function middleware(request: NextRequest) {
-  const session = request.cookies.get("session");
-  const adminSession = request.cookies.get("admin_session");
+export async function middleware(request: NextRequest) {
+  const session = request.cookies.get("session")?.value;
+  const adminSession = request.cookies.get("admin_session")?.value;
   const path = request.nextUrl.pathname;
 
   // Check if it's a protected route
@@ -36,8 +37,32 @@ export function middleware(request: NextRequest) {
   }
 
   // Protect admin routes
-  if (path.startsWith("/admin") && path !== "/admin" && !adminSession) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+  if (path.startsWith("/admin") && path !== "/admin") {
+    let isAuthorizedAdmin = false;
+
+    // Check super admin session first
+    if (adminSession) {
+      try {
+        const payload = await decrypt(adminSession);
+        if (payload?.role === "SUPER_ADMIN") {
+          isAuthorizedAdmin = true;
+        }
+      } catch {}
+    }
+
+    // Check standard user session for ADMIN role
+    if (!isAuthorizedAdmin && session) {
+      try {
+        const payload = await decrypt(session);
+        if (payload?.role === "ADMIN") {
+          isAuthorizedAdmin = true;
+        }
+      } catch {}
+    }
+
+    if (!isAuthorizedAdmin) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
   }
 
   let response = NextResponse.next();

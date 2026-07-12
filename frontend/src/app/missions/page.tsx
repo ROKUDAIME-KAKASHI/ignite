@@ -35,7 +35,26 @@ export default function MissionsPage() {
   useEffect(() => {
     getMissions().then(data => {
       setMissions(data.missions);
-      setCompleted(data.completedIds);
+      
+      // Load local completions to verify
+      const localSaved = localStorage.getItem("ignite_completed_missions");
+      let localIds: string[] = [];
+      if (localSaved) {
+        try {
+          const parsed = JSON.parse(localSaved);
+          const todayStr = new Date().toDateString();
+          if (parsed.date === todayStr) {
+            localIds = parsed.ids || [];
+          } else {
+            localStorage.removeItem("ignite_completed_missions");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      
+      const merged = Array.from(new Set([...data.completedIds, ...localIds]));
+      setCompleted(merged);
     });
   }, []);
 
@@ -53,7 +72,16 @@ export default function MissionsPage() {
     if (res.error) {
       setErrorMsg(prev => ({ ...prev, [id]: res.error || "Failed to submit" }));
     } else {
-      setCompleted((p) => [...p, id]);
+      const todayStr = new Date().toDateString();
+      const updatedCompleted = [...completed, id];
+      setCompleted(updatedCompleted);
+      
+      // Save locally
+      localStorage.setItem("ignite_completed_missions", JSON.stringify({
+        date: todayStr,
+        ids: updatedCompleted
+      }));
+      
       setSelectedMission(null);
       setReflection("");
       refreshUser(); // Sync points across app
@@ -117,7 +145,11 @@ export default function MissionsPage() {
 
         {/* Mission Cards */}
         <div className="space-y-4">
-          {missions.map((m, i) => {
+          {missions.filter(m => {
+            if (activeTab === "Active") return !completed.includes(m.id);
+            if (activeTab === "Completed") return completed.includes(m.id);
+            return true;
+          }).map((m, i) => {
             const done = completed.includes(m.id);
             return (
               <motion.div

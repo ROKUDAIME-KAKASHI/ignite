@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, ChevronLeft, Dices, Trophy, Users, ShieldAlert } from "lucide-react";
-import Link from "next/link";
+import { Plus, ChevronLeft, Dices, Trophy, Users, ShieldAlert, Share2, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { awardXP } from "@/app/actions/gamification";
 import { Badge } from "@/components/ui/badge";
@@ -50,16 +49,16 @@ const HOME_STRETCH: Record<Color, {r: number, c: number}[]> = {
 const COLORS = ["red", "green", "yellow", "blue"] as Color[];
 
 const BG_COLORS = {
-  red: "bg-red-500",
-  green: "bg-green-500",
-  yellow: "bg-yellow-500",
-  blue: "bg-blue-500"
+  red: "bg-gradient-to-br from-red-400 via-red-500 to-red-600 hover:from-red-300 hover:to-red-500 shadow-[inset_0_3px_6px_rgba(255,255,255,0.6),inset_0_-3px_6px_rgba(0,0,0,0.4),0_4px_8px_rgba(0,0,0,0.5)]",
+  green: "bg-gradient-to-br from-green-400 via-green-500 to-green-600 hover:from-green-300 hover:to-green-500 shadow-[inset_0_3px_6px_rgba(255,255,255,0.6),inset_0_-3px_6px_rgba(0,0,0,0.4),0_4px_8px_rgba(0,0,0,0.5)]",
+  yellow: "bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 shadow-[inset_0_3px_6px_rgba(255,255,255,0.6),inset_0_-3px_6px_rgba(0,0,0,0.4),0_4px_8px_rgba(0,0,0,0.5)]",
+  blue: "bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 hover:from-blue-300 hover:to-blue-500 shadow-[inset_0_3px_6px_rgba(255,255,255,0.6),inset_0_-3px_6px_rgba(0,0,0,0.4),0_4px_8px_rgba(0,0,0,0.5)]"
 };
 const BORDER_COLORS = {
-  red: "border-red-600",
-  green: "border-green-600",
-  yellow: "border-yellow-600",
-  blue: "border-blue-600"
+  red: "border-t-red-300 border-l-red-300 border-r-red-700 border-b-red-700 border-[0.5px]",
+  green: "border-t-green-300 border-l-green-300 border-r-green-700 border-b-green-700 border-[0.5px]",
+  yellow: "border-t-amber-300 border-l-amber-300 border-r-amber-700 border-b-amber-700 border-[0.5px]",
+  blue: "border-t-blue-300 border-l-blue-300 border-r-blue-700 border-b-blue-700 border-[0.5px]"
 };
 
 /* ─── Main Component ─── */
@@ -73,8 +72,103 @@ export default function BibleLudoPage() {
   const [gameChannel, setGameChannel] = useState<any>(null);
   const [liveRooms, setLiveRooms] = useState<any[]>([]);
   const [activeRoom, setActiveRoom] = useState<any>(null);
-  const [lobbyPlayers, setLobbyPlayers] = useState<{id: string, name: string}[]>([]);
+  const [lobbyPlayers, setLobbyPlayers] = useState<any[]>([]);
   const [myColor, setMyColor] = useState<Color>("red");
+  const [isReady, setIsReady] = useState(false);
+  const [toasts, setToasts] = useState<{ id: string; message: string }[]>([]);
+  
+  const prevPlayersRef = useRef<any[]>([]);
+
+  const showToast = (message: string) => {
+    const id = Math.random().toString();
+    setToasts(prev => [...prev, { id, message }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
+
+  const findFreeColorSlot = (playersList: any[], userId: string) => {
+    const isHost = activeRoom ? activeRoom.id === userId : true;
+    if (isHost) return "red" as Color;
+
+    const takenColors = playersList
+      .filter((p: any) => p.id !== userId && p.colorSlot)
+      .map((p: any) => p.colorSlot);
+    
+    const freeColor = COLORS.find(c => !takenColors.includes(c));
+    return (freeColor || "green") as Color;
+  };
+
+  const updateLobbyPlayersList = (newList: any[]) => {
+    const prevList = prevPlayersRef.current;
+    
+    // Detect Joins
+    newList.forEach((p: any) => {
+      const existed = prevList.some((oldP: any) => oldP.id === p.id);
+      if (!existed && p.id !== user?.id) {
+        showToast(`${p.name} joined the room`);
+      }
+    });
+
+    // Detect Leaves
+    prevList.forEach((p: any) => {
+      const exists = newList.some((newP: any) => newP.id === p.id);
+      if (!exists && p.id !== user?.id) {
+        showToast(`${p.name} left the room`);
+      }
+    });
+
+    prevPlayersRef.current = newList;
+    setLobbyPlayers(newList);
+  };
+
+  const selectColorSlot = async (color: Color) => {
+    if (!user || !gameChannel) return;
+    
+    const state = gameChannel.presenceState();
+    const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
+    const isTaken = playersList.some((p: any) => p.id !== user.id && p.colorSlot === color);
+    if (isTaken) {
+      showToast("Color slot is already taken!");
+      return;
+    }
+
+    const isHost = activeRoom?.host || false;
+    const ourPresence = playersList.find((p: any) => p.id === user.id);
+    const isReadyState = ourPresence?.isReady || isHost;
+    
+    setMyColor(color);
+    
+    await gameChannel.track({
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      isHost,
+      colorSlot: color,
+      isReady: isReadyState
+    });
+  };
+
+  const toggleReady = async () => {
+    if (!user || !gameChannel || activeRoom?.host) return;
+    
+    const newReadyState = !isReady;
+    setIsReady(newReadyState);
+    
+    await gameChannel.track({
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      isHost: false,
+      colorSlot: myColor,
+      isReady: newReadyState
+    });
+  };
+
+  const [roomPlayers, setRoomPlayers] = useState<Record<Color, { id: string; name: string; isBot: boolean }>>({
+    red: { id: "bot_red", name: "Red Bot", isBot: true },
+    green: { id: "bot_green", name: "Green Bot", isBot: true },
+    yellow: { id: "bot_yellow", name: "Yellow Bot", isBot: true },
+    blue: { id: "bot_blue", name: "Blue Bot", isBot: true }
+  });
 
   const [turn, setTurn] = useState<Color>("red");
   const [dice, setDice] = useState<number | null>(null);
@@ -89,7 +183,68 @@ export default function BibleLudoPage() {
   });
   const [winner, setWinner] = useState<Color | null>(null);
   const [triviaResult, setTriviaResult] = useState<"correct" | "wrong" | null>(null);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
+  // Initialize room players depending on mode
+  const initializeRoomPlayers = (mode: typeof gameMode, playersList: any[] = []) => {
+    if (mode === "solo") {
+      const mapping = {
+        red: { id: user?.id || "player_red", name: user?.firstName || "You", isBot: false },
+        green: { id: "bot_green", name: "Green Bot (AI)", isBot: true },
+        yellow: { id: "bot_yellow", name: "Yellow Bot (AI)", isBot: true },
+        blue: { id: "bot_blue", name: "Blue Bot (AI)", isBot: true }
+      };
+      setRoomPlayers(mapping);
+      return mapping;
+    } else if (mode === "team") {
+      const mapping = {
+        red: { id: user?.id || "player_red", name: user?.firstName || "You", isBot: false },
+        yellow: { id: "bot_yellow", name: "Yellow Partner (AI)", isBot: true },
+        green: { id: "bot_green", name: "Green Opponent (AI)", isBot: true },
+        blue: { id: "bot_blue", name: "Blue Opponent (AI)", isBot: true }
+      };
+      setRoomPlayers(mapping);
+      return mapping;
+    } else if (mode === "local") {
+      const mapping = {
+        red: { id: "local_red", name: "Red Player", isBot: false },
+        green: { id: "local_green", name: "Green Player", isBot: false },
+        yellow: { id: "local_yellow", name: "Yellow Player", isBot: false },
+        blue: { id: "local_blue", name: "Blue Player", isBot: false }
+      };
+      setRoomPlayers(mapping);
+      return mapping;
+    } else if (mode === "live") {
+      const sorted = [...playersList].sort((a: any, b: any) => {
+        if (a.isHost && !b.isHost) return -1;
+        if (!a.isHost && b.isHost) return 1;
+        return a.id.localeCompare(b.id);
+      });
+      const mapping = {
+        red: sorted[0] ? { id: sorted[0].id, name: sorted[0].name, isBot: false } : { id: "bot_red", name: "Red Bot (AI)", isBot: true },
+        green: sorted[1] ? { id: sorted[1].id, name: sorted[1].name, isBot: false } : { id: "bot_green", name: "Green Bot (AI)", isBot: true },
+        yellow: sorted[2] ? { id: sorted[2].id, name: sorted[2].name, isBot: false } : { id: "bot_yellow", name: "Yellow Bot (AI)", isBot: true },
+        blue: sorted[3] ? { id: sorted[3].id, name: sorted[3].name, isBot: false } : { id: "bot_blue", name: "Blue Bot (AI)", isBot: true }
+      };
+      setRoomPlayers(mapping);
+      return mapping;
+    }
+  };
+
+  // Monitor URL params for direct sharing invite link
+  useEffect(() => {
+    if (typeof window !== "undefined" && user && gameMode === "setup") {
+      const params = new URLSearchParams(window.location.search);
+      const roomParam = params.get("room");
+      if (roomParam && !activeRoom) {
+        // Clear param to prevent loop
+        window.history.replaceState({}, document.title, window.location.pathname);
+        handleJoinRoomById(roomParam);
+      }
+    }
+  }, [user, gameMode, activeRoom]);
+
+  // Global lobby listing channel
   useEffect(() => {
     if (user && (gameMode === "setup" || gameMode === "lobby")) {
       const channel = supabase.channel('ludo_lobby', {
@@ -123,19 +278,19 @@ export default function BibleLudoPage() {
       const isBotTurn = gameMode !== "local" && (
         (gameMode === "solo" && turn !== "red") || 
         (gameMode === "team" && turn !== "red") ||
-        (gameMode === "live" && activeRoom && activeRoom.host && COLORS.indexOf(turn) >= activeRoom.players)
+        (gameMode === "live" && activeRoom && activeRoom.host && roomPlayers[turn]?.isBot)
       );
 
       if (!hasMoves) {
-        setTimeout(() => nextTurn(), 1000);
+        setTimeout(() => nextTurn(false, gameMode === "live"), 1000);
       } else if (isBotTurn) {
         // AI Turn
         setTimeout(() => {
           const movable = tokens[turn].map((t, idx) => ({ idx, can: canMove(turn, idx, dice) })).filter(m => m.can);
           if (movable.length > 0) {
-            moveToken(turn, movable[0].idx, dice);
+            moveToken(turn, movable[0].idx, dice, gameMode === "live");
           } else {
-            nextTurn();
+            nextTurn(false, gameMode === "live");
           }
         }, 1200);
       }
@@ -144,14 +299,14 @@ export default function BibleLudoPage() {
       const isBotTurn = gameMode !== "local" && (
         (gameMode === "solo" && turn !== "red") || 
         (gameMode === "team" && turn !== "red") ||
-        (gameMode === "live" && activeRoom && activeRoom.host && COLORS.indexOf(turn) >= activeRoom.players)
+        (gameMode === "live" && activeRoom && activeRoom.host && roomPlayers[turn]?.isBot)
       );
         
       if (isBotTurn) {
-        setTimeout(() => executeRoll(false), 800);
+        setTimeout(() => executeRoll(gameMode === "live"), 800);
       }
     }
-  }, [dice, turn, isRolling, trivia, winner, gameMode, tokens]);
+  }, [dice, turn, isRolling, trivia, winner, gameMode, tokens, roomPlayers, activeRoom]);
 
   const canMove = (color: Color, tokenIdx: number, roll: number) => {
     const pos = tokens[color][tokenIdx];
@@ -163,7 +318,6 @@ export default function BibleLudoPage() {
       let nextPos = pos + roll;
       // Check if entering home stretch
       const start = START_INDEX[color];
-      const entryPos = start === 1 ? 0 : start - 1; // Pos before start
       
       let relativeMoved = (pos - start + 52) % 52;
       let nextRelative = relativeMoved + roll;
@@ -192,8 +346,12 @@ export default function BibleLudoPage() {
     }
     setDice(null);
 
-    if (sync && gameMode === "live" && gameChannel && turn === myColor) {
-      gameChannel.send({ type: 'broadcast', event: 'next_turn', payload: { extraTurn, nextColor } });
+    if (sync && gameMode === "live" && gameChannel) {
+      const isMyTurn = turn === myColor;
+      const isBotHostTurn = activeRoom?.host && roomPlayers[turn]?.isBot;
+      if (isMyTurn || isBotHostTurn) {
+        gameChannel.send({ type: 'broadcast', event: 'next_turn', payload: { extraTurn, nextColor } });
+      }
     }
   };
 
@@ -364,37 +522,202 @@ export default function BibleLudoPage() {
       setTimeout(() => {
         setTriviaResult(null);
         setTrivia(null);
-        nextTurn();
+        nextTurn(false, gameMode === "live");
       }, 2500);
     }
   };
 
-  // Render board
+  // Lobby management logic
+  const handleCreateRoom = () => {
+    if (!user) return;
+    const roomName = `${user.firstName}'s Room`;
+    const roomData = { id: user.id, name: roomName, players: 1, max: 4, host: true };
+    setActiveRoom(roomData);
+    setMyColor("red");
+    setGameMode("lobby");
+    
+    const gChannel = supabase.channel(`ludo_room_${user.id}`, {
+      config: { presence: { key: user.id } }
+    });
+    
+    gChannel.on('presence', { event: 'sync' }, () => {
+      const state = gChannel.presenceState();
+      const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
+      
+      updateLobbyPlayersList(playersList);
+      
+      const me = playersList.find((p: any) => p.id === user.id);
+      if (me?.colorSlot) {
+        setMyColor(me.colorSlot);
+      }
+      
+      if (lobbyChannel) {
+        lobbyChannel.track({ isHost: true, roomName: roomName, players: playersList.length });
+      }
+    }).subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await gChannel.track({
+          id: user.id,
+          name: `${user.firstName} ${user.lastName}`,
+          isHost: true,
+          colorSlot: "red",
+          isReady: true
+        });
+      }
+    });
+    
+    setGameChannel(gChannel);
+  };
+
+  const handleJoinRoomById = (roomId: string) => {
+    if (!user) return;
+    const roomData = { id: roomId, name: "Joined Room", players: 1, max: 4, host: false };
+    setActiveRoom(roomData);
+    setGameMode("lobby");
+    
+    const gChannel = supabase.channel(`ludo_room_${roomId}`, {
+      config: { presence: { key: user.id } }
+    });
+    
+    gChannel.on('presence', { event: 'sync' }, () => {
+      const state = gChannel.presenceState();
+      const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
+      
+      updateLobbyPlayersList(playersList);
+      
+      const me = playersList.find((p: any) => p.id === user.id);
+      if (me?.colorSlot) {
+        setMyColor(me.colorSlot);
+        setIsReady(me.isReady || false);
+      }
+    })
+    .on('broadcast', { event: 'start_game' }, ({ payload }) => {
+      setRoomPlayers(payload.roomPlayers);
+      setGameMode("live");
+      setTokens(payload.tokens);
+      setWinner(null);
+      setTurn("red");
+    })
+    .on('broadcast', { event: 'roll_dice' }, ({ payload }) => {
+      setDice(payload.result);
+    })
+    .on('broadcast', { event: 'next_turn' }, ({ payload }) => {
+      setTurn(payload.nextColor);
+      setDice(null);
+    })
+    .on('broadcast', { event: 'move_token' }, ({ payload }) => {
+      forceMoveToken(payload.color, payload.tokenIdx, payload.newTokens, payload.extraTurn, payload.isWin, payload.winnerColor);
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        const state = gChannel.presenceState();
+        const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
+        const freeColor = findFreeColorSlot(playersList, user.id);
+        
+        await gChannel.track({
+          id: user.id,
+          name: `${user.firstName} ${user.lastName}`,
+          isHost: false,
+          colorSlot: freeColor,
+          isReady: false
+        });
+      }
+    });
+    
+    setGameChannel(gChannel);
+  };
+
+  const startLiveGame = () => {
+    if (!gameChannel) return;
+    
+    const nonHosts = lobbyPlayers.filter((p: any) => !p.isHost);
+    const allReady = nonHosts.every((p: any) => p.isReady);
+    if (!allReady) {
+      showToast("Waiting for all players to be Ready!");
+      return;
+    }
+
+    const compiledPlayers: any = {
+      red: { id: "bot_red", name: "Red Bot (AI)", isBot: true },
+      green: { id: "bot_green", name: "Green Bot (AI)", isBot: true },
+      yellow: { id: "bot_yellow", name: "Yellow Bot (AI)", isBot: true },
+      blue: { id: "bot_blue", name: "Blue Bot (AI)", isBot: true }
+    };
+
+    lobbyPlayers.forEach((p: any) => {
+      if (p.colorSlot) {
+        compiledPlayers[p.colorSlot] = { id: p.id, name: p.name, isBot: false };
+      }
+    });
+
+    const initialTokens = {
+      red: [-1, -1, -1, -1],
+      green: [-1, -1, -1, -1],
+      yellow: [-1, -1, -1, -1],
+      blue: [-1, -1, -1, -1]
+    };
+    
+    gameChannel.send({
+      type: 'broadcast',
+      event: 'start_game',
+      payload: {
+        roomPlayers: compiledPlayers,
+        tokens: initialTokens
+      }
+    });
+    
+    setGameMode("live");
+    setTokens(initialTokens);
+    setWinner(null);
+    setTurn("red");
+  };
+
+  const handleLeaveRoom = async () => {
+    if (gameChannel) {
+      await supabase.removeChannel(gameChannel);
+      setGameChannel(null);
+    }
+    if (activeRoom?.host && lobbyChannel) {
+      await lobbyChannel.track({ isHost: false });
+    }
+    setActiveRoom(null);
+    setLobbyPlayers([]);
+    setIsReady(false);
+    setGameMode("setup");
+  };
+
+  const getPlayerName = (color: Color) => {
+    if (gameMode === "local") {
+      return `${color.charAt(0).toUpperCase() + color.slice(1)} Player`;
+    }
+    if (gameMode === "solo") {
+      if (color === "red") return user?.firstName || "You";
+      return `${color.charAt(0).toUpperCase() + color.slice(1)} Bot`;
+    }
+    if (gameMode === "team") {
+      if (color === "red") return user?.firstName || "You";
+      if (color === "yellow") return "Teammate (AI)";
+      return `${color.charAt(0).toUpperCase() + color.slice(1)} Opponent (AI)`;
+    }
+    if (gameMode === "live") {
+      return roomPlayers[color]?.name || "AI Bot";
+    }
+    return "AI Bot";
+  };
+
+  const shareRoomLink = () => {
+    if (typeof window !== "undefined" && activeRoom) {
+      const link = `${window.location.origin}/ludo?room=${activeRoom.id}`;
+      navigator.clipboard.writeText(link);
+      setInviteCopied(true);
+      setTimeout(() => setInviteCopied(false), 3000);
+    }
+  };
+
+  // Render board cell tokens list helper
   const getCellTokens = (r: number, c: number) => {
     const res: {color: Color, idx: number}[] = [];
     
-    // Check bases
-    if (r < 6 && c < 6) {
-      tokens.red.forEach((t, i) => { if (t === -1 && (r === 2 || r === 3) && (c === 2 || c === 3)) {
-        if ((i === 0 && r===2 && c===2) || (i === 1 && r===2 && c===3) || (i === 2 && r===3 && c===2) || (i === 3 && r===3 && c===3)) res.push({color: "red", idx: i});
-      }});
-    }
-    if (r < 6 && c > 8) {
-      tokens.green.forEach((t, i) => { if (t === -1 && (r === 2 || r === 3) && (c === 11 || c === 12)) {
-        if ((i === 0 && r===2 && c===11) || (i === 1 && r===2 && c===12) || (i === 2 && r===3 && c===11) || (i === 3 && r===3 && c===12)) res.push({color: "green", idx: i});
-      }});
-    }
-    if (r > 8 && c < 6) {
-      tokens.blue.forEach((t, i) => { if (t === -1 && (r === 11 || r === 12) && (c === 2 || c === 3)) {
-        if ((i === 0 && r===11 && c===2) || (i === 1 && r===11 && c===3) || (i === 2 && r===12 && c===2) || (i === 3 && r===12 && c===3)) res.push({color: "blue", idx: i});
-      }});
-    }
-    if (r > 8 && c > 8) {
-      tokens.yellow.forEach((t, i) => { if (t === -1 && (r === 11 || r === 12) && (c === 11 || c === 12)) {
-        if ((i === 0 && r===11 && c===11) || (i === 1 && r===11 && c===12) || (i === 2 && r===12 && c===11) || (i === 3 && r===12 && c===12)) res.push({color: "yellow", idx: i});
-      }});
-    }
-
     // Check path
     const pathIdx = PATH.findIndex(p => p.r === r && p.c === c);
     if (pathIdx !== -1) {
@@ -420,9 +743,18 @@ export default function BibleLudoPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-background">
+    <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7] dark:bg-background">
+      {/* Header bar */}
       <div className="px-4 pt-6 pb-4 border-b border-border flex items-center justify-between bg-card shadow-sm z-10">
-        <Button onClick={() => gameMode === "setup" ? router.push('/quizzes') : setGameMode("setup")} variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:text-foreground">
+        <Button onClick={() => {
+          if (gameMode === "setup") {
+            router.push('/quizzes');
+          } else if (gameMode === "lobby" || gameMode === "live") {
+            handleLeaveRoom();
+          } else {
+            setGameMode("setup");
+          }
+        }} variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-5 h-5" />
         </Button>
         <h1 className="text-xl font-bold font-serif text-foreground">Journey to Emmaus</h1>
@@ -433,29 +765,29 @@ export default function BibleLudoPage() {
         <div className="flex-1 p-6 flex flex-col justify-center max-w-md mx-auto w-full">
           <div className="text-center mb-8">
             <div className="w-24 h-24 rounded-3xl gradient-life flex items-center justify-center mx-auto shadow-2xl mb-6 halo-glow text-5xl">🎲</div>
-            <h2 className="text-3xl font-extrabold font-serif mb-2">Bible Ludo</h2>
-            <p className="text-muted-foreground">Select your game mode</p>
+            <h2 className="text-3xl font-extrabold font-serif mb-2 text-foreground">Bible Ludo</h2>
+            <p className="text-muted-foreground text-sm">Race your tokens to the heavenly kingdom by answering scripture trivia!</p>
           </div>
 
           <div className="space-y-4">
-            <Button onClick={() => { setGameMode("solo"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><Users className="w-5 h-5" /></div>
+            <Button onClick={() => { setGameMode("solo"); initializeRoomPlayers("solo"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4 transition-all">
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center"><Users className="w-5 h-5" /></div>
               <div>
                 <p className="font-bold text-foreground">Solo vs AI</p>
                 <p className="text-xs text-muted-foreground font-normal">Play against 3 computer bots</p>
               </div>
             </Button>
             
-            <Button onClick={() => { setGameMode("team"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center"><Trophy className="w-5 h-5" /></div>
+            <Button onClick={() => { setGameMode("team"); initializeRoomPlayers("team"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4 transition-all">
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center"><Trophy className="w-5 h-5" /></div>
               <div>
                 <p className="font-bold text-foreground">2v2 Team Mode <Badge className="ml-2 text-[10px] gradient-gold border-0">40 Grace Points</Badge></p>
                 <p className="text-xs text-muted-foreground font-normal">You & Yellow vs Green & Blue</p>
               </div>
             </Button>
 
-            <Button onClick={() => { setGameMode("local"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 hover:shadow-md transition-all text-left flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><Dices className="w-5 h-5" /></div>
+            <Button onClick={() => { setGameMode("local"); initializeRoomPlayers("local"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 hover:shadow-md transition-all text-left flex gap-4">
+              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center"><Dices className="w-5 h-5" /></div>
               <div>
                 <p className="font-bold text-foreground">Pass & Play (Group)</p>
                 <p className="text-xs text-muted-foreground font-normal">Play locally with up to 4 friends</p>
@@ -463,7 +795,7 @@ export default function BibleLudoPage() {
             </Button>
 
             <Button onClick={() => setGameMode("lobby")} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 hover:shadow-md transition-all text-left flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><Users className="w-5 h-5" /></div>
+              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center"><Users className="w-5 h-5" /></div>
               <div>
                 <p className="font-bold text-foreground">Live Online Multiplayer</p>
                 <p className="text-xs text-muted-foreground font-normal">Play with others globally in real time</p>
@@ -474,75 +806,142 @@ export default function BibleLudoPage() {
       ) : gameMode === "lobby" ? (
         <div className="flex-1 p-6 flex flex-col justify-center max-w-md mx-auto w-full space-y-6">
           <div className="text-center mb-4">
-            <h2 className="text-2xl font-extrabold font-serif mb-1">Live Lobbies</h2>
+            <h2 className="text-2xl font-extrabold font-serif mb-1 text-foreground">Live Lobbies</h2>
             <p className="text-muted-foreground text-sm">Join a room or create your own</p>
           </div>
           
           {!activeRoom ? (
             <>
-              <Button onClick={() => {
-                const roomData = { id: user?.id, name: `${user?.firstName}'s Room`, players: 1, max: 4, host: true };
-                setActiveRoom(roomData);
-                if (lobbyChannel) lobbyChannel.track({ isHost: true, roomName: roomData.name, players: 1 });
-                
-                const gChannel = supabase.channel(`ludo_room_${user?.id}`);
-                gChannel.on('broadcast', { event: 'join' }, () => {
-                  setLobbyPlayers(prev => [...prev, {id: 'temp', name: 'Player'}]);
-                  setActiveRoom((prev: any) => prev ? { ...prev, players: prev.players + 1 } : prev);
-                  if (lobbyChannel) lobbyChannel.track({ isHost: true, roomName: roomData.name, players: roomData.players + lobbyPlayers.length + 1 });
-                }).subscribe();
-                setGameChannel(gChannel);
-              }} className="w-full h-12 rounded-xl gradient-gold text-white font-bold shadow-md halo-glow">
+              <Button onClick={handleCreateRoom} className="w-full h-12 rounded-xl gradient-gold text-white font-bold shadow-md halo-glow flex items-center justify-center">
                 <Plus className="w-4 h-4 mr-2" /> Create Ludo Room
               </Button>
-              <div className="space-y-2">
-                {liveRooms.map(room => (
-                  <div key={room.id} className="bg-card rounded-xl p-4 border border-border/60 flex items-center justify-between shadow-sm">
-                    <div>
-                      <p className="font-bold font-serif">{room.name}</p>
-                      <p className="text-xs text-muted-foreground">{room.players}/4 Players</p>
-                    </div>
-                    <Button onClick={() => {
-                      setActiveRoom(room);
-                      setMyColor(COLORS[room.players]);
-                      const gChannel = supabase.channel(`ludo_room_${room.id}`);
-                      gChannel.on('broadcast', { event: 'start_game' }, () => {
-                        setGameMode("live");
-                        setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]});
-                        setWinner(null);
-                        setTurn("red");
-                      }).on('broadcast', { event: 'roll_dice' }, ({ payload }) => {
-                        setDice(payload.result);
-                      }).on('broadcast', { event: 'next_turn' }, ({ payload }) => {
-                        setTurn(payload.nextColor);
-                        setDice(null);
-                      }).on('broadcast', { event: 'move_token' }, ({ payload }) => {
-                        forceMoveToken(payload.color, payload.tokenIdx, payload.newTokens, payload.extraTurn, payload.isWin, payload.winnerColor);
-                      }).subscribe(status => {
-                        if (status === 'SUBSCRIBED') gChannel.send({ type: 'broadcast', event: 'join' });
-                      });
-                      setGameChannel(gChannel);
-                    }} variant="outline" className="h-8">Join</Button>
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Active Rooms</p>
+                {liveRooms.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm bg-card rounded-2xl border border-dashed p-4">
+                    No active rooms right now.<br />Create a room to invite others!
                   </div>
-                ))}
+                ) : (
+                  liveRooms.map(room => (
+                    <div key={room.id} className="bg-card rounded-xl p-4 border border-border/60 flex items-center justify-between shadow-sm">
+                      <div>
+                        <p className="font-bold font-serif text-foreground">{room.name}</p>
+                        <p className="text-xs text-muted-foreground">{room.players}/4 Players</p>
+                      </div>
+                      <Button onClick={() => handleJoinRoomById(room.id)} variant="outline" className="h-8">Join</Button>
+                    </div>
+                  ))
+                )}
               </div>
             </>
           ) : (
-            <div className="bg-card rounded-2xl border p-6 text-center card-holy">
-              <h3 className="font-bold text-xl mb-4">{activeRoom.name}</h3>
-              <p className="text-sm text-muted-foreground mb-6">Waiting for players... (You are {myColor})</p>
-              {activeRoom.host && (
-                <Button onClick={() => {
-                  gameChannel.send({ type: 'broadcast', event: 'start_game' });
-                  setGameMode("live");
-                  setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]});
-                  setWinner(null);
-                  setTurn("red");
-                }} className="w-full h-12 rounded-xl gradient-gold text-white font-bold mb-3">
-                  Start Game Now
+            <div className="bg-card rounded-2xl border p-6 text-center card-holy relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-2 gradient-gold" />
+              <h3 className="font-bold text-xl mb-1 mt-2 text-foreground">{activeRoom.name}</h3>
+              <p className="text-xs text-muted-foreground mb-6">Room Owner: {getPlayerName("red")}</p>
+              
+              {/* Connected Slots List */}
+              <div className="space-y-3 mb-8 text-left">
+                <p className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground mb-2">Players Joined</p>
+                {COLORS.map((color) => {
+                  const player = lobbyPlayers.find((p: any) => p.colorSlot === color);
+                  const hasPlayer = player !== undefined;
+                  const isUser = player?.id === user?.id;
+                  
+                  const colors = {
+                    red: "text-red-500 bg-red-500/10 border-red-500/20 hover:bg-red-500/20",
+                    green: "text-green-500 bg-green-500/10 border-green-500/20 hover:bg-green-500/20",
+                    yellow: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20",
+                    blue: "text-blue-500 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20"
+                  };
+
+                  return (
+                    <div 
+                      key={color} 
+                      onClick={() => {
+                        if (!hasPlayer) {
+                          selectColorSlot(color);
+                        }
+                      }}
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer",
+                        hasPlayer ? "bg-card border-border/80" : "bg-muted/40 border-dashed border-border/60 hover:bg-muted/60"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn("w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold uppercase", colors[color])}>
+                          {color[0]}
+                        </div>
+                        <span className={cn("text-sm font-semibold", hasPlayer ? "text-foreground" : "text-muted-foreground")}>
+                          {hasPlayer ? `${player.name} ${isUser ? "(You)" : ""}` : `Empty Slot (Tap to select)`}
+                        </span>
+                      </div>
+                      
+                      {hasPlayer ? (
+                        <div className="flex items-center gap-2">
+                          {player.isHost ? (
+                            <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[9px] font-bold">
+                              Host
+                            </Badge>
+                          ) : (
+                            <Badge className={cn(
+                              "text-[9px] font-bold border",
+                              player.isReady 
+                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" 
+                                : "bg-zinc-500/15 text-zinc-500 dark:text-zinc-400 border-zinc-500/20"
+                            )}>
+                              {player.isReady ? "Ready" : "Not Ready"}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground font-medium">Click to claim</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Lobby Action Buttons */}
+              <div className="space-y-2">
+                <Button 
+                  onClick={shareRoomLink} 
+                  variant="outline" 
+                  className="w-full h-11 rounded-xl flex items-center justify-center font-bold text-sm gap-2"
+                >
+                  {inviteCopied ? (
+                    <>
+                      <Check className="w-4 h-4 text-green-500 animate-scale" /> Link Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4" /> Share Invite Link
+                    </>
+                  )}
                 </Button>
-              )}
-              <Button onClick={() => { setActiveRoom(null); if(lobbyChannel) lobbyChannel.track({ isHost: false }); }} variant="ghost" className="w-full h-10">Leave</Button>
+
+                {!activeRoom.host && (
+                  <Button 
+                    onClick={toggleReady} 
+                    className={cn(
+                      "w-full h-12 rounded-xl font-bold text-base shadow-md transition-all",
+                      isReady ? "bg-zinc-500 hover:bg-zinc-600 text-white" : "gradient-gold text-white halo-glow"
+                    )}
+                  >
+                    {isReady ? "Cancel Ready" : "I am Ready"}
+                  </Button>
+                )}
+
+                {activeRoom.host && (
+                  <Button onClick={startLiveGame} className="w-full h-12 rounded-xl gradient-gold text-white font-bold text-base shadow-md halo-glow">
+                    Start Game Now
+                  </Button>
+                )}
+                
+                <Button onClick={handleLeaveRoom} variant="ghost" className="w-full h-10 rounded-xl">
+                  Leave Lobby
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -556,28 +955,35 @@ export default function BibleLudoPage() {
               <div className={`w-8 h-8 rounded-full ${BG_COLORS[turn]} shadow-inner border-2 border-black/10`} />
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Current Turn</p>
-                <p className="font-bold text-sm leading-none capitalize">
-                  {gameMode === "local" || gameMode === "live" ? `${turn} Player` : (turn === "red" ? "Your Turn" : `${turn} Bot`)}
-                  {gameMode === "live" && turn === myColor && " (You)"}
+                <p className="font-bold text-sm leading-none capitalize text-foreground">
+                  {getPlayerName(turn)} {gameMode === "live" && turn === myColor && " (You)"}
                 </p>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
               {isRolling ? (
-                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.5 }}>
-                  <Dices className="w-8 h-8 text-primary" />
+                <motion.div 
+                  animate={{ rotateX: 360, rotateY: 360, scale: [1, 1.2, 1] }} 
+                  transition={{ repeat: Infinity, duration: 0.5, ease: "easeInOut" }}
+                >
+                  <Dices className="w-10 h-10 text-primary drop-shadow-md" />
                 </motion.div>
               ) : dice ? (
-                <div className="w-10 h-10 bg-card border-2 border-primary rounded-xl flex items-center justify-center text-xl font-bold text-primary shadow-sm">
+                <motion.div 
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="w-10 h-10 bg-gradient-to-br from-card to-muted border-2 border-primary rounded-xl flex items-center justify-center text-xl font-black text-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]"
+                >
                   {dice}
-                </div>
+                </motion.div>
               ) : (
                 <Button 
                   onClick={() => handleRollClick()} 
-                  disabled={gameMode !== "local" && gameMode !== "live" && turn !== "red"}
+                  disabled={gameMode === "live" && turn !== myColor}
                   size="sm"
-                  className={`rounded-xl font-bold ${((gameMode === "local" || turn === "red") || (gameMode === "live" && turn === myColor)) ? "gradient-gold shadow-md halo-glow" : "bg-muted text-muted-foreground"}`}
+                  className={`rounded-xl font-bold ${((gameMode === "local" || (gameMode !== "live" && turn === "red")) || (gameMode === "live" && turn === myColor)) ? "gradient-gold shadow-md halo-glow" : "bg-muted text-muted-foreground"}`}
                 >
                   Roll
                 </Button>
@@ -585,155 +991,384 @@ export default function BibleLudoPage() {
             </div>
           </div>
 
-        {/* Board */}
-        <div 
-          className="bg-card p-2 rounded-2xl shadow-xl border-4 border-amber-800/20 relative"
-          style={{ width: "min(100%, 400px)", aspectRatio: "1/1" }}
-        >
-          <div className="w-full h-full grid" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)`, gridTemplateRows: `repeat(${BOARD_SIZE}, 1fr)` }}>
-            {Array.from({ length: BOARD_SIZE * BOARD_SIZE }).map((_, i) => {
-              const r = Math.floor(i / BOARD_SIZE);
-              const c = i % BOARD_SIZE;
-              
-              // Base colors
-              let cellClass = "border border-black/5 bg-stone-50";
-              if (r < 6 && c < 6) cellClass = "bg-red-50 border-red-200";
-              else if (r < 6 && c > 8) cellClass = "bg-green-50 border-green-200";
-              else if (r > 8 && c < 6) cellClass = "bg-blue-50 border-blue-200";
-              else if (r > 8 && c > 8) cellClass = "bg-yellow-50 border-yellow-200";
-              
-              // Home stretches
-              if (r === 7 && c >= 1 && c <= 5) cellClass = "bg-red-200/50";
-              if (c === 7 && r >= 1 && r <= 5) cellClass = "bg-green-200/50";
-              if (r === 7 && c >= 9 && c <= 13) cellClass = "bg-yellow-200/50";
-              if (c === 7 && r >= 9 && r <= 13) cellClass = "bg-blue-200/50";
-
-              // Starts
-              if (r === 6 && c === 1) cellClass = "bg-red-300";
-              if (r === 1 && c === 8) cellClass = "bg-green-300";
-              if (r === 8 && c === 13) cellClass = "bg-yellow-300";
-              if (r === 13 && c === 6) cellClass = "bg-blue-300";
-
-              // Center
-              if (r >= 6 && r <= 8 && c >= 6 && c <= 8) cellClass = "gradient-gold shadow-inner rounded-sm relative";
-
-              const cellTokens = getCellTokens(r, c);
-
-              return (
-                <div key={i} className={`relative flex flex-wrap items-center justify-center ${cellClass}`}>
-                  {cellTokens.map((t, idx) => (
-                    <button
-                      key={`${t.color}-${t.idx}`}
-                      onClick={() => {
-                        const canPlayerClick = gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor);
-                        if (canPlayerClick && turn === t.color && dice !== null && !trivia && canMove(turn, t.idx, dice)) {
-                          moveToken(turn, t.idx, dice);
-                        }
-                      }}
-                      className={cn(
-                        `w-[60%] h-[60%] rounded-full shadow-lg border-2 absolute z-10 transition-transform duration-300 ease-in-out`,
-                        BG_COLORS[t.color], BORDER_COLORS[t.color],
-                        (((gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor)) && turn === t.color && dice && canMove(turn, t.idx, dice) && !trivia) ? "animate-pulse ring-4 ring-primary/50 ring-offset-2 scale-110" : "")
-                      )}
-                      style={{ 
-                        transform: cellTokens.length > 1 ? `translate(${(idx%2)*30 - 15}%, ${Math.floor(idx/2)*30 - 15}%) scale(0.8)` : "scale(1)"
-                      }}
-                    />
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-      </div>
-
-      {/* Trivia Overlay */}
-      <AnimatePresence>
-        {trivia && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          {/* Ludo Premium Board */}
+          <div 
+            className="bg-white/40 dark:bg-black/40 backdrop-blur-xl p-3 rounded-[2rem] shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] border border-white/20 dark:border-white/10 relative select-none ring-1 ring-amber-500/20"
+            style={{ width: "min(100%, 400px)", aspectRatio: "1/1" }}
           >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-              className="bg-card w-full max-w-sm rounded-3xl p-6 shadow-2xl card-holy"
-            >
-              <div className="w-12 h-12 rounded-full gradient-spirit flex items-center justify-center mx-auto mb-4 text-white">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <h2 className="text-xl font-bold text-center font-serif mb-2">Bible Trivia Challenge!</h2>
-              <p className="text-sm text-center text-muted-foreground mb-6">Answer correctly to roll the dice.</p>
-              
-              <div className="bg-muted/50 p-4 rounded-xl border mb-6">
-                <p className="font-bold text-base text-foreground font-serif leading-snug">{trivia.q}</p>
-              </div>
+            <div className="w-full h-full grid rounded-xl overflow-hidden shadow-inner bg-stone-100/50 dark:bg-neutral-900/50" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)`, gridTemplateRows: `repeat(${BOARD_SIZE}, 1fr)` }}>
+              {/* 1. Four corner Bases */}
+              {COLORS.map(color => {
+                const isTurn = turn === color;
+                const playerName = getPlayerName(color);
+                
+                const baseThemes = {
+                  red: {
+                    border: isTurn ? "border-red-500 ring-4 ring-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.6)]" : "border-red-500/20",
+                    bg: "bg-gradient-to-br from-red-100 via-red-50 to-white dark:from-red-950/40 dark:via-red-900/20 dark:to-black/40",
+                    text: "text-red-700 dark:text-red-400 drop-shadow-sm",
+                    pockets: "bg-red-500/5 border-red-200/50 dark:border-red-800/30 shadow-inner"
+                  },
+                  green: {
+                    border: isTurn ? "border-green-500 ring-4 ring-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.6)]" : "border-green-500/20",
+                    bg: "bg-gradient-to-br from-green-100 via-green-50 to-white dark:from-green-950/40 dark:via-green-900/20 dark:to-black/40",
+                    text: "text-green-700 dark:text-green-400 drop-shadow-sm",
+                    pockets: "bg-green-500/5 border-green-200/50 dark:border-green-800/30 shadow-inner"
+                  },
+                  yellow: {
+                    border: isTurn ? "border-yellow-500 ring-4 ring-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.6)]" : "border-yellow-500/20",
+                    bg: "bg-gradient-to-br from-amber-100 via-amber-50 to-white dark:from-yellow-950/40 dark:via-yellow-900/20 dark:to-black/40",
+                    text: "text-amber-700 dark:text-amber-400 drop-shadow-sm",
+                    pockets: "bg-amber-500/5 border-amber-200/50 dark:border-yellow-800/30 shadow-inner"
+                  },
+                  blue: {
+                    border: isTurn ? "border-blue-500 ring-4 ring-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.6)]" : "border-blue-500/20",
+                    bg: "bg-gradient-to-br from-blue-100 via-blue-50 to-white dark:from-blue-950/40 dark:via-blue-900/20 dark:to-black/40",
+                    text: "text-blue-700 dark:text-blue-400 drop-shadow-sm",
+                    pockets: "bg-blue-500/5 border-blue-200/50 dark:border-blue-800/30 shadow-inner"
+                  }
+                };
+                
+                const theme = baseThemes[color];
+                
+                const gridPositions = {
+                  red: { gridRow: '1/7', gridColumn: '1/7' },
+                  green: { gridRow: '1/7', gridColumn: '10/16' },
+                  yellow: { gridRow: '10/16', gridColumn: '10/16' },
+                  blue: { gridRow: '10/16', gridColumn: '1/7' }
+                };
+                
+                const avatarEmojis = { red: "👑", green: "🕊️", yellow: "⭐", blue: "🛡️" };
 
-              <div className="space-y-2">
-                {triviaResult ? (
-                   <div className="text-center py-4 bg-muted/50 rounded-xl border">
-                     {triviaResult === "correct" ? (
-                       <p className="text-green-500 font-bold text-xl">Correct!</p>
-                     ) : (
-                       <div>
-                         <p className="text-red-500 font-bold text-xl mb-2">Incorrect!</p>
-                         <p className="text-sm text-foreground">The correct answer is: <span className="font-bold text-green-500">{trivia.a}</span></p>
-                       </div>
-                     )}
-                   </div>
-                ) : (
-                  trivia.options.map(opt => (
-                    <Button 
-                      key={opt}
-                      onClick={() => handleTrivia(opt)}
-                      variant="outline"
-                      className="w-full h-11 justify-start font-semibold text-sm"
-                    >
-                      {opt}
-                    </Button>
-                  ))
+                return (
+                  <div
+                    key={`base-${color}`}
+                    style={gridPositions[color]}
+                    className={cn(
+                      "rounded-xl border bg-gradient-to-br p-1.5 flex flex-col justify-between overflow-hidden transition-all duration-300",
+                      theme.bg, theme.border
+                    )}
+                  >
+                    {/* Player Info Header */}
+                    <div className="flex items-center justify-between gap-1 border-b border-black/5 pb-1">
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span className="text-xs shrink-0">{avatarEmojis[color]}</span>
+                        <span className={cn("text-[9px] font-extrabold truncate", theme.text)}>
+                          {playerName}
+                        </span>
+                      </div>
+                      {isTurn && (
+                        <span className="text-[7px] font-black uppercase bg-primary text-primary-foreground px-1 py-0.5 rounded animate-pulse shrink-0">
+                          Active
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Base Pockets */}
+                    <div className={cn("flex-1 mt-1 rounded-lg border border-dashed flex items-center justify-center p-1", theme.pockets)}>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Array.from({ length: 4 }).map((_, i) => {
+                          const tokenPos = tokens[color][i];
+                          const inBase = tokenPos === -1;
+                          
+                          return (
+                            <div 
+                              key={`pocket-${color}-${i}`}
+                              className="w-7 h-7 rounded-full border border-black/5 bg-white/40 dark:bg-black/20 shadow-inner flex items-center justify-center relative"
+                            >
+                              {inBase && (
+                                <motion.button
+                                  layoutId={`token-${color}-${i}`}
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                  whileHover={{ scale: 1.1, y: -2 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => {
+                                    const canPlayerClick = gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor);
+                                    if (canPlayerClick && turn === color && dice !== null && !trivia && canMove(color, i, dice)) {
+                                      moveToken(color, i, dice);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white cursor-pointer z-20",
+                                    BG_COLORS[color], BORDER_COLORS[color],
+                                    (((gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor)) && turn === color && dice && canMove(color, i, dice) && !trivia) ? "animate-pulse ring-4 ring-primary/50" : "")
+                                  )}
+                                >
+                                  {i + 1}
+                                </motion.button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* 2. Center Home Panel */}
+              <div 
+                style={{ gridRow: '7/10', gridColumn: '7/10' }}
+                className="bg-stone-50 dark:bg-muted border border-black/5 rounded relative flex items-center justify-center shadow-inner overflow-hidden"
+              >
+                <svg viewBox="0 0 100 100" className="w-full h-full absolute inset-0 pointer-events-none">
+                  {/* Left - Red */}
+                  <polygon points="0,0 50,50 0,100" fill="#ef4444" opacity="0.15" />
+                  <line x1="0" y1="0" x2="50" y2="50" stroke="#ef4444" strokeWidth="0.5" opacity="0.3" />
+                  <line x1="0" y1="100" x2="50" y2="50" stroke="#ef4444" strokeWidth="0.5" opacity="0.3" />
+
+                  {/* Top - Green */}
+                  <polygon points="0,0 50,50 100,0" fill="#22c55e" opacity="0.15" />
+                  <line x1="0" y1="0" x2="50" y2="50" stroke="#22c55e" strokeWidth="0.5" opacity="0.3" />
+                  <line x1="100" y1="0" x2="50" y2="50" stroke="#22c55e" strokeWidth="0.5" opacity="0.3" />
+
+                  {/* Right - Yellow */}
+                  <polygon points="100,0 50,50 100,100" fill="#eab308" opacity="0.15" />
+                  <line x1="100" y1="0" x2="50" y2="50" stroke="#eab308" strokeWidth="0.5" opacity="0.3" />
+                  <line x1="100" y1="100" x2="50" y2="50" stroke="#eab308" strokeWidth="0.5" opacity="0.3" />
+
+                  {/* Bottom - Blue */}
+                  <polygon points="0,100 50,50 100,100" fill="#3b82f6" opacity="0.15" />
+                  <line x1="0" y1="100" x2="50" y2="50" stroke="#3b82f6" strokeWidth="0.5" opacity="0.3" />
+                  <line x1="100" y1="100" x2="50" y2="50" stroke="#3b82f6" strokeWidth="0.5" opacity="0.3" />
+                </svg>
+                
+                <div className="absolute w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shadow-md text-sm pointer-events-none z-10 border border-amber-300">
+                  👑
+                </div>
+
+                {/* Red Finished (Left side) */}
+                {tokens.red.filter(t => t === 200).length > 0 && (
+                  <div className="absolute left-1 flex flex-col gap-0.5 z-20">
+                    {tokens.red.map((t, i) => t === 200 && (
+                      <div key={`fin-red-${i}`} className="w-2 h-2 rounded-full bg-red-500 border border-white dark:border-black shadow-sm" />
+                    ))}
+                  </div>
+                )}
+                {/* Green Finished (Top side) */}
+                {tokens.green.filter(t => t === 200).length > 0 && (
+                  <div className="absolute top-1 flex gap-0.5 z-20">
+                    {tokens.green.map((t, i) => t === 200 && (
+                      <div key={`fin-green-${i}`} className="w-2 h-2 rounded-full bg-green-500 border border-white dark:border-black shadow-sm" />
+                    ))}
+                  </div>
+                )}
+                {/* Yellow Finished (Right side) */}
+                {tokens.yellow.filter(t => t === 200).length > 0 && (
+                  <div className="absolute right-1 flex flex-col gap-0.5 z-20">
+                    {tokens.yellow.map((t, i) => t === 200 && (
+                      <div key={`fin-yellow-${i}`} className="w-2 h-2 rounded-full bg-yellow-500 border border-white dark:border-black shadow-sm" />
+                    ))}
+                  </div>
+                )}
+                {/* Blue Finished (Bottom side) */}
+                {tokens.blue.filter(t => t === 200).length > 0 && (
+                  <div className="absolute bottom-1 flex gap-0.5 z-20">
+                    {tokens.blue.map((t, i) => t === 200 && (
+                      <div key={`fin-blue-${i}`} className="w-2 h-2 rounded-full bg-blue-500 border border-white dark:border-black shadow-sm" />
+                    ))}
+                  </div>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Winner Overlay */}
-      <AnimatePresence>
-        {winner && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-              className="bg-card w-full max-w-sm rounded-3xl p-6 shadow-2xl card-holy text-center border border-amber-500/30"
-            >
-              <div className="w-20 h-20 rounded-full gradient-gold flex items-center justify-center mx-auto mb-4 text-white text-4xl shadow-lg halo-glow">
-                🏆
-              </div>
-              <h2 className="text-3xl font-bold font-serif mb-2 capitalize">
-                {gameMode === "team" ? (winner === "red" ? "Team Red/Yellow Wins!" : "Team Green/Blue Wins!") : (winner === "red" ? "You Won!" : `${winner} Won!`)}
-              </h2>
-              <p className="text-sm text-muted-foreground mb-6">The Journey to Emmaus is complete.</p>
-              
-              {winner === "red" && (
-                <p className="text-amber-600 font-bold mb-6 text-lg">+{gameMode === "team" ? "40" : "25"} Grace Points Awarded!</p>
+              {/* 3. Path tracks */}
+              {PATH.map((p, idx) => {
+                const cellTokens = getCellTokens(p.r, p.c);
+                let cellClass = "bg-stone-50 dark:bg-muted border border-black/5 hover:bg-stone-100 transition-colors";
+                
+                // Starting slots
+                if (p.r === 6 && p.c === 1) cellClass = "bg-red-100 border-red-300 relative dark:bg-red-950/20";
+                else if (p.r === 1 && p.c === 8) cellClass = "bg-green-100 border-green-300 relative dark:bg-green-950/20";
+                else if (p.r === 8 && p.c === 13) cellClass = "bg-yellow-100 border-yellow-300 relative dark:bg-yellow-950/20";
+                else if (p.r === 13 && p.c === 6) cellClass = "bg-blue-100 border-blue-300 relative dark:bg-blue-950/20";
+                
+                const isStart = (p.r === 6 && p.c === 1) || (p.r === 1 && p.c === 8) || (p.r === 8 && p.c === 13) || (p.r === 13 && p.c === 6);
+                
+                return (
+                  <div 
+                    key={`path-${idx}`} 
+                    style={{ gridRowStart: p.r + 1, gridColumnStart: p.c + 1 }}
+                    className={`relative flex items-center justify-center ${cellClass}`}
+                  >
+                    {isStart && <span className="absolute inset-0 flex items-center justify-center text-[10px] opacity-25 select-none">⭐️</span>}
+                    {cellTokens.map((t, tokenIdx) => (
+                      <button
+                        key={`${t.color}-${t.idx}`}
+                        onClick={() => {
+                          const canPlayerClick = gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor);
+                          if (canPlayerClick && turn === t.color && dice !== null && !trivia && canMove(turn, t.idx, dice)) {
+                            moveToken(turn, t.idx, dice);
+                          }
+                        }}
+                        className={cn(
+                          `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute z-10 transition-all duration-300 ease-in-out`,
+                          BG_COLORS[t.color], BORDER_COLORS[t.color],
+                          (((gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor)) && turn === t.color && dice && canMove(turn, t.idx, dice) && !trivia) ? "animate-pulse ring-2 ring-primary ring-offset-1 scale-110" : "")
+                        )}
+                        style={{ 
+                          transform: cellTokens.length > 1 ? `translate(${(tokenIdx%2)*12 - 6}px, ${Math.floor(tokenIdx/2)*12 - 6}px) scale(0.9)` : "scale(1)"
+                        }}
+                      >
+                        {t.idx + 1}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+
+              {/* 4. Home stretches */}
+              {COLORS.flatMap(color => 
+                HOME_STRETCH[color].map((p, sIdx) => {
+                  const cellTokens = getCellTokens(p.r, p.c);
+                  
+                  const homeStretchClasses = {
+                    red: "bg-red-50 border-red-200/50 dark:bg-red-950/10",
+                    green: "bg-green-50 border-green-200/50 dark:bg-green-950/10",
+                    yellow: "bg-yellow-50 border-yellow-200/50 dark:bg-yellow-950/10",
+                    blue: "bg-blue-50 border-blue-200/50 dark:bg-blue-950/10"
+                  };
+                  
+                  return (
+                    <div
+                      key={`stretch-${color}-${sIdx}`}
+                      style={{ gridRowStart: p.r + 1, gridColumnStart: p.c + 1 }}
+                      className={`relative flex items-center justify-center border border-black/5 ${homeStretchClasses[color]}`}
+                    >
+                      {cellTokens.map((t, tokenIdx) => (
+                        <button
+                          key={`${t.color}-${t.idx}`}
+                          onClick={() => {
+                            const canPlayerClick = gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor);
+                            if (canPlayerClick && turn === t.color && dice !== null && !trivia && canMove(turn, t.idx, dice)) {
+                              moveToken(turn, t.idx, dice);
+                            }
+                          }}
+                          className={cn(
+                            `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute z-10 transition-all duration-300 ease-in-out`,
+                            BG_COLORS[t.color], BORDER_COLORS[t.color],
+                            (((gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor)) && turn === t.color && dice && canMove(turn, t.idx, dice) && !trivia) ? "animate-pulse ring-2 ring-primary ring-offset-1 scale-110" : "")
+                          )}
+                          style={{ 
+                            transform: cellTokens.length > 1 ? `translate(${(tokenIdx%2)*12 - 6}px, ${Math.floor(tokenIdx/2)*12 - 6}px) scale(0.9)` : "scale(1)"
+                          }}
+                        >
+                          {t.idx + 1}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })
               )}
+            </div>
+          </div>
 
-              <div className="flex gap-3">
-                <Button onClick={() => setGameMode("setup")} className="flex-1 gradient-gold text-white font-bold h-11 rounded-xl shadow-md">
-                  Play Again
-                </Button>
-                <Button onClick={() => router.push('/quizzes')} variant="outline" className="flex-1 h-11 rounded-xl font-bold">
-                  Exit
-                </Button>
-              </div>
+        </div>
+
+        {/* Trivia Overlay */}
+        <AnimatePresence>
+          {trivia && (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+                className="bg-card w-full max-w-sm rounded-3xl p-6 shadow-2xl card-holy border border-border/80"
+              >
+                <div className="w-12 h-12 rounded-full gradient-spirit flex items-center justify-center mx-auto mb-4 text-white">
+                  <ShieldAlert className="w-6 h-6" />
+                </div>
+                <h2 className="text-xl font-bold text-center font-serif mb-2 text-foreground">Bible Trivia Challenge!</h2>
+                <p className="text-sm text-center text-muted-foreground mb-6">Answer correctly to roll the dice.</p>
+                
+                <div className="bg-muted/50 p-4 rounded-xl border mb-6">
+                  <p className="font-bold text-base text-foreground font-serif leading-snug">{trivia.q}</p>
+                </div>
+
+                <div className="space-y-2">
+                  {triviaResult ? (
+                     <div className="text-center py-4 bg-muted/50 rounded-xl border">
+                       {triviaResult === "correct" ? (
+                         <p className="text-green-500 font-bold text-xl">Correct!</p>
+                       ) : (
+                         <div>
+                           <p className="text-red-500 font-bold text-xl mb-2">Incorrect!</p>
+                           <p className="text-sm text-foreground">The correct answer is: <span className="font-bold text-green-500">{trivia.a}</span></p>
+                         </div>
+                       )}
+                     </div>
+                  ) : (
+                    trivia.options.map(opt => (
+                      <Button 
+                        key={opt}
+                        onClick={() => handleTrivia(opt)}
+                        variant="outline"
+                        className="w-full h-11 justify-start font-semibold text-sm border-border/80 text-foreground"
+                      >
+                        {opt}
+                      </Button>
+                    ))
+                  )}
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+
+        {/* Winner Overlay */}
+        <AnimatePresence>
+          {winner && (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+                className="bg-card w-full max-w-sm rounded-3xl p-6 shadow-2xl card-holy text-center border border-amber-500/30"
+              >
+                <div className="w-20 h-20 rounded-full gradient-gold flex items-center justify-center mx-auto mb-4 text-white text-4xl shadow-lg halo-glow">
+                  🏆
+                </div>
+                <h2 className="text-3xl font-bold font-serif mb-2 capitalize text-foreground animate-scale">
+                  {gameMode === "team" ? (winner === "red" ? "Team Red/Yellow Wins!" : "Team Green/Blue Wins!") : (winner === "red" ? "You Won!" : `${winner} Won!`)}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6">The Journey to Emmaus is complete.</p>
+                
+                {winner === "red" && (
+                  <p className="text-amber-600 font-bold mb-6 text-lg">+{gameMode === "team" ? "40" : "25"} Grace Points Awarded!</p>
+                )}
+
+                <div className="flex gap-3">
+                  <Button onClick={() => setGameMode("setup")} className="flex-1 gradient-gold text-white font-bold h-11 rounded-xl shadow-md">
+                    Play Again
+                  </Button>
+                  <Button onClick={() => router.push('/quizzes')} variant="outline" className="flex-1 h-11 rounded-xl font-bold">
+                    Exit
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Live Toasts */}
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-xs pointer-events-none">
+          <AnimatePresence>
+            {toasts.map(toast => (
+              <motion.div
+                key={toast.id}
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                className="bg-zinc-900/95 dark:bg-zinc-100/95 text-white dark:text-zinc-900 text-xs font-bold p-3 rounded-xl shadow-xl border border-zinc-700/50 dark:border-zinc-300/50 backdrop-blur-sm pointer-events-auto flex items-center justify-between"
+              >
+                <span>{toast.message}</span>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
         </>
       )}
     </div>

@@ -29,11 +29,38 @@ export default function NoahsArkPage() {
 
   const MAX_WRONG = 6; // 6 stages of the flood
 
+  // Load state
   useEffect(() => {
+    const saved = localStorage.getItem("ignite_noahs_ark_state");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setCurrentWordObj(parsed.currentWordObj);
+        setGuessedLetters(new Set(parsed.guessedLetters));
+        setWrongGuesses(parsed.wrongGuesses);
+        setGameState(parsed.gameState);
+        return;
+      } catch (e) {
+        console.error("Failed to load state", e);
+      }
+    }
     startNewGame();
   }, []);
 
+  // Save state
+  useEffect(() => {
+    if (currentWordObj) {
+      localStorage.setItem("ignite_noahs_ark_state", JSON.stringify({
+        currentWordObj,
+        guessedLetters: Array.from(guessedLetters),
+        wrongGuesses,
+        gameState
+      }));
+    }
+  }, [currentWordObj, guessedLetters, wrongGuesses, gameState]);
+
   const startNewGame = () => {
+    localStorage.removeItem("ignite_noahs_ark_state");
     const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
     setCurrentWordObj(randomWord);
     setGuessedLetters(new Set());
