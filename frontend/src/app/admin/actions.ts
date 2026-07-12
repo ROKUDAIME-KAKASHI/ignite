@@ -172,6 +172,7 @@ export async function getAdminDashboardData() {
     status: u.role === "ADMIN" ? "Admin" : u.role === "LEADER" ? "Leader" : "Member"
   }));
 
+  const cookieStore = await cookies();
   const adminToken = cookieStore.get("admin_session")?.value;
   let isSuperAdmin = false;
   if (adminToken) {
