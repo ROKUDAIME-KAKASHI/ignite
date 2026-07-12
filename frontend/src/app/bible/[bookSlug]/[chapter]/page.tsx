@@ -225,15 +225,19 @@ export default function BibleReaderPage() {
     const utterance = new SpeechSynthesisUtterance(cleanText);
 
     const voices = window.speechSynthesis.getVoices();
-    let preferredVoice = 
-      voices.find(v => v.name.includes('Google UK English Male')) || 
-      voices.find(v => v.name.includes('David') || v.name.includes('Male')) || 
-      voices.find(v => v.lang === 'en-GB' && v.name.includes('Male'));
-      
-    utterance.rate = 0.92;
-    utterance.pitch = 0.85;
     
-    if (!preferredVoice) preferredVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+    // Structured cross-platform voice priority (aiming for a clear, deep male English voice)
+    const preferredVoice = 
+      voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('male')) ||
+      voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('male')) ||
+      voices.find(v => v.lang === 'en-US' && (v.name.includes('David') || v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('male'))) ||
+      voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male')) ||
+      voices.find(v => v.lang.startsWith('en')) ||
+      voices[0];
+      
+    utterance.rate = 0.92; // Slightly slowed for a calm, reverent reading pace
+    utterance.pitch = 0.85; // Low pitch for a deep, narrative voice tone
+    
     if (preferredVoice) utterance.voice = preferredVoice;
 
     utterance.onend = () => {
