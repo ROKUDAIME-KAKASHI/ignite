@@ -231,6 +231,26 @@ export default function BibleLudoPage() {
     }
   };
 
+  // Load seen questions from localStorage on mount to avoid repetitions
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const storedSeen = localStorage.getItem("ludo_seen_questions");
+        const seenList = storedSeen ? JSON.parse(storedSeen) : [];
+        const remaining = TRIVIA_QUESTIONS.filter(q => !seenList.includes(q.q));
+        if (remaining.length > 0) {
+          setUnusedQuestions(remaining);
+        } else {
+          // Reset seen list once all questions are answered
+          localStorage.removeItem("ludo_seen_questions");
+          setUnusedQuestions([...TRIVIA_QUESTIONS]);
+        }
+      } catch (e) {
+        console.error("Error loading seen trivia questions:", e);
+      }
+    }
+  }, []);
+
   // Monitor URL params for direct sharing invite link
   useEffect(() => {
     if (typeof window !== "undefined" && user && gameMode === "setup") {
@@ -369,6 +389,11 @@ export default function BibleLudoPage() {
       let questionsToUse = unusedQuestions;
       if (questionsToUse.length === 0) {
         questionsToUse = [...TRIVIA_QUESTIONS];
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("ludo_seen_questions");
+          } catch {}
+        }
       }
       
       const qIndex = Math.floor(Math.random() * questionsToUse.length);
@@ -380,6 +405,20 @@ export default function BibleLudoPage() {
       const updatedQuestions = [...questionsToUse];
       updatedQuestions.splice(qIndex, 1);
       setUnusedQuestions(updatedQuestions);
+
+      // Track seen question in localStorage
+      if (typeof window !== "undefined") {
+        try {
+          const storedSeen = localStorage.getItem("ludo_seen_questions");
+          const seenList = storedSeen ? JSON.parse(storedSeen) : [];
+          if (!seenList.includes(selectedTrivia.q)) {
+            seenList.push(selectedTrivia.q);
+            localStorage.setItem("ludo_seen_questions", JSON.stringify(seenList));
+          }
+        } catch (e) {
+          console.error("Error saving seen question:", e);
+        }
+      }
     } else {
       executeRoll(true);
     }
