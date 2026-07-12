@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchChapter, TRANSLATIONS, type Translation, type BibleVerse } from "@/lib/bible-api";
 import { getBookBySlug, getAdjacentBook } from "@/lib/bible-books";
@@ -66,6 +66,19 @@ export default function BibleReaderPage() {
   const [markingRead, setMarkingRead] = useState(false);
   const [markedRead, setMarkedRead] = useState(false);
   const [isReading, setIsReading] = useState(false);
+  const readingRef = useRef(false);
+
+  // Load voices on mount for browser voice list caching
+  useEffect(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.getVoices();
+      const handleVoices = () => {
+        window.speechSynthesis.getVoices();
+      };
+      window.addEventListener("voiceschanged", handleVoices);
+      return () => window.removeEventListener("voiceschanged", handleVoices);
+    }
+  }, []);
   
   // Timer state
   const [timeLeft, setTimeLeft] = useState(60);
@@ -186,38 +199,72 @@ export default function BibleReaderPage() {
     setMarkingRead(false);
   };
 
-  const toggleReading = () => {
+  const speakVerse = useCallback((index: number) => {
+    if (!readingRef.current) return;
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    
-    if (isReading) {
-      window.speechSynthesis.cancel();
+
+    if (index >= verses.length) {
       setIsReading(false);
+      readingRef.current = false;
+      setHighlighted(null);
       return;
     }
 
-    window.speechSynthesis.cancel(); // Cancel any existing speech
-    
-    const fullText = verses.map(v => v.text).join(" ");
-    const cleanText = fullText.replace(/[*_~\[\]]/g, ''); // Strip weird characters
+    const verseObj = verses[index];
+    setHighlighted(verseObj.verse);
+
+    // Scroll highlighted verse into view gently
+    const el = document.getElementById(`v-${verseObj.verse}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    window.speechSynthesis.cancel();
+
+    const cleanText = verseObj.text.replace(/[*_~\[\]]/g, '').trim();
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    
+
     const voices = window.speechSynthesis.getVoices();
     let preferredVoice = 
       voices.find(v => v.name.includes('Google UK English Male')) || 
       voices.find(v => v.name.includes('David') || v.name.includes('Male')) || 
       voices.find(v => v.lang === 'en-GB' && v.name.includes('Male'));
       
-    utterance.rate = 0.95; // Natural calm pace
-    utterance.pitch = 0.85; // Deep voice
+    utterance.rate = 0.92;
+    utterance.pitch = 0.85;
     
     if (!preferredVoice) preferredVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
     if (preferredVoice) utterance.voice = preferredVoice;
 
-    utterance.onend = () => setIsReading(false);
-    utterance.onerror = () => setIsReading(false);
+    utterance.onend = () => {
+      if (readingRef.current) {
+        speakVerse(index + 1);
+      }
+    };
+    utterance.onerror = (e) => {
+      console.error("TTS error:", e);
+      if (readingRef.current) {
+        speakVerse(index + 1);
+      }
+    };
 
-    setIsReading(true);
     window.speechSynthesis.speak(utterance);
+  }, [verses]);
+
+  const toggleReading = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    
+    if (isReading) {
+      readingRef.current = false;
+      setIsReading(false);
+      window.speechSynthesis.cancel();
+      setHighlighted(null);
+      return;
+    }
+
+    readingRef.current = true;
+    setIsReading(true);
+    speakVerse(0);
   };
   
   // Stop speaking when leaving page
@@ -363,6 +410,7 @@ export default function BibleReaderPage() {
                 return (
                   <motion.div
                     key={v.verse}
+                    id={`v-${v.verse}`}
                     layout
                     onClick={() => handleVersePress(v.verse)}
                     className={cn(
