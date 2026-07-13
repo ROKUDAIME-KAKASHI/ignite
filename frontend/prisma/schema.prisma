@@ -39,6 +39,8 @@ model User {
   mentorshipQuestions MentorshipQuestion[]
   journeyNodes  UserJourneyNode[]
   pendingValidations PendingValidation[]
+  chatMessages  ChatMessage[]
+  bibleBookmarks BibleBookmark[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -50,6 +52,28 @@ model PasswordResetToken {
   userId    String
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model BibleBookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  bookSlug  String
+  chapter   Int
+  verse     Int
+  text      String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookSlug, chapter, verse])
 }
 
 

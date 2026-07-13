@@ -12,24 +12,7 @@ import Link from "next/link";
 import { awardXP } from "@/app/actions/gamification";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
-
-// ── Bookmark helpers (localStorage) ──────────────────────────────────────────
-function bmKey(bookSlug: string, ch: number, v: number) {
-  return `bm:${bookSlug}:${ch}:${v}`;
-}
-function isBookmarked(bookSlug: string, ch: number, v: number): boolean {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem(bmKey(bookSlug, ch, v)) === "1";
-}
-function toggleBookmark(bookSlug: string, ch: number, v: number): boolean {
-  const key = bmKey(bookSlug, ch, v);
-  if (localStorage.getItem(key) === "1") {
-    localStorage.removeItem(key);
-    return false;
-  }
-  localStorage.setItem(key, "1");
-  return true;
-}
+import { getDatabaseBookmarks, toggleDatabaseBookmark } from "../../actions";
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 function VersesSkeleton() {
@@ -121,14 +104,18 @@ export default function BibleReaderPage() {
     return () => clearInterval(interval);
   }, [timeLeft, isActive]);
 
-  // Load bookmarks from localStorage
+  // Load bookmarks from Database
   useEffect(() => {
     if (!book) return;
-    const bms = new Set<number>();
-    for (let v = 1; v <= 200; v++) {
-      if (isBookmarked(bookSlug, chapter, v)) bms.add(v);
-    }
-    setBookmarks(bms);
+    getDatabaseBookmarks().then(bms => {
+      const chapterBms = new Set<number>();
+      bms.forEach(bm => {
+        if (bm.bookSlug === bookSlug && bm.chapter === chapter) {
+          chapterBms.add(bm.verse);
+        }
+      });
+      setBookmarks(chapterBms);
+    });
   }, [bookSlug, chapter, book]);
 
   // Fetch chapter
@@ -179,13 +166,26 @@ export default function BibleReaderPage() {
     setHighlighted(highlighted === verse ? null : verse);
   };
 
-  const handleBookmark = (verse: number) => {
-    const now = toggleBookmark(bookSlug, chapter, verse);
-    setBookmarks((prev) => {
+  const handleBookmark = async (verse: number) => {
+    const verseText = verses.find(v => v.verse === verse)?.text;
+    const isCurrentlyBookmarked = bookmarks.has(verse);
+    
+    // Optimistic UI update
+    setBookmarks(prev => {
       const next = new Set(prev);
-      now ? next.add(verse) : next.delete(verse);
+      isCurrentlyBookmarked ? next.delete(verse) : next.add(verse);
       return next;
     });
+
+    const res = await toggleDatabaseBookmark(bookSlug, chapter, verse, verseText);
+    if (!res.success) {
+      // Revert if failed
+      setBookmarks(prev => {
+        const next = new Set(prev);
+        isCurrentlyBookmarked ? next.add(verse) : next.delete(verse);
+        return next;
+      });
+    }
   };
 
   const handleMarkAsRead = async () => {

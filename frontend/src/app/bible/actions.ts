@@ -61,3 +61,54 @@ export async function getBibleContent() {
 
   return { plans, featured };
 }
+
+export async function toggleDatabaseBookmark(bookSlug: string, chapter: number, verse: number, text?: string) {
+  try {
+    const session = await getSession();
+    if (!session?.id) return { success: false, error: "Not logged in" };
+
+    const existing = await prisma.bibleBookmark.findFirst({
+      where: { userId: session.id, bookSlug, chapter, verse }
+    });
+
+    if (existing) {
+      await prisma.bibleBookmark.delete({ where: { id: existing.id } });
+      return { success: true, bookmarked: false };
+    } else {
+      await prisma.bibleBookmark.create({
+        data: {
+          userId: session.id,
+          bookSlug,
+          chapter,
+          verse,
+          text
+        }
+      });
+      return { success: true, bookmarked: true };
+    }
+  } catch (error) {
+    console.error("Bookmark error:", error);
+    return { success: false, error: "Failed to toggle bookmark" };
+  }
+}
+
+export async function getDatabaseBookmarks() {
+  try {
+    const session = await getSession();
+    if (!session?.id) return [];
+
+    const bookmarks = await prisma.bibleBookmark.findMany({
+      where: { userId: session.id },
+      orderBy: [
+        { bookSlug: 'asc' },
+        { chapter: 'asc' },
+        { verse: 'asc' }
+      ]
+    });
+    
+    return bookmarks;
+  } catch (error) {
+    console.error("Fetch bookmarks error:", error);
+    return [];
+  }
+}

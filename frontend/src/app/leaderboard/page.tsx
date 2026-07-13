@@ -21,20 +21,21 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [parishLeaderboard, setParishLeaderboard] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"individuals" | "parishes">("individuals");
+  const [timeframe, setTimeframe] = useState<"all-time" | "weekly" | "seasonal">("all-time");
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
-      const data = await getLeaderboardUsers();
+      const data = await getLeaderboardUsers(timeframe);
       setLeaderboard(data);
-      const parishData = await getParishLeaderboard();
+      const parishData = await getParishLeaderboard(timeframe);
       setParishLeaderboard(parishData);
       setIsLoading(false);
     };
     load();
-  }, []);
+  }, [timeframe]);
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -60,19 +61,38 @@ export default function LeaderboardPage() {
             "Let us run with endurance the race that is set before us." &mdash; Hebrews 12:1
           </p>
 
-          <div className="flex gap-2 mt-4 bg-white/10 p-1 rounded-xl w-fit backdrop-blur-sm">
-            <button 
-              onClick={() => setActiveTab("individuals")}
-              className={cn("px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2", activeTab === "individuals" ? "bg-white text-amber-700 shadow-sm" : "text-amber-100 hover:text-white")}
-            >
-              <Users className="w-4 h-4" /> Individuals
-            </button>
-            <button 
-              onClick={() => setActiveTab("parishes")}
-              className={cn("px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2", activeTab === "parishes" ? "bg-white text-amber-700 shadow-sm" : "text-amber-100 hover:text-white")}
-            >
-              <Church className="w-4 h-4" /> Parishes
-            </button>
+          <div className="flex flex-col gap-2 mt-4">
+            {/* Timeframe Selector */}
+            <div className="flex gap-1 bg-white/10 p-1 rounded-xl w-fit backdrop-blur-sm">
+              {(["all-time", "weekly", "seasonal"] as const).map((tf) => (
+                <button
+                  key={tf}
+                  onClick={() => setTimeframe(tf)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-colors capitalize",
+                    timeframe === tf ? "bg-white text-amber-700 shadow-sm" : "text-amber-100 hover:text-white"
+                  )}
+                >
+                  {tf === "seasonal" ? "Great Lent" : tf.replace("-", " ")}
+                </button>
+              ))}
+            </div>
+
+            {/* Type Selector */}
+            <div className="flex gap-1 bg-white/10 p-1 rounded-xl w-fit backdrop-blur-sm">
+              <button 
+                onClick={() => setActiveTab("individuals")}
+                className={cn("px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2", activeTab === "individuals" ? "bg-white text-amber-700 shadow-sm" : "text-amber-100 hover:text-white")}
+              >
+                <Users className="w-4 h-4" /> Individuals
+              </button>
+              <button 
+                onClick={() => setActiveTab("parishes")}
+                className={cn("px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2", activeTab === "parishes" ? "bg-white text-amber-700 shadow-sm" : "text-amber-100 hover:text-white")}
+              >
+                <Church className="w-4 h-4" /> Parishes
+              </button>
+            </div>
           </div>
         </div>
       </div>

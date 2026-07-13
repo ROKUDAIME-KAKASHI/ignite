@@ -1,4 +1,4 @@
-# Gamification Awards System Plan
+/# Gamification Awards System Plan
 
 To create a deeply engaging and rewarding experience for the youth, we will implement a robust 10-award system. Each award will have 8 distinct tiers (levels), encouraging long-term engagement across an entire year (such as attending all 52 Sundays).
 

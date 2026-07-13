@@ -12,7 +12,7 @@ import { useEffect } from "react";
 
 const tabs = ["Browse", "Plans", "Bookmarks"];
 
-import { getBibleContent, getBibleProgress } from "./actions";
+import { getBibleContent, getBibleProgress, getDatabaseBookmarks } from "./actions";
 
 const otGroups = groupBooksByCategory("OT");
 const ntGroups = groupBooksByCategory("NT");
@@ -21,7 +21,7 @@ export default function BiblePage() {
   const [activeTab, setActiveTab] = useState("Browse");
   const [search, setSearch] = useState("");
   const [testament, setTestament] = useState<"OT" | "NT">("NT");
-  const [bookmarks, setBookmarks] = useState<{ bookSlug: string, ch: string, v: string, name: string }[]>([]);
+  const [bookmarks, setBookmarks] = useState<{ bookSlug: string, ch: string, v: string, name: string, text?: string | null }[]>([]);
   const [lastRead, setLastRead] = useState<{ slug: string, ch: string, name: string, total: number } | null>(null);
   const [progress, setProgress] = useState<{ read: number, total: number }>({ read: 0, total: 1189 });
 
@@ -52,16 +52,19 @@ export default function BiblePage() {
     }
 
     // Load bookmarks
-    const bms = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith("bm:")) {
-        const [, slug, ch, v] = key.split(":");
-        const b = getBookBySlug(slug);
-        if (b) bms.push({ bookSlug: slug, ch, v, name: b.name });
-      }
-    }
-    setBookmarks(bms);
+    getDatabaseBookmarks().then(dbBms => {
+      const bms = dbBms.map(bm => {
+        const b = getBookBySlug(bm.bookSlug);
+        return { 
+          bookSlug: bm.bookSlug, 
+          ch: bm.chapter.toString(), 
+          v: bm.verse.toString(), 
+          name: b?.name || bm.bookSlug,
+          text: bm.text
+        };
+      });
+      setBookmarks(bms);
+    });
   }, [activeTab]);
 
   const searchResults = useMemo(() => {
@@ -307,10 +310,15 @@ export default function BiblePage() {
                         href={`/bible/${bm.bookSlug}/${bm.ch}`}
                         className="flex items-center justify-between px-4 py-3 rounded-xl bg-card border border-border/60 card-holy card-holy-hover"
                       >
-                        <div>
+                        <div className="flex-1 pr-4">
                           <p className="font-bold text-sm text-foreground font-serif">{bm.name} {bm.ch}:{bm.v}</p>
+                          {bm.text && (
+                            <p className="text-xs text-muted-foreground italic mt-1 line-clamp-2">
+                              "{bm.text}"
+                            </p>
+                          )}
                         </div>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                       </Link>
                     ))}
                   </div>
