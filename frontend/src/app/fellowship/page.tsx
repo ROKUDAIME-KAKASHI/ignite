@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { getMessages, sendMessage, deleteMessage } from "@/app/actions/globalChat";
+import { supabase } from "@/lib/supabase";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ export default function FellowshipChatPage() {
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<any>(null);
 
   const fetchMessages = async () => {
     const data = await getMessages(50);
@@ -26,9 +28,32 @@ export default function FellowshipChatPage() {
 
   useEffect(() => {
     fetchMessages();
-    // Poll every 5 seconds for new messages
+    
+    // Poll every 5 seconds for new messages as a fallback
     const interval = setInterval(fetchMessages, 5000);
-    return () => clearInterval(interval);
+
+    // Supabase Realtime Broadcast for instant updates across all users
+    const channel = supabase.channel('global_fellowship_chat', {
+      config: {
+        broadcast: { ack: true }
+      }
+    });
+    
+    channel.on('broadcast', { event: 'new_message' }, () => {
+      fetchMessages();
+    })
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        channelRef.current = channel;
+      }
+    });
+
+    return () => {
+      clearInterval(interval);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -68,6 +93,15 @@ export default function FellowshipChatPage() {
       setInputText(content);
     } else {
       await fetchMessages(); // Fetch real data to get exact timestamps and IDs
+      
+      // Tell all other clients instantly that there's a new message
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'new_message',
+          payload: { refresh: true }
+        });
+      }
     }
     setSending(false);
   };
@@ -79,6 +113,15 @@ export default function FellowshipChatPage() {
     if (!res.success) {
       console.error(res.error);
       await fetchMessages(); // Re-fetch to restore if failed
+    } else {
+      // Broadcast deletion
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'new_message',
+          payload: { refresh: true }
+        });
+      }
     }
   };
 
