@@ -155,7 +155,7 @@ export default function BibleReaderPage() {
   }, []);
 
   const prevChapter = chapter > 1 ? chapter - 1 : null;
-  const nextChapter = chapter < book?.chapters ? chapter + 1 : null;
+  const nextChapter = chapter < (book?.chapters ?? 0) ? chapter + 1 : null;
   const prevBook = !prevChapter && bookSlug ? getAdjacentBook(bookSlug, "prev") : null;
   const nextBook = !nextChapter && bookSlug ? getAdjacentBook(bookSlug, "next") : null;
 
