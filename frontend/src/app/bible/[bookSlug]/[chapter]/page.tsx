@@ -145,22 +145,19 @@ export default function BibleReaderPage() {
     }
   }, [load, book, chapter]);
 
-  if (!book) {
-    return (
-      <div className="flex-1 flex items-center justify-center px-6 text-center">
-        <div>
-          <p className="text-4xl mb-3">✝️</p>
-          <p className="font-serif font-bold text-xl text-foreground">Book not found</p>
-          <Link href="/bible" className="text-sm text-primary mt-2 block underline">Return to Scripture</Link>
-        </div>
-      </div>
-    );
-  }
+  // Stop speaking when leaving page
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   const prevChapter = chapter > 1 ? chapter - 1 : null;
-  const nextChapter = chapter < book.chapters ? chapter + 1 : null;
-  const prevBook = !prevChapter ? getAdjacentBook(bookSlug, "prev") : null;
-  const nextBook = !nextChapter ? getAdjacentBook(bookSlug, "next") : null;
+  const nextChapter = chapter < book?.chapters ? chapter + 1 : null;
+  const prevBook = !prevChapter && bookSlug ? getAdjacentBook(bookSlug, "prev") : null;
+  const nextBook = !nextChapter && bookSlug ? getAdjacentBook(bookSlug, "next") : null;
 
   const handleVersePress = (verse: number) => {
     setHighlighted(highlighted === verse ? null : verse);
@@ -189,7 +186,7 @@ export default function BibleReaderPage() {
   };
 
   const handleMarkAsRead = async () => {
-    if (!user || markedRead) return;
+    if (!user || markedRead || !book) return;
     setMarkingRead(true);
     const res = await awardXP(10, `Read Scripture: ${book.name} ${chapter}`);
     if (res.success && res.xp) {
@@ -270,15 +267,19 @@ export default function BibleReaderPage() {
     setIsReading(true);
     speakVerse(0);
   };
-  
-  // Stop speaking when leaving page
-  useEffect(() => {
-    return () => {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
+
+  if (!book) {
+    return (
+      <div className="flex-1 flex items-center justify-center px-6 text-center">
+        <div>
+          <p className="text-4xl mb-3">✝️</p>
+          <p className="font-serif font-bold text-xl text-foreground">Book not found</p>
+          <Link href="/bible" className="text-sm text-primary mt-2 block underline">Return to Scripture</Link>
+        </div>
+      </div>
+    );
+  }
+
 
   const fontSizeClass = {
     sm: "text-sm leading-7",

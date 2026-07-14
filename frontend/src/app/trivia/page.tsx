@@ -174,7 +174,7 @@ export default function LiveTriviaPage() {
     setHasAnswered(true);
     
     let points = 0;
-    if (opt === question.a) {
+    if (String(opt).trim().toLowerCase() === String(question.a).trim().toLowerCase()) {
       // faster = more points. max 100, min 50.
       points = Math.max(50, Math.floor((timeLeft / 15) * 100));
       setMyScore(prev => prev + points);

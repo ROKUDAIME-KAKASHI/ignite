@@ -261,7 +261,6 @@ export default function JourneysPage() {
                 {selectedNode.type === "read" && (
                   <Button 
                     onClick={() => {
-                      handleCompleteNode();
                       // Basic heuristic to jump to the bible
                       router.push("/bible");
                     }} 
@@ -271,15 +270,13 @@ export default function JourneysPage() {
                     <BookOpen className="w-4 h-4 mr-2" /> Start Reading
                   </Button>
                 )}
-                {selectedNode.type !== "read" && (
-                  <Button 
-                    onClick={handleCompleteNode} 
-                    disabled={isProcessing}
-                    className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
-                  >
-                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Step"}
-                  </Button>
-                )}
+                <Button 
+                  onClick={handleCompleteNode} 
+                  disabled={isProcessing}
+                  className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
+                >
+                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Step"}
+                </Button>
               </div>
             )}
           </motion.div>

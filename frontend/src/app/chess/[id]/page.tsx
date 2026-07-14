@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Chessboard } from "react-chessboard";
 import { Loader2, ArrowLeft, RefreshCw } from "lucide-react";
@@ -17,6 +17,7 @@ export default function ChessGamePage() {
   
   const [game, setGame] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const channelRef = useRef<any>(null);
 
   const fetchGame = async () => {
     const data = await getChessGame(gameId);
@@ -33,6 +34,8 @@ export default function ChessGamePage() {
       fetchGame();
     }).subscribe();
 
+    channelRef.current = channel;
+
     return () => { supabase.removeChannel(channel); };
   }, [gameId]);
 
@@ -45,8 +48,10 @@ export default function ChessGamePage() {
     
     const res = await makeChessMove(gameId, { from: sourceSquare, to: targetSquare, promotion });
     if (res.success) {
-      // Broadcast to other player
-      supabase.channel(`chess_${gameId}`).send({ type: 'broadcast', event: 'move' });
+      // Broadcast to other player using the already subscribed channel
+      if (channelRef.current) {
+        channelRef.current.send({ type: 'broadcast', event: 'move' });
+      }
       fetchGame();
       return true;
     }

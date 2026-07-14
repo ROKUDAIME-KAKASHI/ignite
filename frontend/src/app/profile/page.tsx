@@ -174,6 +174,14 @@ export default function ProfilePage() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, [user?.id]);
 
+  const [notificationPerm, setNotificationPerm] = useState<NotificationPermission>("default");
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotificationPerm(Notification.permission);
+    }
+  }, []);
+
   const handleInstallClick = () => {
     if (!installPrompt) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
@@ -196,7 +204,9 @@ export default function ProfilePage() {
   const handleEnableNotifications = async () => {
     try {
       const permissionResult = await Notification.requestPermission();
+      setNotificationPerm(permissionResult);
       if (permissionResult === "granted" && "serviceWorker" in navigator) {
+        await navigator.serviceWorker.register('/sw.js');
         const registration = await navigator.serviceWorker.ready;
         const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "BIr1RWyN87fiJWv_-co9Peyyo6tl3Xx51znoApIegoOQVxEGfC01BK-2qFLB5F4KBKWRPwDE_8zTAUA_2h-2MYc";
         const subscription = await registration.pushManager.subscribe({
@@ -207,7 +217,7 @@ export default function ProfilePage() {
         const res = await fetch('/api/notifications/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subscription })
+          body: JSON.stringify({ subscription: subscription.toJSON() })
         });
         
         if (res.ok) {
@@ -507,9 +517,15 @@ export default function ProfilePage() {
           <div onClick={handleEnableNotifications} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer">
             <div>
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Notifications</p>
-              <p className="text-sm font-medium text-foreground mt-0.5">Turn on push notifications</p>
+              <p className="text-sm font-medium text-foreground mt-0.5">
+                {notificationPerm === "granted" ? "Enabled (click to manage)" : "Turn on push notifications"}
+              </p>
             </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            {notificationPerm === "granted" ? (
+              <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">Active</Badge>
+            ) : (
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            )}
           </div>
           {/* Install App */}
           <div onClick={handleInstallClick} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer">

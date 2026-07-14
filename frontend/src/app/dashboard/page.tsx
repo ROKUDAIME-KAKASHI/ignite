@@ -122,7 +122,7 @@ export default async function DashboardPage() {
 
   const [dbUser, chaptersRead, prayersSaid, eventsAttended] = userId ? await Promise.all([
     prisma.user.findUnique({ where: { id: userId }, select: { xp: true, streak: true, level: true } }),
-    prisma.xPLog.count({ where: { userId, reason: { contains: "Chapter" } } }),
+    prisma.xPLog.count({ where: { userId, reason: { startsWith: "Read Scripture:" } } }),
     prisma.xPLog.count({ where: { userId, reason: { contains: "prayer" } } }), // Covers both submitting and praying for others
     prisma.attendance.count({ where: { userId } }),
   ]) : [null, 0, 0, 0];
@@ -289,7 +289,7 @@ export default async function DashboardPage() {
       <div className="px-4 space-y-5 pb-24 md:pb-8">
 
         {/* Daily Verse */}
-        <div className="rounded-2xl overflow-hidden card-holy card-holy-hover">
+        <Link href="/bible" className="block rounded-2xl overflow-hidden card-holy card-holy-hover">
           <div className="bg-gradient-to-r from-amber-700/15 to-yellow-600/10 dark:from-amber-700/25 dark:to-yellow-600/15 px-4 pt-4 pb-3 border-b border-amber-200/30 dark:border-amber-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -305,7 +305,7 @@ export default async function DashboardPage() {
           <div className="px-5 py-4 bg-card">
             <p className="text-sm font-serif italic text-foreground/80 leading-relaxed">"{journey?.verse || "I can do all things through Christ who strengthens me."}"</p>
           </div>
-        </div>
+        </Link>
 
         {/* Reflection */}
         <div className="rounded-2xl overflow-hidden card-holy card-holy-hover">

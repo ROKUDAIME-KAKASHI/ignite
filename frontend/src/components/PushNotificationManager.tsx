@@ -26,6 +26,9 @@ export function PushNotificationManager() {
     if (permission === "granted" && user) {
       (async () => {
         try {
+          if ('serviceWorker' in navigator) {
+            await navigator.serviceWorker.register('/sw.js');
+          }
           const registration = await navigator.serviceWorker.ready;
           const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
@@ -34,7 +37,7 @@ export function PushNotificationManager() {
           await fetch('/api/notifications/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subscription })
+            body: JSON.stringify({ subscription: subscription.toJSON() })
           });
         } catch (e) {
           console.error("Silent resubscribe failed:", e);
@@ -47,6 +50,9 @@ export function PushNotificationManager() {
     try {
       const permissionResult = await Notification.requestPermission();
       if (permissionResult === "granted") {
+        if ('serviceWorker' in navigator) {
+          await navigator.serviceWorker.register('/sw.js');
+        }
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
@@ -56,7 +62,7 @@ export function PushNotificationManager() {
         await fetch('/api/notifications/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subscription })
+          body: JSON.stringify({ subscription: subscription.toJSON() })
         });
         
         setPermission("granted");

@@ -95,6 +95,11 @@ export default function BibleLudoPage() {
       .filter((p: any) => p.id !== userId && p.colorSlot)
       .map((p: any) => p.colorSlot);
     
+    // Host is always red, ensure it's marked as taken for joiners
+    if (!takenColors.includes("red")) {
+      takenColors.push("red");
+    }
+    
     const freeColor = COLORS.find(c => !takenColors.includes(c));
     return (freeColor || "green") as Color;
   };
@@ -549,7 +554,7 @@ export default function BibleLudoPage() {
 
   const handleTrivia = (opt: string) => {
     if (!trivia || triviaResult) return;
-    if (opt === trivia.a) {
+    if (String(opt).trim().toLowerCase() === String(trivia.a).trim().toLowerCase()) {
       setTriviaResult("correct");
       setTimeout(() => {
         setTriviaResult(null);
@@ -618,7 +623,7 @@ export default function BibleLudoPage() {
       config: { presence: { key: user.id } }
     });
     
-    gChannel.on('presence', { event: 'sync' }, () => {
+    gChannel.on('presence', { event: 'sync' }, async () => {
       const state = gChannel.presenceState();
       const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
       
@@ -628,6 +633,22 @@ export default function BibleLudoPage() {
       if (me?.colorSlot) {
         setMyColor(me.colorSlot);
         setIsReady(me.isReady || false);
+
+        // Resolve color conflicts: If another player has my color
+        const conflictingPlayer = playersList.find(p => p.id !== user.id && p.colorSlot === me.colorSlot);
+        if (conflictingPlayer && (!me.isHost)) {
+          // I should yield if the other player is host, or if their ID is smaller (deterministic)
+          const shouldIYield = conflictingPlayer.isHost || conflictingPlayer.id < user.id;
+          if (shouldIYield) {
+            const newColor = findFreeColorSlot(playersList, user.id);
+            if (newColor !== me.colorSlot) {
+              await gChannel.track({
+                ...me,
+                colorSlot: newColor
+              });
+            }
+          }
+        }
       }
     })
     .on('broadcast', { event: 'start_game' }, ({ payload }) => {

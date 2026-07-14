@@ -35,6 +35,15 @@ export default function NotificationsPage() {
   const [inbox, setInbox] = useState<NotificationItem[]>([]);
   const { user } = useAuth();
 
+  const [preferences, setPreferences] = useState({
+    dailyVerse: true,
+    prayerWall: true,
+    parishNotices: true,
+    gamification: false,
+    events: true,
+    none: false,
+  });
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       if ("Notification" in window) {
@@ -52,7 +61,32 @@ export default function NotificationsPage() {
         setInbox(data as unknown as NotificationItem[]);
       });
     }
+    
+    const savedPrefs = localStorage.getItem("ignite_notification_prefs");
+    if (savedPrefs) {
+      try {
+        setPreferences(JSON.parse(savedPrefs));
+      } catch (e) {}
+    }
   }, [user]);
+
+  const togglePreference = (key: keyof typeof preferences) => {
+    setPreferences(prev => {
+      let next = { ...prev, [key]: !prev[key] };
+      
+      if (key === "none" && next.none) {
+        next = { dailyVerse: false, prayerWall: false, parishNotices: false, gamification: false, events: false, none: true };
+      } else if (key !== "none" && next[key]) {
+        next.none = false;
+      } else if (key !== "none" && !next.none) {
+        const anyActive = next.dailyVerse || next.prayerWall || next.parishNotices || next.gamification || next.events;
+        if (!anyActive) next.none = true;
+      }
+
+      localStorage.setItem("ignite_notification_prefs", JSON.stringify(next));
+      return next;
+    });
+  };
 
   const handleMarkAsRead = async (id: string) => {
     setInbox(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
@@ -73,6 +107,7 @@ export default function NotificationsPage() {
       setPermission(perm);
       
       if (perm === "granted" && "serviceWorker" in navigator) {
+        await navigator.serviceWorker.register('/sw.js');
         const registration = await navigator.serviceWorker.ready;
         const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "BIr1RWyN87fiJWv_-co9Peyyo6tl3Xx51znoApIegoOQVxEGfC01BK-2qFLB5F4KBKWRPwDE_8zTAUA_2h-2MYc";
         const subscription = await registration.pushManager.subscribe({
@@ -83,7 +118,7 @@ export default function NotificationsPage() {
         await fetch("/api/notifications/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscription })
+          body: JSON.stringify({ subscription: subscription.toJSON() })
         });
       }
     } catch (error) {
@@ -294,28 +329,36 @@ export default function NotificationsPage() {
           </div>
           <div className="divide-y divide-border/40">
             {[
-              { title: "Daily Verse", desc: "Receive a scripture reading every morning", active: true },
-              { title: "Prayer Wall Alerts", desc: "When someone prays for your request", active: true },
-              { title: "Parish Notices", desc: "Important announcements from your admin", active: true },
-              { title: "Gamification", desc: "Weekly rank updates and new badges", active: false },
-              { title: "Community Events", desc: "Reminders for masses and retreats", active: true },
-            ].map((pref, i) => (
-              <div key={i} className="p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-foreground">{pref.title}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{pref.desc}</p>
-                </div>
-                <div className={cn(
-                  "w-11 h-6 rounded-full flex items-center p-1 transition-colors",
-                  pref.active && permission === "granted" ? "bg-primary" : "bg-slate-200 dark:bg-slate-700"
-                )}>
+              { id: "dailyVerse" as const, title: "Daily Verse", desc: "Receive a scripture reading every morning" },
+              { id: "prayerWall" as const, title: "Prayer Wall Alerts", desc: "When someone prays for your request" },
+              { id: "parishNotices" as const, title: "Parish Notices", desc: "Important announcements from your admin" },
+              { id: "gamification" as const, title: "Gamification", desc: "Weekly rank updates and new badges" },
+              { id: "events" as const, title: "Community Events", desc: "Reminders for masses and retreats" },
+              { id: "none" as const, title: "None", desc: "Turn off all notifications" },
+            ].map((pref) => {
+              const isActive = preferences[pref.id];
+              return (
+                <div 
+                  key={pref.id} 
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors"
+                  onClick={() => togglePreference(pref.id)}
+                >
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{pref.title}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{pref.desc}</p>
+                  </div>
                   <div className={cn(
-                    "w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
-                    pref.active && permission === "granted" ? "translate-x-5" : "translate-x-0"
-                  )} />
+                    "w-11 h-6 rounded-full flex items-center p-1 transition-colors shrink-0",
+                    isActive && permission === "granted" ? "bg-primary" : "bg-slate-200 dark:bg-slate-700"
+                  )}>
+                    <div className={cn(
+                      "w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
+                      isActive && permission === "granted" ? "translate-x-5" : "translate-x-0"
+                    )} />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         

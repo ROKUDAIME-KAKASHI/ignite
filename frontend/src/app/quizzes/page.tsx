@@ -223,10 +223,9 @@ export default function QuizzesPage() {
     }
   };
 
-  /* Submit answer */
   const submitAnswer = () => {
     if (selected === null) return;
-    const correct = selected === q.answer;
+    const correct = String(selected).trim().toLowerCase() === String(q.answer).trim().toLowerCase();
     
     let newScore = score;
     if (correct) {
@@ -653,7 +652,7 @@ export default function QuizzesPage() {
                 {(q.type === "mcq" ? q.options! : ["True", "False"]).map((opt) => {
                   const val = q.type === "truefalse" ? opt === "True" : opt;
                   const isSelected = selected === val;
-                  const isCorrect  = q.answer === val;
+                  const isCorrect  = String(q.answer).trim().toLowerCase() === String(val).trim().toLowerCase();
                   const showCorrect = revealed && isCorrect;
                   const showWrong   = revealed && isSelected && !isCorrect;
 
@@ -685,11 +684,11 @@ export default function QuizzesPage() {
                 {revealed && (
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn(
                     "rounded-2xl p-4 border",
-                    selected === q.answer
+                    String(selected).trim().toLowerCase() === String(q.answer).trim().toLowerCase()
                       ? "bg-green-50 dark:bg-green-900/15 border-green-200 dark:border-green-800"
                       : "bg-red-50 dark:bg-red-900/15 border-red-200 dark:border-red-800"
                   )}>
-                    <p className="text-sm font-bold mb-1">{selected === q.answer ? "✅ Correct!" : "❌ Incorrect"}</p>
+                    <p className="text-sm font-bold mb-1">{String(selected).trim().toLowerCase() === String(q.answer).trim().toLowerCase() ? "✅ Correct!" : "❌ Incorrect"}</p>
                     <p className="text-xs text-muted-foreground leading-relaxed font-serif italic">{q.explanation}</p>
                   </motion.div>
                 )}

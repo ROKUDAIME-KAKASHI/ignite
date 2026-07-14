@@ -146,7 +146,7 @@ export async function getAdminDashboardData() {
     prisma.user.count(),
     prisma.prayerRequest.count(),
     prisma.quizAttempt.count(),
-    prisma.xPLog.count({ where: { reason: { contains: "Chapter" } } }),
+    prisma.xPLog.count({ where: { reason: { startsWith: "Read Scripture:" } } }),
     prisma.userJourneyNode.count({ where: { status: "completed" } }),
     prisma.user.aggregate({ _sum: { stars: true } })
   ]);
