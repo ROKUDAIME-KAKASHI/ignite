@@ -85,23 +85,19 @@ export async function getQuizzes() {
   const session = await getSession();
   const userId = session?.id;
 
-  let dailyQuizAttemptedToday = false;
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  // Check attempts for all quizzes today
+  let completedQuizIds = new Set<string>();
   if (userId) {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const dailyQuiz = quizzes.find(q => q.type === "DAILY");
-    if (dailyQuiz) {
-      const attempt = await prisma.quizAttempt.findFirst({
-        where: {
-          userId,
-          quizId: dailyQuiz.id,
-          completedAt: { gte: todayStart }
-        }
-      });
-      if (attempt) {
-        dailyQuizAttemptedToday = true;
+    const attempts = await prisma.quizAttempt.findMany({
+      where: {
+        userId,
+        completedAt: { gte: todayStart }
       }
-    }
+    });
+    attempts.forEach(a => completedQuizIds.add(a.quizId));
   }
 
   return quizzes.map(q => {
@@ -122,24 +118,37 @@ export async function getQuizzes() {
       };
     });
 
-    if (q.type === "DAILY") {
-      const dayIndex = Math.floor(Date.now() / 86400000);
-      const start = (dayIndex * 5) % TRIVIA_QUESTIONS.length;
-      mappedQuestions = [];
-      for (let i = 0; i < 5; i++) {
-        const tq = TRIVIA_QUESTIONS[(start + i) % TRIVIA_QUESTIONS.length];
-        const isTrueFalse = tq.options.length === 2 && tq.options.includes("True") && tq.options.includes("False");
-        mappedQuestions.push({
-          id: `daily-q-${i}`,
-          type: isTrueFalse ? "truefalse" : "mcq",
-          question: tq.q,
-          options: tq.options,
-          answer: isTrueFalse ? tq.a === "True" : tq.a,
-          explanation: `The correct answer is: ${tq.a}`,
-          verse: undefined
-        });
-      }
+    // Generate dynamic jumbled questions for ALL quizzes based on the current day
+    const dayIndex = Math.floor(Date.now() / 86400000);
+    // Use a different salt/offset for each quiz based on its title length and ID
+    const salt = q.title.length * 13 + (q.type === "DAILY" ? 0 : 50);
+    const start = ((dayIndex + salt) * 7) % TRIVIA_QUESTIONS.length;
+    
+    mappedQuestions = [];
+    for (let i = 0; i < 5; i++) {
+      // jump around to jumble the questions
+      const index = (start + (i * 17)) % TRIVIA_QUESTIONS.length;
+      const tq = TRIVIA_QUESTIONS[index];
+      const isTrueFalse = tq.options.length === 2 && tq.options.includes("True") && tq.options.includes("False");
+      mappedQuestions.push({
+        id: `dynamic-q-${q.id}-${i}`,
+        type: isTrueFalse ? "truefalse" : "mcq",
+        question: tq.q,
+        options: tq.options,
+        answer: isTrueFalse ? tq.a === "True" : tq.a,
+        explanation: `The correct answer is: ${tq.a}`,
+        verse: undefined
+      });
     }
+
+    // Shuffle options for MCQ (pseudo-random based on dayIndex so it's stable per day)
+    mappedQuestions.forEach(mq => {
+      if (mq.type === "mcq") {
+        const hash = dayIndex + mq.question.length;
+        if (hash % 2 === 0) mq.options.reverse();
+        if (hash % 3 === 0) mq.options = [mq.options[1], mq.options[0], mq.options[3], mq.options[2]].filter(Boolean) as string[];
+      }
+    });
 
     return {
       id: q.id,
@@ -150,7 +159,7 @@ export async function getQuizzes() {
       emoji: q.type === "DAILY" ? "⭐" : "📜",
       color: q.type === "DAILY" ? "gradient-gold" : "gradient-royal",
       badge: q.type === "DAILY" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-      isCompleted: q.type === "DAILY" ? dailyQuizAttemptedToday : false,
+      isCompleted: completedQuizIds.has(q.id),
       questions: mappedQuestions
     };
   });
@@ -164,19 +173,19 @@ export async function recordQuizAttempt(quizId: string | number, score: number) 
     const quiz = await prisma.quiz.findFirst({ where: { id: String(quizId) } });
     if (!quiz) return { success: false, error: "Quiz not found" };
 
-    if (quiz.type === "DAILY") {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const attempt = await prisma.quizAttempt.findFirst({
-        where: {
-          userId: session.id,
-          quizId: quiz.id,
-          completedAt: { gte: todayStart }
-        }
-      });
-      if (attempt) {
-        return { success: false, error: "Daily quiz already completed today" };
+    // ALL quizzes are now daily-limited
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const attempt = await prisma.quizAttempt.findFirst({
+      where: {
+        userId: session.id,
+        quizId: quiz.id,
+        completedAt: { gte: todayStart }
       }
+    });
+    
+    if (attempt) {
+      return { success: false, error: "Quiz already completed today. Come back tomorrow!" };
     }
 
     await prisma.quizAttempt.create({
