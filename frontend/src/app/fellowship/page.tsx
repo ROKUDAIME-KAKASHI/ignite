@@ -187,6 +187,11 @@ export default function FellowshipChatPage() {
                       <span className="text-[8px] bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold">
                         Lvl {msg.user.level}
                       </span>
+                      {msg.user.badges?.map((ub: any) => (
+                        <span key={ub.badge.id} title={ub.badge.name} className="text-[10px] cursor-help">
+                          {ub.badge.imageUrl || "🏅"}
+                        </span>
+                      ))}
                     </div>
                   )}
                   <div

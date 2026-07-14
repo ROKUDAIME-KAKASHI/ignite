@@ -211,7 +211,10 @@ export async function getAllUsers() {
         email: true,
         role: true,
         createdAt: true,
-        stars: true
+        stars: true,
+        badges: {
+          include: { badge: true }
+        }
       }
     });
 
@@ -221,6 +224,7 @@ export async function getAllUsers() {
       email: u.email,
       role: u.role,
       stars: u.stars || 0,
+      badges: u.badges.map(b => b.badge),
       joined: new Date(u.createdAt).toLocaleDateString(),
       status: u.role === "ADMIN" ? "Admin" : u.role === "LEADER" ? "Leader" : "Member"
     }));
@@ -418,6 +422,31 @@ export async function deleteBadge(id: string) {
   await prisma.userBadge.deleteMany({ where: { badgeId: id } });
   await prisma.badge.delete({ where: { id } });
   return { success: true };
+}
+
+export async function awardBadge(userId: string, badgeId: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  try {
+    await prisma.userBadge.create({
+      data: { userId, badgeId }
+    });
+    return { success: true };
+  } catch (e: any) {
+    if (e.code === 'P2002') return { error: "User already has this badge" };
+    return { error: "Failed to award badge" };
+  }
+}
+
+export async function revokeBadge(userId: string, badgeId: string) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+  try {
+    await prisma.userBadge.delete({
+      where: { userId_badgeId: { userId, badgeId } }
+    });
+    return { success: true };
+  } catch (e) {
+    return { error: "Failed to revoke badge" };
+  }
 }
 
 // ── Public (no admin auth required) ──────────────────────────────────────────

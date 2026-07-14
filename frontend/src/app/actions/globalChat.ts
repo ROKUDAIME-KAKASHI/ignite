@@ -36,6 +36,9 @@ export async function getMessages(limit = 50) {
             avatarUrl: true,
             role: true,
             level: true,
+            badges: {
+              include: { badge: true }
+            }
           },
         },
       },

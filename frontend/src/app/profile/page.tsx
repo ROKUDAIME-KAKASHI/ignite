@@ -283,6 +283,11 @@ export default function ProfilePage() {
             <Badge className="bg-white/20 text-white border border-white/30 backdrop-blur-sm text-xs font-bold px-3 py-1">
               🕊️ {getLiturgicalSeason()}
             </Badge>
+            {stats.badgeList.map((b, i) => (
+              <Badge key={`badge-${i}`} className="bg-white/20 text-white border border-white/30 backdrop-blur-sm text-xs font-bold px-3 py-1" title={b.desc}>
+                {b.emoji} {b.label}
+              </Badge>
+            ))}
           </div>
         </div>
       </div>

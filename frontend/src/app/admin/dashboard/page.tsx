@@ -37,7 +37,9 @@ import {
   loginAsUser, 
   updateUserRole, 
   getAllUsers,
-  getAuditLogs
+  getAuditLogs,
+  awardBadge,
+  revokeBadge
 } from "../actions";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 import { getMissions } from "@/app/missions/actions";
@@ -48,6 +50,7 @@ export default function AdminDashboardPage() {
 
   const [activeTab, setActiveTab] = useState<"overview" | "users" | "trivia" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes" | "audit">("overview");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [selectedUserForBadges, setSelectedUserForBadges] = useState<any>(null);
 
   // New search & pagination states
   const [allUsers, setAllUsers] = useState<any[]>([]);
@@ -133,6 +136,24 @@ export default function AdminDashboardPage() {
     if (!confirm("Delete this suggestion?")) return;
     await deleteChatSuggestion(id);
     await fetchContent();
+  };
+
+  const handleAwardBadge = async (userId: string, badgeId: string) => {
+    const res = await awardBadge(userId, badgeId);
+    if (res.success) {
+      await fetchAllUsersData();
+    } else {
+      alert(res.error);
+    }
+  };
+
+  const handleRevokeBadge = async (userId: string, badgeId: string) => {
+    const res = await revokeBadge(userId, badgeId);
+    if (res.success) {
+      await fetchAllUsersData();
+    } else {
+      alert(res.error);
+    }
   };
 
   const fetchPrayers = async () => {
@@ -684,6 +705,12 @@ export default function AdminDashboardPage() {
                       </div>
 
                       <div className="flex gap-2 self-end sm:self-center">
+                        <button 
+                          onClick={() => setSelectedUserForBadges(user)}
+                          className="text-xs bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 px-3 py-1.5 rounded-lg text-amber-600 dark:text-amber-400 font-bold transition-colors"
+                        >
+                          Badges
+                        </button>
                         {isSuperAdmin && (
                           <>
                             <button 
@@ -1413,6 +1440,55 @@ export default function AdminDashboardPage() {
         )}
         
       </div>
+
+      {/* Badge Management Modal */}
+      {selectedUserForBadges && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-5 border-b border-border/50 flex items-center justify-between">
+              <h3 className="font-bold font-serif text-lg text-foreground">Manage Badges</h3>
+              <button onClick={() => setSelectedUserForBadges(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <div className="p-5">
+              <p className="text-xs text-muted-foreground mb-4">Editing badges for <span className="font-bold text-foreground">{selectedUserForBadges.name}</span></p>
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                {badges.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No badges exist in the system yet. Create them in the Content tab.</p>
+                ) : (
+                  badges.map(b => {
+                    const hasBadge = selectedUserForBadges.badges?.find((ub: any) => ub.id === b.id);
+                    return (
+                      <div key={b.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-slate-50 dark:bg-slate-800/50">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">{b.imageUrl}</div>
+                          <div>
+                            <p className="text-sm font-bold text-foreground leading-none">{b.name}</p>
+                            <p className="text-[10px] text-muted-foreground mt-1">{b.description}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (hasBadge) {
+                              await handleRevokeBadge(selectedUserForBadges.id, b.id);
+                              setSelectedUserForBadges({...selectedUserForBadges, badges: selectedUserForBadges.badges.filter((x:any) => x.id !== b.id)});
+                            } else {
+                              await handleAwardBadge(selectedUserForBadges.id, b.id);
+                              setSelectedUserForBadges({...selectedUserForBadges, badges: [...(selectedUserForBadges.badges || []), b]});
+                            }
+                          }}
+                          className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition-colors", hasBadge ? "bg-red-100 text-red-600 hover:bg-red-200" : "bg-green-100 text-green-700 hover:bg-green-200")}
+                        >
+                          {hasBadge ? "Revoke" : "Award"}
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
