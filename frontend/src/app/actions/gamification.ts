@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { logAudit } from "@/lib/logger";
 
 export async function awardXP(amount: number, reason: string) {
   try {
@@ -34,6 +35,8 @@ export async function awardXP(amount: number, reason: string) {
     const { revalidatePath } = await import("next/cache");
     revalidatePath("/", "layout");
 
+    await logAudit(session.id, "EARNED_XP", { amount, reason, newLevel });
+
     return { success: true, xp: user.xp, level: newLevel };
   } catch (error) {
     console.error(error);
@@ -55,6 +58,8 @@ export async function awardStars(amount: number, reason: string) {
 
     const { revalidatePath } = await import("next/cache");
     revalidatePath("/", "layout");
+
+    await logAudit(session.id, "EARNED_STARS", { amount, reason });
 
     return { success: true, stars: user.stars };
   } catch (error) {

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
+import { logAudit } from "@/lib/logger";
 
 export async function requestPasswordReset(email: string) {
   try {
@@ -64,6 +65,8 @@ export async function requestPasswordReset(email: string) {
 
     // Returning resetUrl purely so you can copy it in the app without checking console.
     // REMOVE THIS in production when real emails are implemented!
+    await logAudit(user.id, "PASSWORD_RESET_REQUESTED", { method: "email" });
+
     return { success: true, resetUrl: process.env.NODE_ENV === 'development' ? resetUrl : undefined };
   } catch (error) {
     console.error("Error requesting password reset:", error);
@@ -92,6 +95,8 @@ export async function resetPassword(token: string, newPasswordHash: string) {
     await prisma.passwordResetToken.delete({
       where: { token }
     });
+
+    await logAudit(resetToken.userId, "PASSWORD_RESET_COMPLETED");
 
     return { success: true };
   } catch (error) {

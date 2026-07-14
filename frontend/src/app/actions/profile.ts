@@ -1,6 +1,7 @@
 "use server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { logAudit } from "@/lib/logger";
 
 export async function debugEnv() {
   return process.env.DATABASE_URL?.substring(0, 45) || "Missing DB URL";
@@ -117,6 +118,8 @@ export async function joinParish(inviteCode: string) {
       where: { id: session.id },
       data: { churchId: church.id }
     });
+
+    await logAudit(session.id, "JOINED_PARISH", { churchId: church.id, inviteCode });
 
     return { success: true, churchName: church.name };
   } catch (error: any) {

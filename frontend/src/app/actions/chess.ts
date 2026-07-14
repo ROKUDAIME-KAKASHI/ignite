@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { Chess } from "chess.js";
+import { logAudit } from "@/lib/logger";
 
 export async function getAvailableChessGames() {
   const session = await getSession();
@@ -82,6 +83,8 @@ export async function createNewChessGame() {
     }
   });
 
+  await logAudit(session.id, "CREATED_CHESS_GAME", { gameId: newGame.id });
+
   return { success: true, gameId: newGame.id };
 }
 
@@ -96,6 +99,8 @@ export async function joinChessGame(gameId: string) {
     where: { id: gameId },
     data: { blackPlayerId: session.id }
   });
+
+  await logAudit(session.id, "JOINED_CHESS_GAME", { gameId: updated.id });
 
   return { success: true, gameId: updated.id };
 }
@@ -120,6 +125,9 @@ export async function createOrJoinChessGame() {
       where: { id: waitingGame.id },
       data: { blackPlayerId: session.id }
     });
+    
+    await logAudit(session.id, "JOINED_CHESS_GAME", { gameId: updated.id });
+    
     return { success: true, gameId: updated.id };
   }
 
@@ -133,6 +141,8 @@ export async function createOrJoinChessGame() {
       status: "active"
     }
   });
+
+  await logAudit(session.id, "CREATED_CHESS_GAME", { gameId: newGame.id });
 
   return { success: true, gameId: newGame.id };
 }
@@ -190,6 +200,8 @@ export async function makeChessMove(gameId: string, move: { from: string, to: st
         lastMoveAt: new Date()
       }
     });
+
+    await logAudit(session.id, "MADE_CHESS_MOVE", { gameId, move: result.san, status });
 
     return { success: true, fen: chess.fen(), status };
   } catch (err) {

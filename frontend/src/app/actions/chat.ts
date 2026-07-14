@@ -3,6 +3,7 @@
 import { getAIClient } from "@/lib/ai";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logAudit } from "@/lib/logger";
 
 export async function askAbba(prompt: string, history: {role: string, content: string}[]) {
   try {
@@ -26,6 +27,10 @@ Do not use markdown formatting like **bold** or *italics* as the chat UI does no
         model: 'gemini-2.5-flash',
         contents: finalPrompt,
     });
+
+    if (session?.id) {
+      await logAudit(session.id, "ASKED_ABBA", { promptLength: prompt.length });
+    }
 
     return { success: true, text: response.text };
   } catch (error) {

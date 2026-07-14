@@ -5,6 +5,7 @@ import { encrypt, decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { OAuth2Client } from "google-auth-library";
+import { logAudit } from "@/lib/logger";
 
 const googleClient = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
@@ -31,8 +32,9 @@ export async function login(data: FormData) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const session = await encrypt(sessionData);
 
-  const cookieStore = await cookies();
   cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
+
+  await logAudit(user.id, "USER_LOGIN", { method: "email" });
 
   return { success: true, user: sessionData };
 }
@@ -70,8 +72,9 @@ export async function signup(data: FormData) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const session = await encrypt(sessionData);
 
-  const cookieStore = await cookies();
   cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
+
+  await logAudit(user.id, "USER_SIGNUP", { method: "email" });
 
   return { success: true, user: sessionData };
 }
@@ -120,8 +123,9 @@ export async function googleAuth(idToken: string) {
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const session = await encrypt(sessionData);
 
-    const cookieStore = await cookies();
     cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
+
+    await logAudit(user.id, "USER_LOGIN_GOOGLE");
 
     return { success: true, user: sessionData };
   } catch (err: any) {
@@ -132,7 +136,19 @@ export async function googleAuth(idToken: string) {
 
 export async function logout() {
   const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session")?.value;
+  let userId = null;
+  if (sessionToken) {
+    const sessionData = await decrypt(sessionToken).catch(() => null);
+    userId = sessionData?.id;
+  }
+  
   cookieStore.delete("session");
+  
+  if (userId) {
+    await logAudit(userId as string, "USER_LOGOUT");
+  }
+
   return { success: true };
 }
 
@@ -154,5 +170,8 @@ export async function updateProfile(firstName: string, lastName: string) {
   const newSessionToken = await encrypt(updatedSession);
   
   cookieStore.set("session", newSessionToken, { expires, httpOnly: true, secure: true });
+  
+  await logAudit(sessionData.id as string, "PROFILE_UPDATED", { firstName, lastName });
+  
   return { success: true, user: updatedSession };
 }
