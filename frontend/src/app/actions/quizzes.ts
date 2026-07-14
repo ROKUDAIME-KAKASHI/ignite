@@ -134,7 +134,7 @@ export async function getQuizzes() {
         id: `dynamic-q-${q.id}-${i}`,
         type: isTrueFalse ? "truefalse" : "mcq",
         question: tq.q,
-        options: tq.options,
+        options: [...tq.options],
         answer: isTrueFalse ? tq.a === "True" : tq.a,
         explanation: `The correct answer is: ${tq.a}`,
         verse: undefined
@@ -143,10 +143,14 @@ export async function getQuizzes() {
 
     // Shuffle options for MCQ (pseudo-random based on dayIndex so it's stable per day)
     mappedQuestions.forEach(mq => {
-      if (mq.type === "mcq") {
+      if (mq.type === "mcq" && mq.options) {
         const hash = dayIndex + mq.question.length;
-        if (hash % 2 === 0) mq.options.reverse();
-        if (hash % 3 === 0) mq.options = [mq.options[1], mq.options[0], mq.options[3], mq.options[2]].filter(Boolean) as string[];
+        if (hash % 2 === 0) {
+          mq.options = [...mq.options].reverse();
+        }
+        if (hash % 3 === 0 && mq.options.length === 4) {
+          mq.options = [mq.options[1], mq.options[0], mq.options[3], mq.options[2]];
+        }
       }
     });
 
