@@ -128,12 +128,17 @@ export default function BibleLudoPage() {
   };
 
   const selectColorSlot = async (color: Color) => {
-    if (!user || !gameChannel) return;
+    console.log("selectColorSlot called with color:", color);
+    if (!user || !gameChannel) {
+      console.log("selectColorSlot missing user or gameChannel:", { user: !!user, gameChannel: !!gameChannel });
+      return;
+    }
     
     const state = gameChannel.presenceState();
     const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
     const isTaken = playersList.some((p: any) => p.id !== user.id && p.colorSlot === color);
     if (isTaken) {
+      console.log("selectColorSlot: color taken!");
       showToast("Color slot is already taken!");
       return;
     }
@@ -142,15 +147,21 @@ export default function BibleLudoPage() {
     const ourPresence = playersList.find((p: any) => p.id === user.id);
     const isReadyState = ourPresence?.isReady || isHost;
     
+    console.log("selectColorSlot tracking:", { id: user.id, colorSlot: color, isHost, isReady: isReadyState });
     setMyColor(color);
     
-    await gameChannel.track({
-      id: user.id,
-      name: `${user.firstName} ${user.lastName}`,
-      isHost,
-      colorSlot: color,
-      isReady: isReadyState
-    });
+    try {
+      await gameChannel.track({
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+        isHost,
+        colorSlot: color,
+        isReady: isReadyState
+      });
+      console.log("selectColorSlot track success");
+    } catch (err) {
+      console.error("selectColorSlot track error:", err);
+    }
   };
 
   const toggleReady = async () => {
@@ -728,6 +739,7 @@ export default function BibleLudoPage() {
       }
     });
     
+    setRoomPlayers(compiledPlayers);
     setGameMode("live");
     setTokens(initialTokens);
     setWinner(null);
