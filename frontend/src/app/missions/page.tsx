@@ -134,7 +134,7 @@ export default function MissionsPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+                "flex-1 py-2 text-sm font-semibold rounded-lg transition duration-200",
                 activeTab === tab ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -158,7 +158,7 @@ export default function MissionsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07 }}
                 className={cn(
-                  "rounded-2xl overflow-hidden border card-holy-hover transition-all card-holy",
+                  "rounded-2xl overflow-hidden border card-holy-hover transition card-holy",
                   done ? "opacity-70 border-amber-200/50" : "border-amber-200/50"
                 )}
               >
@@ -194,7 +194,7 @@ export default function MissionsPage() {
                   {done ? (
                     <Button
                       disabled
-                      className="w-full h-10 rounded-xl font-bold transition-all bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                      className="w-full h-10 rounded-xl font-bold transition bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
                       variant="outline"
                     >
                       <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -236,7 +236,7 @@ export default function MissionsPage() {
                   ) : (
                     <Button
                       onClick={() => setSelectedMission(m.id)}
-                      className="w-full h-10 rounded-xl font-bold transition-all gradient-gold text-white shadow-md"
+                      className="w-full h-10 rounded-xl font-bold transition gradient-gold text-white shadow-md"
                     >
                       <PenTool className="w-4 h-4 mr-2" />
                       Write Reflection to Complete

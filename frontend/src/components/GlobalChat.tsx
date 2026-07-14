@@ -150,7 +150,7 @@ export function GlobalChat() {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="w-14 h-14 rounded-full gradient-spirit text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all p-0 flex items-center justify-center halo-glow"
+              className="w-14 h-14 rounded-full gradient-spirit text-white shadow-xl hover:shadow-2xl hover:scale-105 transition p-0 flex items-center justify-center halo-glow"
             >
               <MessageSquare className="w-6 h-6" />
             </Button>
@@ -296,7 +296,7 @@ export function GlobalChat() {
                   disabled={!input.trim() || isTyping}
                   size="icon"
                   className={cn(
-                    "absolute right-1.5 w-8 h-8 rounded-lg transition-all duration-200",
+                    "absolute right-1.5 w-8 h-8 rounded-lg transition duration-200",
                     input.trim() ? "gradient-gold shadow-md halo-glow" : "bg-muted text-muted-foreground"
                   )}
                 >

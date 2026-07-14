@@ -355,7 +355,7 @@ export default function AdminDashboardPage() {
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
           {(["overview", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
-              "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition-all whitespace-nowrap snap-center",
+              "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             )}>
               {t} 
@@ -429,9 +429,9 @@ export default function AdminDashboardPage() {
                     return (
                       <div className="space-y-4">
                         <div className="w-full h-4 rounded-full overflow-hidden flex bg-slate-100 dark:bg-slate-800">
-                          <div className="bg-blue-500 h-full transition-all duration-500" style={{ width: `${adminPct}%` }} title={`Admins: ${admins}`} />
-                          <div className="bg-purple-500 h-full transition-all duration-500" style={{ width: `${leaderPct}%` }} title={`Leaders: ${leaders}`} />
-                          <div className="bg-slate-400 h-full transition-all duration-500" style={{ width: `${memberPct}%` }} title={`Members: ${members}`} />
+                          <div className="bg-blue-500 h-full transition-[width] duration-500" style={{ width: `${adminPct}%` }} title={`Admins: ${admins}`} />
+                          <div className="bg-purple-500 h-full transition-[width] duration-500" style={{ width: `${leaderPct}%` }} title={`Leaders: ${leaders}`} />
+                          <div className="bg-slate-400 h-full transition-[width] duration-500" style={{ width: `${memberPct}%` }} title={`Members: ${members}`} />
                         </div>
                         <div className="grid grid-cols-3 gap-2 text-xs pt-1">
                           <div className="flex items-center gap-1.5">
@@ -472,7 +472,7 @@ export default function AdminDashboardPage() {
                       <div className="text-[9px] font-bold text-white dark:text-slate-900 absolute -top-6 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-950 dark:bg-slate-50 px-1.5 py-0.5 rounded shadow-sm z-10 whitespace-nowrap">
                         {d.val} acts
                       </div>
-                      <div className={cn("w-full rounded-t-md bg-gradient-to-t from-slate-300 to-slate-800 dark:from-slate-700 dark:to-slate-100 group-hover:opacity-90 transition-all duration-300", d.height)} />
+                      <div className={cn("w-full rounded-t-md bg-gradient-to-t from-slate-300 to-slate-800 dark:from-slate-700 dark:to-slate-100 group-hover:opacity-90 transition duration-300", d.height)} />
                       <span className="text-[9px] font-bold text-slate-400 leading-none">{d.day}</span>
                     </div>
                   ))}

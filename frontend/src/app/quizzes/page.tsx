@@ -316,7 +316,7 @@ export default function QuizzesPage() {
                 <button
                   onClick={() => setMode("solo")}
                   className={cn(
-                    "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+                    "flex-1 py-2 text-sm font-semibold rounded-lg transition duration-200",
                     mode === "solo" ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -325,7 +325,7 @@ export default function QuizzesPage() {
                 <button
                   onClick={() => setMode("multiplayer")}
                   className={cn(
-                    "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5",
+                    "flex-1 py-2 text-sm font-semibold rounded-lg transition duration-200 flex items-center justify-center gap-1.5",
                     mode === "multiplayer" ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -554,7 +554,7 @@ export default function QuizzesPage() {
                     const p = lobbyPlayers[i];
                     return (
                       <div key={i} className={cn(
-                        "w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all relative group",
+                        "w-12 h-12 rounded-full flex items-center justify-center text-xl transition relative group",
                         p ? "bg-primary/10 border-2 border-primary" : "bg-muted border-2 border-dashed border-border"
                       )}>
                         {p ? ["👨", "👩", "👦", "👧", "👨‍🦱", "👩‍🦱", "🧔", "👱‍♀️"][i % 8] : ""}
@@ -658,7 +658,7 @@ export default function QuizzesPage() {
                       onClick={() => { if (!revealed) setSelected(val); }}
                       disabled={revealed}
                       className={cn(
-                        "w-full text-left px-4 py-3.5 rounded-xl border-2 text-sm font-semibold transition-all duration-200 flex items-center justify-between",
+                        "w-full text-left px-4 py-3.5 rounded-xl border-2 text-sm font-semibold transition duration-200 flex items-center justify-between",
                         !revealed && isSelected ? "border-primary bg-primary/8 text-primary" :
                         !revealed ? "border-border/60 bg-card text-foreground hover:border-primary/50 hover:bg-primary/4" :
                         showCorrect ? "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300" :

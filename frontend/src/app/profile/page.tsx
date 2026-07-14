@@ -397,7 +397,7 @@ export default function ProfilePage() {
               return visibleAwards.map((award) => {
                 const earned = award.currentLevel > 0;
                 return (
-                <div key={award.id} className={cn("p-3 rounded-2xl border flex flex-col items-center text-center shadow-sm relative overflow-hidden transition-all", earned ? "bg-gradient-to-b from-white to-amber-50/30 dark:from-gray-800 dark:to-amber-900/10 border-amber-200/60 dark:border-amber-800/50 card-holy" : "bg-muted/50 border-border/40 grayscale opacity-60")}>
+                <div key={award.id} className={cn("p-3 rounded-2xl border flex flex-col items-center text-center shadow-sm relative overflow-hidden transition", earned ? "bg-gradient-to-b from-white to-amber-50/30 dark:from-gray-800 dark:to-amber-900/10 border-amber-200/60 dark:border-amber-800/50 card-holy" : "bg-muted/50 border-border/40 grayscale opacity-60")}>
                   {earned && award.isMaxed && <div className="absolute top-0 right-0 p-1 px-2 bg-amber-500 text-white text-[7px] font-bold rounded-bl-xl">MAX</div>}
                   
                   <div className="relative mb-2 mt-2">
@@ -524,7 +524,7 @@ export default function ProfilePage() {
           <Button
             onClick={handleLogout}
             disabled={loggingOut}
-            className="w-full h-12 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold text-base shadow-lg shadow-red-500/25 transition-all"
+            className="w-full h-12 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold text-base shadow-lg shadow-red-500/25 transition"
           >
             {loggingOut ? (
               <span className="flex items-center gap-2">

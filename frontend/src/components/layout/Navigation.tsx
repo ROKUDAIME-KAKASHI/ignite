@@ -106,7 +106,7 @@ export function Navigation() {
                         transition={{ type: "spring", stiffness: 400, damping: 35 }}
                       />
                     )}
-                    <Icon className={cn("w-5 h-5 transition-all duration-200", isActive ? "text-amber-700 scale-110" : "text-muted-foreground")} strokeWidth={isActive ? 2.5 : 1.8} />
+                    <Icon className={cn("w-5 h-5 transition duration-200", isActive ? "text-amber-700 scale-110" : "text-muted-foreground")} strokeWidth={isActive ? 2.5 : 1.8} />
                     <span className={cn("text-[10px] font-semibold tracking-wide", isActive ? "text-amber-700" : "text-muted-foreground")}>
                       {item.name}
                     </span>
@@ -152,7 +152,7 @@ export function Navigation() {
                 <Link
                   href={item.href}
                   className={cn(
-                    "relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200",
+                    "relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition duration-200",
                     isActive ? "text-amber-700 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   )}
                 >

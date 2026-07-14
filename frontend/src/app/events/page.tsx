@@ -191,7 +191,7 @@ export default function EventsPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+                "flex-1 py-2 text-sm font-semibold rounded-lg transition duration-200",
                 activeTab === tab ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -264,7 +264,7 @@ export default function EventsPage() {
                             <Button
                               onClick={() => toggleReg(event.id)}
                               className={cn(
-                                "flex-1 h-9 rounded-xl font-bold text-sm transition-all",
+                                "flex-1 h-9 rounded-xl font-bold text-sm transition",
                                 isReg
                                   ? "bg-muted text-muted-foreground border border-border"
                                   : `${event.gradient || "gradient-gold"} text-white shadow-md`
@@ -280,7 +280,7 @@ export default function EventsPage() {
                         ) : (
                           <Button
                             onClick={() => openGallery(event.id)}
-                            className="flex-1 h-9 rounded-xl font-bold text-sm transition-all bg-secondary text-secondary-foreground hover:bg-secondary/80 flex items-center justify-center gap-2 border border-border/50"
+                            className="flex-1 h-9 rounded-xl font-bold text-sm transition bg-secondary text-secondary-foreground hover:bg-secondary/80 flex items-center justify-center gap-2 border border-border/50"
                           >
                             <Camera className="w-4 h-4" />
                             View Gallery ({event.photosCount || 0})

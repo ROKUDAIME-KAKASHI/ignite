@@ -191,7 +191,7 @@ export default function FellowshipChatPage() {
           <Button
             type="submit"
             disabled={!inputText.trim() || sending}
-            className="absolute right-1 top-1 w-10 h-10 rounded-full bg-amber-600 hover:bg-amber-700 text-white shadow-sm p-0 flex items-center justify-center transition-all"
+            className="absolute right-1 top-1 w-10 h-10 rounded-full bg-amber-600 hover:bg-amber-700 text-white shadow-sm p-0 flex items-center justify-center transition"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 ml-0.5" />}
           </Button>

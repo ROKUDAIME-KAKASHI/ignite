@@ -359,7 +359,7 @@ export default function BibleReaderPage() {
               key={s}
               onClick={() => setFontSize(s)}
               className={cn(
-                "flex items-center justify-center w-8 h-7 rounded-lg text-xs font-bold transition-all",
+                "flex items-center justify-center w-8 h-7 rounded-lg text-xs font-bold transition",
                 fontSize === s ? "gradient-gold text-white shadow-sm" : "text-muted-foreground hover:bg-muted"
               )}
               style={{ fontSize: `${10 + i * 2}px` }}
@@ -418,7 +418,7 @@ export default function BibleReaderPage() {
                     layout
                     onClick={() => handleVersePress(v.verse)}
                     className={cn(
-                      "group relative px-3 py-2 rounded-xl cursor-pointer transition-all duration-200",
+                      "group relative px-3 py-2 rounded-xl cursor-pointer transition duration-200",
                       isHighlighted
                         ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40"
                         : "hover:bg-muted/60"
@@ -451,7 +451,7 @@ export default function BibleReaderPage() {
                           <button
                             onClick={(e) => { e.stopPropagation(); handleBookmark(v.verse); }}
                             className={cn(
-                              "flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all",
+                              "flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition",
                               isBookmarkedVerse
                                 ? "bg-primary/15 text-primary"
                                 : "bg-muted text-muted-foreground hover:text-primary"
@@ -470,7 +470,7 @@ export default function BibleReaderPage() {
                               if (navigator.share) navigator.share({ text });
                               else navigator.clipboard?.writeText(text);
                             }}
-                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-muted text-muted-foreground hover:text-primary transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-muted text-muted-foreground hover:text-primary transition"
                           >
                             <Share2 className="w-3.5 h-3.5" /> Share
                           </button>
@@ -502,7 +502,7 @@ export default function BibleReaderPage() {
                     onClick={handleMarkAsRead} 
                     disabled={markedRead || markingRead}
                     className={cn(
-                      "rounded-xl h-12 px-8 font-bold shadow-md transition-all",
+                      "rounded-xl h-12 px-8 font-bold shadow-md transition",
                       markedRead ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30" : "gradient-gold text-white halo-glow"
                     )}
                   >
@@ -569,7 +569,7 @@ export default function BibleReaderPage() {
                       key={ch}
                       href={`/bible/${bookSlug}/${ch}`}
                       className={cn(
-                        "flex items-center justify-center h-9 rounded-lg text-xs font-bold transition-all",
+                        "flex items-center justify-center h-9 rounded-lg text-xs font-bold transition",
                         ch === chapter
                           ? "gradient-gold text-white shadow-sm"
                           : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"

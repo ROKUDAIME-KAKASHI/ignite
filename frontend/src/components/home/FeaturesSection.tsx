@@ -35,7 +35,7 @@ export function FeaturesSection() {
               <Link href="/login" className="block h-full group">
                 <motion.div 
                   whileHover={{ y: -5 }}
-                  className="bg-white rounded-2xl p-8 border border-gray-200 hover:border-amber-700/30 shadow-sm hover:shadow-lg transition-all h-full"
+                  className="bg-white rounded-2xl p-8 border border-gray-200 hover:border-amber-700/30 shadow-sm hover:shadow-lg transition h-full"
                 >
                   <div className="w-14 h-14 rounded-2xl bg-amber-50 text-2xl flex items-center justify-center mb-6 text-amber-700 group-hover:scale-110 transition-transform">
                     {f.icon}

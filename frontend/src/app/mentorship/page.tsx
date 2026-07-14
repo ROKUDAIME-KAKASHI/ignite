@@ -85,7 +85,7 @@ export default function MentorshipPage() {
         <button
           onClick={() => setActiveTab("all")}
           className={cn(
-            "flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200",
+            "flex-1 py-2.5 text-sm font-bold rounded-lg transition duration-200",
             activeTab === "all" ? "bg-primary/10 text-primary" : "text-muted-foreground"
           )}
         >
@@ -94,7 +94,7 @@ export default function MentorshipPage() {
         <button
           onClick={() => setActiveTab("my")}
           className={cn(
-            "flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200",
+            "flex-1 py-2.5 text-sm font-bold rounded-lg transition duration-200",
             activeTab === "my" ? "bg-primary/10 text-primary" : "text-muted-foreground"
           )}
         >

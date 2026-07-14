@@ -122,7 +122,7 @@ export default function ScanPage() {
             <button 
               onClick={submitReflection}
               disabled={reflection.trim().split(/\s+/).filter(w => w.length > 0).length < 3 || reflection.trim().length < 10}
-              className="mt-6 px-6 py-3 gradient-gold text-white hover:opacity-90 disabled:opacity-50 disabled:grayscale rounded-xl font-bold transition-all w-full flex justify-center"
+              className="mt-6 px-6 py-3 gradient-gold text-white hover:opacity-90 disabled:opacity-50 disabled:grayscale rounded-xl font-bold transition w-full flex justify-center"
             >
               Submit & Check-in
             </button>

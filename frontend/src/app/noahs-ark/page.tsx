@@ -109,7 +109,7 @@ export default function NoahsArkPage() {
       
       {/* Flood Animation Background */}
       <div 
-        className="absolute bottom-0 left-0 w-full bg-blue-500/30 transition-all duration-1000 -z-10 flex items-start justify-center"
+        className="absolute bottom-0 left-0 w-full bg-blue-500/30 transition duration-1000 -z-10 flex items-start justify-center"
         style={{ height: `${waterLevel}%` }}
       >
         <div className="w-full h-4 bg-blue-400/50 animate-pulse" />
@@ -194,7 +194,7 @@ export default function NoahsArkPage() {
         <div className="text-center">
           <p className="text-sm font-bold text-muted-foreground">Water Level: {wrongGuesses} / {MAX_WRONG}</p>
           <div className="w-full max-w-md mx-auto h-3 bg-muted rounded-full mt-2 overflow-hidden border border-border">
-            <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${waterLevel}%` }} />
+            <div className="h-full bg-blue-500 transition-[width] duration-500" style={{ width: `${waterLevel}%` }} />
           </div>
         </div>
       </div>

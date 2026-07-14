@@ -163,7 +163,7 @@ export default async function DashboardPage() {
               <span className="text-white text-xs font-semibold">{streak} Day Streak</span>
             </div>
             {session?.role === "ADMIN" && (
-              <a href="/admin/dashboard" className="flex items-center gap-1.5 bg-red-600/80 hover:bg-red-700 text-white rounded-full px-3 py-1.5 border border-red-500 shadow-lg transition-all transform hover:scale-105 active:scale-95">
+              <a href="/admin/dashboard" className="flex items-center gap-1.5 bg-red-600/80 hover:bg-red-700 text-white rounded-full px-3 py-1.5 border border-red-500 shadow-lg transition transform hover:scale-105 active:scale-95">
                 <span>🛡️</span>
                 <span className="text-xs font-bold uppercase tracking-wider">Admin Console</span>
               </a>
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
 
       {/* ── Grace Points Card ── */}
       <div className="relative z-20 px-4 -mt-6 mb-5">
-        <a href="/leaderboard" className="block glass dark:glass-dark rounded-2xl p-4 card-holy shadow-xl group hover:shadow-2xl transition-all">
+        <a href="/leaderboard" className="block glass dark:glass-dark rounded-2xl p-4 card-holy shadow-xl group hover:shadow-2xl transition">
           <div className="flex justify-between items-center mb-3">
             <div>
               <p className="text-[10px] font-bold text-primary uppercase tracking-widest group-hover:text-amber-500 transition-colors">Your Grace Points & Rank</p>

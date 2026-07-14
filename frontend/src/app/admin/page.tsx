@@ -83,7 +83,7 @@ export default function AdminLoginPage() {
           <button 
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-600/25 transition-all disabled:opacity-50 mt-4"
+            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-600/25 transition disabled:opacity-50 mt-4"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
               <>

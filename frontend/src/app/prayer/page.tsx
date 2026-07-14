@@ -97,7 +97,7 @@ function PrayerCard({ req, onPray, catColor }: { req: PrayerRequest; onPray: (id
           onClick={handlePray}
           disabled={praying}
           className={cn(
-            "flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl transition-all",
+            "flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl transition",
             req.prayed
               ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
               : praying
@@ -243,7 +243,7 @@ export default function PrayerWall() {
                 <button
                   onClick={() => setAnonymous(!anonymous)}
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all",
+                    "flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition",
                     anonymous
                       ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
                       : "border-border/60 text-muted-foreground hover:text-foreground"
@@ -283,7 +283,7 @@ export default function PrayerWall() {
               key={c}
               onClick={() => setFilter(c)}
               className={cn(
-                "shrink-0 text-xs font-bold px-4 py-2 rounded-full transition-all whitespace-nowrap border",
+                "shrink-0 text-xs font-bold px-4 py-2 rounded-full transition whitespace-nowrap border",
                 filter === c
                   ? "gradient-lent text-white border-transparent shadow-md"
                   : "border-border/60 text-muted-foreground hover:text-foreground bg-card"

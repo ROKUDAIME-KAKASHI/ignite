@@ -225,7 +225,7 @@ export default function MemoryMatchPage() {
                 className="aspect-square perspective-1000 cursor-pointer"
               >
                 <div className={cn(
-                  "w-full h-full relative transition-all duration-500 preserve-3d",
+                  "w-full h-full relative transition duration-500 preserve-3d",
                   (card.isFlipped || card.isMatched) ? "rotate-y-180" : ""
                 )}>
                   {/* Front (Hidden) */}

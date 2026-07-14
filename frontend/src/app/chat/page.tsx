@@ -294,7 +294,7 @@ export default function ChatPage() {
               disabled={!input.trim() || isTyping}
               size="icon"
               className={cn(
-                "absolute right-1.5 w-9 h-9 rounded-xl transition-all duration-200",
+                "absolute right-1.5 w-9 h-9 rounded-xl transition duration-200",
                 input.trim() ? "gradient-gold shadow-md halo-glow" : "bg-muted text-muted-foreground"
               )}
             >

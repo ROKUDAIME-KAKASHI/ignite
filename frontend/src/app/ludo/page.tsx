@@ -815,7 +815,7 @@ export default function BibleLudoPage() {
           </div>
 
           <div className="space-y-4">
-            <Button onClick={() => { setGameMode("solo"); initializeRoomPlayers("solo"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4 transition-all">
+            <Button onClick={() => { setGameMode("solo"); initializeRoomPlayers("solo"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4 transition">
               <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center"><Users className="w-5 h-5" /></div>
               <div>
                 <p className="font-bold text-foreground">Solo vs AI</p>
@@ -823,7 +823,7 @@ export default function BibleLudoPage() {
               </div>
             </Button>
             
-            <Button onClick={() => { setGameMode("team"); initializeRoomPlayers("team"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4 transition-all">
+            <Button onClick={() => { setGameMode("team"); initializeRoomPlayers("team"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 text-left flex gap-4 transition">
               <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center"><Trophy className="w-5 h-5" /></div>
               <div>
                 <p className="font-bold text-foreground">2v2 Team Mode <Badge className="ml-2 text-[10px] gradient-gold border-0">40 Grace Points</Badge></p>
@@ -831,7 +831,7 @@ export default function BibleLudoPage() {
               </div>
             </Button>
 
-            <Button onClick={() => { setGameMode("local"); initializeRoomPlayers("local"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 hover:shadow-md transition-all text-left flex gap-4">
+            <Button onClick={() => { setGameMode("local"); initializeRoomPlayers("local"); setTokens({red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1]}); setWinner(null); }} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 hover:shadow-md transition text-left flex gap-4">
               <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center"><Dices className="w-5 h-5" /></div>
               <div>
                 <p className="font-bold text-foreground">Pass & Play (Group)</p>
@@ -839,7 +839,7 @@ export default function BibleLudoPage() {
               </div>
             </Button>
 
-            <Button onClick={() => setGameMode("lobby")} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 hover:shadow-md transition-all text-left flex gap-4">
+            <Button onClick={() => setGameMode("lobby")} className="w-full h-16 rounded-2xl bg-card border-2 border-border/60 justify-start px-6 hover:border-primary/50 hover:shadow-md transition text-left flex gap-4">
               <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center"><Users className="w-5 h-5" /></div>
               <div>
                 <p className="font-bold text-foreground">Live Online Multiplayer</p>
@@ -909,7 +909,7 @@ export default function BibleLudoPage() {
                         }
                       }}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer",
+                        "flex items-center justify-between p-3 rounded-xl border transition cursor-pointer",
                         hasPlayer ? "bg-card border-border/80" : "bg-muted/40 border-dashed border-border/60 hover:bg-muted/60"
                       )}
                     >
@@ -969,7 +969,7 @@ export default function BibleLudoPage() {
                   <Button 
                     onClick={toggleReady} 
                     className={cn(
-                      "w-full h-12 rounded-xl font-bold text-base shadow-md transition-all",
+                      "w-full h-12 rounded-xl font-bold text-base shadow-md transition",
                       isReady ? "bg-zinc-500 hover:bg-zinc-600 text-white" : "gradient-gold text-white halo-glow"
                     )}
                   >
@@ -1090,7 +1090,7 @@ export default function BibleLudoPage() {
                     key={`base-${color}`}
                     style={gridPositions[color]}
                     className={cn(
-                      "rounded-xl border bg-gradient-to-br p-1.5 flex flex-col justify-between overflow-hidden transition-all duration-300",
+                      "rounded-xl border bg-gradient-to-br p-1.5 flex flex-col justify-between overflow-hidden transition duration-300",
                       theme.bg, theme.border
                     )}
                   >
@@ -1248,7 +1248,7 @@ export default function BibleLudoPage() {
                           }
                         }}
                         className={cn(
-                          `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute z-10 transition-all duration-300 ease-in-out`,
+                          `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute z-10 transition duration-300 ease-in-out`,
                           BG_COLORS[t.color], BORDER_COLORS[t.color],
                           (((gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor)) && turn === t.color && dice && canMove(turn, t.idx, dice) && !trivia) ? "animate-pulse ring-2 ring-primary ring-offset-1 scale-110" : "")
                         )}
@@ -1291,7 +1291,7 @@ export default function BibleLudoPage() {
                             }
                           }}
                           className={cn(
-                            `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute z-10 transition-all duration-300 ease-in-out`,
+                            `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute z-10 transition duration-300 ease-in-out`,
                             BG_COLORS[t.color], BORDER_COLORS[t.color],
                             (((gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor)) && turn === t.color && dice && canMove(turn, t.idx, dice) && !trivia) ? "animate-pulse ring-2 ring-primary ring-offset-1 scale-110" : "")
                           )}

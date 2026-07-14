@@ -102,7 +102,7 @@ export default function JourneysPage() {
         <button
           onClick={() => setActiveTab("map")}
           className={cn(
-            "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+            "flex-1 py-2 text-sm font-semibold rounded-lg transition duration-200",
             activeTab === "map" ? "bg-card text-emerald-700 shadow-sm" : "text-muted-foreground"
           )}
         >
@@ -111,7 +111,7 @@ export default function JourneysPage() {
         <button
           onClick={() => setActiveTab("library")}
           className={cn(
-            "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+            "flex-1 py-2 text-sm font-semibold rounded-lg transition duration-200",
             activeTab === "library" ? "bg-card text-emerald-700 shadow-sm" : "text-muted-foreground"
           )}
         >
@@ -176,7 +176,7 @@ export default function JourneysPage() {
                       whileHover={node.status !== "locked" ? { scale: 1.1 } : {}}
                       whileTap={node.status !== "locked" ? { scale: 0.95 } : {}}
                       className={cn(
-                        "w-16 h-16 rounded-full flex items-center justify-center shrink-0 border-4 border-[#fdfbf7] transition-all",
+                        "w-16 h-16 rounded-full flex items-center justify-center shrink-0 border-4 border-[#fdfbf7] transition",
                         bgColor, shadow
                       )}
                     >

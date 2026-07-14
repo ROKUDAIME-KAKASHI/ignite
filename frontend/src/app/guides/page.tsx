@@ -49,7 +49,7 @@ export default function GuidesPage() {
           <button 
             onClick={() => setActiveTab("confession")}
             className={cn(
-              "flex-1 py-2.5 text-sm font-bold rounded-lg transition-all",
+              "flex-1 py-2.5 text-sm font-bold rounded-lg transition",
               activeTab === "confession" ? "bg-white dark:bg-slate-700 text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -58,7 +58,7 @@ export default function GuidesPage() {
           <button 
             onClick={() => setActiveTab("prayers")}
             className={cn(
-              "flex-1 py-2.5 text-sm font-bold rounded-lg transition-all",
+              "flex-1 py-2.5 text-sm font-bold rounded-lg transition",
               activeTab === "prayers" ? "bg-white dark:bg-slate-700 text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >

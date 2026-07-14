@@ -202,7 +202,7 @@ export default function NotificationsPage() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className={cn(
-                        "relative flex gap-4 p-4 rounded-2xl border transition-all cursor-pointer",
+                        "relative flex gap-4 p-4 rounded-2xl border transition cursor-pointer",
                         notif.isRead 
                           ? "bg-white border-border/40 opacity-75" 
                           : "bg-amber-50/50 border-amber-200 dark:bg-amber-950/20 shadow-sm"

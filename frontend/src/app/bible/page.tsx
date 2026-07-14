@@ -120,7 +120,7 @@ export default function BiblePage() {
             </div>
             <div className="h-2 rounded-full bg-blue-100 dark:bg-blue-950 overflow-hidden relative">
               <div 
-                className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-1000 ease-out" 
+                className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition duration-1000 ease-out" 
                 style={{ width: `${Math.max(1, (progress.read / progress.total) * 100)}%` }} 
               />
             </div>
@@ -173,7 +173,7 @@ export default function BiblePage() {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={cn(
-                    "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+                    "flex-1 py-2 text-sm font-semibold rounded-lg transition duration-200",
                     activeTab === tab ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -224,7 +224,7 @@ export default function BiblePage() {
                       key={t}
                       onClick={() => setTestament(t)}
                       className={cn(
-                        "flex-1 py-2.5 rounded-xl text-sm font-bold transition-all",
+                        "flex-1 py-2.5 rounded-xl text-sm font-bold transition",
                         testament === t
                           ? t === "NT" ? "gradient-royal text-white shadow-md" : "gradient-gold text-white shadow-md"
                           : "bg-muted text-muted-foreground hover:text-foreground"
@@ -247,7 +247,7 @@ export default function BiblePage() {
                         <Link
                           key={book.slug}
                           href={`/bible/${book.slug}/1`}
-                          className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-card border border-border/60 card-holy-hover hover:border-primary/40 hover:bg-amber-50/40 dark:hover:bg-amber-900/10 transition-all group"
+                          className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-card border border-border/60 card-holy-hover hover:border-primary/40 hover:bg-amber-50/40 dark:hover:bg-amber-900/10 transition group"
                         >
                           <div>
                             <p className="font-serif font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{book.name}</p>
@@ -279,7 +279,7 @@ export default function BiblePage() {
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                            <div className="h-full rounded-full gradient-gold transition-all" style={{ width: `${plan.progress}%` }} />
+                            <div className="h-full rounded-full gradient-gold transition-[width]" style={{ width: `${plan.progress}%` }} />
                           </div>
                           <span className="text-[11px] font-bold text-primary">{plan.progress}%</span>
                         </div>

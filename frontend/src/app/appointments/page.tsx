@@ -127,7 +127,7 @@ export default function AppointmentsPage() {
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="w-full h-12 rounded-xl bg-stone-800 hover:bg-stone-900 text-white font-bold shadow-md transition-all"
+                className="w-full h-12 rounded-xl bg-stone-800 hover:bg-stone-900 text-white font-bold shadow-md transition"
               >
                 {loading ? "Sending Request..." : "Request Appointment"}
               </Button>

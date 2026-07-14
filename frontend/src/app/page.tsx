@@ -267,7 +267,7 @@ export default function HeroPage() {
                 <Link href="/login" className="block h-full group">
                   <motion.div 
                     whileHover={{ y: -5 }}
-                    className="bg-white rounded-2xl p-8 border border-gray-200 hover:border-amber-700/30 shadow-sm hover:shadow-lg transition-all h-full"
+                    className="bg-white rounded-2xl p-8 border border-gray-200 hover:border-amber-700/30 shadow-sm hover:shadow-lg transition h-full"
                   >
                     <div className="w-14 h-14 rounded-2xl bg-amber-50 text-2xl flex items-center justify-center mb-6 text-amber-700 group-hover:scale-110 transition-transform">
                       {f.icon}
@@ -390,7 +390,7 @@ export default function HeroPage() {
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-2 px-10 py-5 rounded-xl bg-amber-700 text-white font-bold text-lg hover:bg-amber-800 transition-all hover:scale-105 shadow-xl shadow-amber-900/10"
+            className="inline-flex items-center justify-center gap-2 px-10 py-5 rounded-xl bg-amber-700 text-white font-bold text-lg hover:bg-amber-800 transition hover:scale-105 shadow-xl shadow-amber-900/10"
           >
             Join Ignite — It&apos;s Free
             <ArrowRight className="w-5 h-5" />
