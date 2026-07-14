@@ -79,6 +79,19 @@ export default function BibleLudoPage() {
   
   const prevPlayersRef = useRef<any[]>([]);
 
+  const extractPresencePlayers = (state: any) => {
+    return Object.values(state)
+      .map((arr: any) => {
+        if (!arr || arr.length === 0) return null;
+        // Prioritize any entry that has a colorSlot selected
+        const withColor = arr.find((p: any) => p && p.colorSlot);
+        if (withColor) return withColor;
+        // Fallback to the latest tracked presence
+        return arr[arr.length - 1] || arr[0];
+      })
+      .filter(Boolean);
+  };
+
   const showToast = (message: string) => {
     const id = Math.random().toString();
     setToasts(prev => [...prev, { id, message }]);
@@ -135,7 +148,7 @@ export default function BibleLudoPage() {
     }
     
     const state = gameChannel.presenceState();
-    const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
+    const playersList = extractPresencePlayers(state);
     const isTaken = playersList.some((p: any) => p.id !== user.id && p.colorSlot === color);
     if (isTaken) {
       console.log("selectColorSlot: color taken!");
@@ -602,7 +615,7 @@ export default function BibleLudoPage() {
     
     gChannel.on('presence', { event: 'sync' }, () => {
       const state = gChannel.presenceState();
-      const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
+      const playersList = extractPresencePlayers(state);
       
       updateLobbyPlayersList(playersList);
       
@@ -641,7 +654,7 @@ export default function BibleLudoPage() {
     
     gChannel.on('presence', { event: 'sync' }, async () => {
       const state = gChannel.presenceState();
-      const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
+      const playersList = extractPresencePlayers(state);
       
       updateLobbyPlayersList(playersList);
       
@@ -773,7 +786,19 @@ export default function BibleLudoPage() {
       if (color === "yellow") return "Teammate (AI)";
       return `${color.charAt(0).toUpperCase() + color.slice(1)} Opponent (AI)`;
     }
-    if (gameMode === "live") {
+    if (gameMode === "lobby" || gameMode === "live") {
+      if (gameMode === "lobby") {
+        const p = lobbyPlayers.find((player: any) => player.colorSlot === color);
+        if (p) return p.name;
+        if (color === "red" && activeRoom?.host) {
+          return user ? `${user.firstName} ${user.lastName}` : "Host";
+        }
+        // Fallback if not host, check activeRoom.id (which is host's ID)
+        if (color === "red" && activeRoom) {
+          const hostPlayer = lobbyPlayers.find((player: any) => player.id === activeRoom.id);
+          if (hostPlayer) return hostPlayer.name;
+        }
+      }
       return roomPlayers[color]?.name || "AI Bot";
     }
     return "AI Bot";
