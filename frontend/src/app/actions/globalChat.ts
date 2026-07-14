@@ -66,7 +66,7 @@ export async function sendMessage(content: string) {
   // 1. Zod Input Validation
   const parseResult = chatMessageSchema.safeParse({ content });
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0].message };
+    return { success: false, error: parseResult.error.issues[0].message };
   }
 
   // 2. Rate Limiting Check

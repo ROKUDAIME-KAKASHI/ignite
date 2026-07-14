@@ -30,11 +30,9 @@ export default function OfflinePage() {
         </p>
       </div>
 
-      <Button asChild className="gradient-gold text-white font-bold px-8 h-12 rounded-xl shadow-md halo-glow">
-        <Link href="/">
-          Try Again
-        </Link>
-      </Button>
+      <Link href="/" className="inline-flex items-center justify-center gradient-gold text-white font-bold px-8 h-12 rounded-xl shadow-md halo-glow">
+        Try Again
+      </Link>
     </div>
   );
 }
