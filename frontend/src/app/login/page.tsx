@@ -106,7 +106,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center min-h-screen px-6 relative overflow-hidden bg-background">
+    <div className="flex-1 flex flex-col items-center justify-center h-full px-6 relative overflow-hidden bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-15"
           style={{ background: "radial-gradient(circle, #d4a017 0%, #c2410c 50%, transparent 75%)" }}

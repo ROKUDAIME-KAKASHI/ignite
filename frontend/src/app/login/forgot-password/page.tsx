@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-slate-50 items-center justify-center p-6 relative">
+    <div className="flex-1 flex flex-col h-full bg-slate-50 items-center justify-center p-6 relative">
       <Link href="/login" className="absolute top-6 left-6 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm text-slate-600 hover:text-slate-900 z-10">
         <ArrowLeft className="w-5 h-5" />
       </Link>

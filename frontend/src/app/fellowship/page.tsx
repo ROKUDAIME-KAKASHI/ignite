@@ -127,14 +127,14 @@ export default function FellowshipChatPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen items-center justify-center bg-background">
+      <div className="flex-1 flex flex-col h-full items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen max-h-screen bg-background">
+    <div className="flex flex-col h-full flex-1 bg-background">
       {/* Header */}
       <div className="relative overflow-hidden px-5 pt-8 pb-6 bg-gradient-to-br from-amber-800 to-amber-600 shadow-md shrink-0">
         <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
@@ -222,7 +222,7 @@ export default function FellowshipChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-background border-t shrink-0 pb-safe pb-24">
+      <div className="p-4 bg-background border-t shrink-0 pb-safe">
         <form onSubmit={handleSend} className="flex gap-2 relative">
           <Input
             value={inputText}

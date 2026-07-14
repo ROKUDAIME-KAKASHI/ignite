@@ -788,7 +788,7 @@ export default function BibleLudoPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7] dark:bg-background">
+    <div className="flex-1 flex flex-col h-full bg-[#fdfbf7] dark:bg-background">
       {/* Header bar */}
       <div className="px-4 pt-6 pb-4 border-b border-border flex items-center justify-between bg-card shadow-sm z-10">
         <Button onClick={() => {

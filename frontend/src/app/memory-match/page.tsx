@@ -162,7 +162,7 @@ export default function MemoryMatchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 overflow-hidden relative">
+    <div className="h-full bg-background overflow-hidden relative">
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-indigo-900/20 to-transparent -z-10" />
       
       <div className="px-4 pt-6 pb-4 flex items-center justify-between relative z-10">

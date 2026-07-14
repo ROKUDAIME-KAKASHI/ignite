@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex-1 min-h-screen flex items-center justify-center bg-slate-950 p-6 relative overflow-hidden">
+    <div className="flex-1 h-full flex items-center justify-center bg-slate-950 p-6 relative overflow-hidden">
       
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">

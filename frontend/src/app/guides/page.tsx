@@ -27,7 +27,7 @@ export default function GuidesPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 h-full">
       
       {/* ── Header ── */}
       <div className="px-5 pt-8 pb-6 bg-white dark:bg-slate-900 border-b border-border/50 sticky top-0 z-20">

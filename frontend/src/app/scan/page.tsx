@@ -70,7 +70,7 @@ export default function ScanPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-950 text-white min-h-screen">
+    <div className="flex-1 flex flex-col bg-slate-950 text-white h-full">
       
       {/* ── Header ── */}
       <div className="px-5 pt-8 pb-6 bg-slate-900 border-b border-white/10 sticky top-0 z-20">

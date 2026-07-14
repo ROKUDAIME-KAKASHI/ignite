@@ -114,7 +114,7 @@ export default function LionsDenPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 relative overflow-hidden">
+    <div className="h-full bg-background relative overflow-hidden">
       {/* Dark scary background for the den */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/20 via-background to-background -z-10" />
 

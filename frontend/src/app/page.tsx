@@ -54,7 +54,7 @@ export default function HeroPage() {
   }, [user, loading, router]);
 
   return (
-    <div className="flex-1 bg-[#fdfbf7] text-gray-900 font-sans min-h-screen overflow-hidden">
+    <div className="flex-1 bg-[#fdfbf7] text-gray-900 font-sans h-full overflow-hidden">
       <HeroNav />
 
       {/* ── HERO SECTION (SPLIT LAYOUT) ── */}

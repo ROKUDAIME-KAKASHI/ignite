@@ -186,7 +186,7 @@ export default function LiveTriviaPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#fdfbf7]">
+    <div className="flex-1 flex flex-col h-full bg-[#fdfbf7]">
       <div className="px-4 pt-6 pb-4 border-b border-border flex items-center justify-between bg-white shadow-sm z-10">
         <Button onClick={() => mode === "lobby" ? router.push('/quizzes') : setMode("lobby")} variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-5 h-5" />

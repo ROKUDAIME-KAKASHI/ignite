@@ -132,7 +132,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-background items-center justify-center p-6">
+    <div className="flex-1 flex flex-col h-full bg-background items-center justify-center p-6">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -56,7 +56,7 @@ export default function JourneysPage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen bg-background items-center justify-center">
+      <div className="flex-1 flex flex-col h-full bg-background items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-emerald-700" />
       </div>
     );
@@ -67,7 +67,7 @@ export default function JourneysPage() {
   const maxStars = activeCourse?.totalNodes * 3 || 0;
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-background">
+    <div className="flex-1 flex flex-col h-full bg-background">
       {/* ── Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-10 bg-gradient-to-br from-emerald-800 to-green-700 shadow-md">
         <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />

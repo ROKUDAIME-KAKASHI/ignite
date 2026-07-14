@@ -52,7 +52,7 @@ export default function MentorshipPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-background">
+    <div className="flex-1 flex flex-col h-full bg-background">
       
       {/* ── Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-10 bg-gradient-to-br from-indigo-900 to-slate-800 shadow-md sticky top-0 z-20">
