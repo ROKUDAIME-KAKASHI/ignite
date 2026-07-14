@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { encrypt, decrypt } from "@/lib/auth";
 import webpush from "web-push";
+import { neon } from "@neondatabase/serverless";
 
 async function verifyAdmin() {
   const cookieStore = await cookies();
@@ -525,3 +526,54 @@ export async function sendDirectPushNotification(title: string, message: string)
   }
 }
 
+export async function getAuditLogs(limit = 100) {
+  if (!await verifyAdmin()) return { success: false, error: "Unauthorized" };
+
+  try {
+    const logDbUrl = process.env.LOG_DATABASE_URL;
+    if (!logDbUrl) return { success: false, error: "LOG_DATABASE_URL not configured" };
+
+    const sql = neon(logDbUrl);
+    
+    // Fetch logs from Neon
+    const logs = await sql`
+      SELECT id, user_id, action, details, created_at 
+      FROM audit_logs 
+      ORDER BY created_at DESC 
+      LIMIT ${limit}
+    `;
+
+    if (!logs || logs.length === 0) return { success: true, logs: [] };
+
+    // Fetch user details from Prisma
+    const userIds = Array.from(new Set(logs.map(log => log.user_id).filter(id => id && id !== 'anonymous')));
+    
+    let userMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+      const users = await prisma.user.findMany({
+        where: { id: { in: userIds as string[] } },
+        select: { id: true, firstName: true, lastName: true, email: true }
+      });
+      userMap = Object.fromEntries(users.map(u => [u.id, u]));
+    }
+
+    // Combine data
+    const enrichedLogs = logs.map(log => ({
+      id: log.id,
+      action: log.action,
+      details: log.details,
+      createdAt: log.created_at,
+      user: log.user_id && log.user_id !== 'anonymous' && userMap[log.user_id] 
+        ? {
+            name: `${userMap[log.user_id].firstName} ${userMap[log.user_id].lastName}`,
+            email: userMap[log.user_id].email
+          }
+        : { name: 'Anonymous', email: '' }
+    }));
+
+    return { success: true, logs: enrichedLogs };
+  } catch (error) {
+    console.error("Failed to fetch audit logs:", error);
+    return { success: false, error: "Database error" };
+  }
+}

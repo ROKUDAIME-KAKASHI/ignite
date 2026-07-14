@@ -36,7 +36,8 @@ import {
   deleteUser, 
   loginAsUser, 
   updateUserRole, 
-  getAllUsers 
+  getAllUsers,
+  getAuditLogs
 } from "../actions";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 import { getMissions } from "@/app/missions/actions";
@@ -45,7 +46,7 @@ import { useRouter } from "next/navigation";
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "trivia" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "trivia" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes" | "audit">("overview");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   // New search & pagination states
@@ -69,6 +70,7 @@ export default function AdminDashboardPage() {
   const [existingAnnouncements, setExistingAnnouncements] = useState<any[]>([]);
   const [churches, setChurches] = useState<any[]>([]);
   const [missions, setMissions] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
   const [quotes, setQuotes] = useState<any[]>([]);
   const [chatSuggestions, setChatSuggestions] = useState<any[]>([]);
@@ -181,6 +183,12 @@ export default function AdminDashboardPage() {
     async function fetchData() {
       await fetchDashboardData();
       await fetchAllUsersData();
+      
+      // Fetch audit logs early too
+      const logRes = await getAuditLogs(200);
+      if (logRes.success && logRes.logs) {
+        setAuditLogs(logRes.logs);
+      }
       fetchPrayers();
       fetchEventsAndNotices();
       fetchChurches();
@@ -353,7 +361,7 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["overview", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
+          {(["overview", "audit", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -558,6 +566,66 @@ export default function AdminDashboardPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Audit Logs ── */}
+        {activeTab === "audit" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold font-serif text-foreground">Audit & Activity Logs</h2>
+                <p className="text-sm text-muted-foreground">Comprehensive system-wide tracking of user actions.</p>
+              </div>
+              <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                {auditLogs.length} Records
+              </Badge>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-border/50 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-muted-foreground uppercase bg-slate-50 dark:bg-slate-950/50">
+                    <tr>
+                      <th className="px-6 py-4 font-bold tracking-wider">Timestamp</th>
+                      <th className="px-6 py-4 font-bold tracking-wider">User</th>
+                      <th className="px-6 py-4 font-bold tracking-wider">Action</th>
+                      <th className="px-6 py-4 font-bold tracking-wider">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {auditLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                        <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground whitespace-nowrap">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-foreground">{log.user?.name}</div>
+                          <div className="text-[10px] text-muted-foreground">{log.user?.email}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold shadow-sm">
+                            {log.action}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4">
+                          <pre className="text-[10px] bg-slate-100 dark:bg-slate-950 p-2 rounded-lg text-slate-700 dark:text-slate-300 overflow-x-auto max-w-xs md:max-w-md">
+                            {JSON.stringify(log.details, null, 2)}
+                          </pre>
+                        </td>
+                      </tr>
+                    ))}
+                    {auditLogs.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
+                          No audit logs found or connected.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </motion.div>
