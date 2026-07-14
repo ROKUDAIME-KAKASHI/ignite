@@ -31,6 +31,7 @@ interface QuizSet {
   color: string;
   badge: string;
   desc: string;
+  isCompleted?: boolean;
 }
 
 import { getQuizzes, recordQuizAttempt } from "@/app/actions/quizzes";
@@ -450,9 +451,14 @@ export default function QuizzesPage() {
                           <p className="text-xs text-muted-foreground mb-3">{set.desc}</p>
                           <Button
                             onClick={() => startQuiz(set)}
-                            className={`w-full h-9 rounded-xl font-bold text-sm text-white ${set.color} shadow-md hover:opacity-90`}
+                            disabled={set.isCompleted}
+                            className={`w-full h-9 rounded-xl font-bold text-sm text-white ${set.color} shadow-md hover:opacity-90 disabled:opacity-50`}
                           >
-                            Begin Quiz <ChevronRight className="w-4 h-4 ml-1" />
+                            {set.isCompleted ? (
+                              <>Completed <CheckCircle2 className="w-4 h-4 ml-1" /></>
+                            ) : (
+                              <>Begin Quiz <ChevronRight className="w-4 h-4 ml-1" /></>
+                            )}
                           </Button>
                         </div>
                       </div>

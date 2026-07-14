@@ -1,6 +1,7 @@
 "use server";
 import prisma from "@/lib/prisma";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
+import { getSession } from "@/lib/auth";
 
 export async function getQuizzes() {
   let quizzes = await prisma.quiz.findMany({
@@ -80,16 +81,30 @@ export async function getQuizzes() {
     });
   }
 
-  return quizzes.map(q => ({
-    id: q.id,
-    label: q.title,
-    desc: q.description,
-    type: q.type,
-    xp: q.xpReward,
-    emoji: q.type === "DAILY" ? "⭐" : "📜",
-    color: q.type === "DAILY" ? "gradient-gold" : "gradient-royal",
-    badge: q.type === "DAILY" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    questions: q.questions.map(question => {
+  const session = await getSession();
+  const userId = session?.id;
+
+  let dailyQuizAttemptedToday = false;
+  if (userId) {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const dailyQuiz = quizzes.find(q => q.type === "DAILY");
+    if (dailyQuiz) {
+      const attempt = await prisma.quizAttempt.findFirst({
+        where: {
+          userId,
+          quizId: dailyQuiz.id,
+          completedAt: { gte: todayStart }
+        }
+      });
+      if (attempt) {
+        dailyQuizAttemptedToday = true;
+      }
+    }
+  }
+
+  return quizzes.map(q => {
+    let mappedQuestions = q.questions.map(question => {
       const correctAns = question.answers.find(a => a.isCorrect);
       let parsedCorrect: string | boolean = correctAns?.text || "";
       if (question.type === "truefalse") {
@@ -104,11 +119,41 @@ export async function getQuizzes() {
         explanation: question.explanation || "",
         verse: question.verse || undefined
       };
-    })
-  }));
-}
+    });
 
-import { getSession } from "@/lib/auth";
+    if (q.type === "DAILY") {
+      const dayIndex = Math.floor(Date.now() / 86400000);
+      const start = (dayIndex * 5) % TRIVIA_QUESTIONS.length;
+      mappedQuestions = [];
+      for (let i = 0; i < 5; i++) {
+        const tq = TRIVIA_QUESTIONS[(start + i) % TRIVIA_QUESTIONS.length];
+        const isTrueFalse = tq.options.length === 2 && tq.options.includes("True") && tq.options.includes("False");
+        mappedQuestions.push({
+          id: `daily-q-${i}`,
+          type: isTrueFalse ? "truefalse" : "mcq",
+          question: tq.q,
+          options: tq.options,
+          answer: isTrueFalse ? tq.a === "True" : tq.a,
+          explanation: `The correct answer is: ${tq.a}`,
+          verse: undefined
+        });
+      }
+    }
+
+    return {
+      id: q.id,
+      label: q.title,
+      desc: q.description,
+      type: q.type,
+      xp: q.xpReward,
+      emoji: q.type === "DAILY" ? "⭐" : "📜",
+      color: q.type === "DAILY" ? "gradient-gold" : "gradient-royal",
+      badge: q.type === "DAILY" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+      isCompleted: q.type === "DAILY" ? dailyQuizAttemptedToday : false,
+      questions: mappedQuestions
+    };
+  });
+}
 
 export async function recordQuizAttempt(quizId: string | number, score: number) {
   const session = await getSession();
@@ -117,6 +162,21 @@ export async function recordQuizAttempt(quizId: string | number, score: number) 
   try {
     const quiz = await prisma.quiz.findFirst({ where: { id: String(quizId) } });
     if (!quiz) return { success: false, error: "Quiz not found" };
+
+    if (quiz.type === "DAILY") {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const attempt = await prisma.quizAttempt.findFirst({
+        where: {
+          userId: session.id,
+          quizId: quiz.id,
+          completedAt: { gte: todayStart }
+        }
+      });
+      if (attempt) {
+        return { success: false, error: "Daily quiz already completed today" };
+      }
+    }
 
     await prisma.quizAttempt.create({
       data: {
