@@ -156,6 +156,11 @@ export default function BibleLudoPage() {
   const toggleReady = async () => {
     if (!user || !gameChannel || activeRoom?.host) return;
     
+    if (!myColor) {
+      showToast("Please select a color first!");
+      return;
+    }
+    
     const newReadyState = !isReady;
     setIsReady(newReadyState);
     
@@ -630,22 +635,23 @@ export default function BibleLudoPage() {
       updateLobbyPlayersList(playersList);
       
       const me = playersList.find((p: any) => p.id === user.id);
-      if (me?.colorSlot) {
-        setMyColor(me.colorSlot);
+      if (me) {
+        setMyColor(me.colorSlot || null);
         setIsReady(me.isReady || false);
 
         // Resolve color conflicts: If another player has my color
-        const conflictingPlayer = playersList.find(p => p.id !== user.id && p.colorSlot === me.colorSlot);
-        if (conflictingPlayer && (!me.isHost)) {
-          // I should yield if the other player is host, or if their ID is smaller (deterministic)
-          const shouldIYield = conflictingPlayer.isHost || conflictingPlayer.id < user.id;
-          if (shouldIYield) {
-            const newColor = findFreeColorSlot(playersList, user.id);
-            if (newColor !== me.colorSlot) {
+        if (me.colorSlot) {
+          const conflictingPlayer = playersList.find(p => p.id !== user.id && p.colorSlot === me.colorSlot);
+          if (conflictingPlayer && (!me.isHost)) {
+            // I should yield if the other player is host, or if their ID is smaller (deterministic)
+            const shouldIYield = conflictingPlayer.isHost || conflictingPlayer.id < user.id;
+            if (shouldIYield) {
               await gChannel.track({
                 ...me,
-                colorSlot: newColor
+                colorSlot: null,
+                isReady: false
               });
+              showToast("Your color was taken! Please pick another.");
             }
           }
         }
@@ -670,15 +676,11 @@ export default function BibleLudoPage() {
     })
     .subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
-        const state = gChannel.presenceState();
-        const playersList = Object.values(state).map((arr: any) => arr[0]).filter(Boolean);
-        const freeColor = findFreeColorSlot(playersList, user.id);
-        
         await gChannel.track({
           id: user.id,
           name: `${user.firstName} ${user.lastName}`,
           isHost: false,
-          colorSlot: freeColor,
+          colorSlot: null,
           isReady: false
         });
       }
@@ -909,6 +911,17 @@ export default function BibleLudoPage() {
               {/* Connected Slots List */}
               <div className="space-y-3 mb-8 text-left">
                 <p className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground mb-2">Players Joined</p>
+                
+                {/* Users without a color yet */}
+                {lobbyPlayers.filter((p: any) => !p.colorSlot).map((p: any) => (
+                  <div key={p.id} className="flex items-center justify-between p-3 rounded-xl border bg-muted/20 border-dashed border-border/40">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold uppercase bg-stone-200 text-stone-500">?</div>
+                      <span className="text-sm font-semibold text-muted-foreground">{p.name} (Choosing color...)</span>
+                    </div>
+                  </div>
+                ))}
+
                 {COLORS.map((color) => {
                   const player = lobbyPlayers.find((p: any) => p.colorSlot === color);
                   const hasPlayer = player !== undefined;
