@@ -2,6 +2,7 @@
 import prisma from "@/lib/prisma";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 import { getSession } from "@/lib/auth";
+import { logAudit } from "@/lib/logger";
 
 export async function getQuizzes() {
   let quizzes = await prisma.quiz.findMany({
@@ -185,6 +186,10 @@ export async function recordQuizAttempt(quizId: string | number, score: number) 
         score: score
       }
     });
+
+    // Log the action to the separate Neon audit database
+    await logAudit(session.id, "COMPLETED_QUIZ", { quizId: quiz.id, score, type: quiz.type });
+
     return { success: true };
   } catch (e) {
     console.error(e);

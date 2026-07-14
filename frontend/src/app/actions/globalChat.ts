@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import * as jose from "jose";
 import { z } from "zod";
 import { LRUCache } from "lru-cache";
+import { logAudit } from "@/lib/logger";
 
 // Rate limiting cache (500 items max, TTL 10 seconds)
 // This will limit each user to 1 message per 3 seconds.
@@ -109,6 +110,9 @@ export async function sendMessage(content: string) {
       ]);
     }
 
+    // Log the action
+    await logAudit(session.userId, "SENT_CHAT_MESSAGE", { messageId: message.id, contentLength: parseResult.data.content.length });
+
     return { success: true, messageId: message.id };
   } catch (error) {
     console.error("Failed to send message:", error);
@@ -136,6 +140,9 @@ export async function deleteMessage(messageId: string) {
       where: { id: messageId },
       data: { isDeleted: true },
     });
+
+    // Log the action
+    await logAudit(session.userId, "DELETED_CHAT_MESSAGE", { messageId, messageOwner: message.userId });
 
     return { success: true };
   } catch (error) {
