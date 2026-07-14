@@ -73,7 +73,7 @@ export default function BibleLudoPage() {
   const [liveRooms, setLiveRooms] = useState<any[]>([]);
   const [activeRoom, setActiveRoom] = useState<any>(null);
   const [lobbyPlayers, setLobbyPlayers] = useState<any[]>([]);
-  const [myColor, setMyColor] = useState<Color>("red");
+  const [myColor, setMyColor] = useState<Color | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [toasts, setToasts] = useState<{ id: string; message: string }[]>([]);
   
