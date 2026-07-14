@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import Link from "next/link";
 import { ChevronRight, ScanLine, Megaphone, Calendar, MapPin, Clock } from "lucide-react";
 
 import prisma from "@/lib/prisma";
@@ -163,10 +164,10 @@ export default async function DashboardPage() {
               <span className="text-white text-xs font-semibold">{streak} Day Streak</span>
             </div>
             {session?.role === "ADMIN" && (
-              <a href="/admin/dashboard" className="flex items-center gap-1.5 bg-red-600/80 hover:bg-red-700 text-white rounded-full px-3 py-1.5 border border-red-500 shadow-lg transition transform hover:scale-105 active:scale-95">
+              <Link href="/admin/dashboard" className="flex items-center gap-1.5 bg-red-600/80 hover:bg-red-700 text-white rounded-full px-3 py-1.5 border border-red-500 shadow-lg transition transform hover:scale-105 active:scale-95">
                 <span>🛡️</span>
                 <span className="text-xs font-bold uppercase tracking-wider">Admin Console</span>
-              </a>
+              </Link>
             )}
           </div>
         </div>
@@ -174,7 +175,7 @@ export default async function DashboardPage() {
 
       {/* ── Grace Points Card ── */}
       <div className="relative z-20 px-4 -mt-6 mb-5">
-        <a href="/leaderboard" className="block glass dark:glass-dark rounded-2xl p-4 card-holy shadow-xl group hover:shadow-2xl transition">
+        <Link href="/leaderboard" className="block glass dark:glass-dark rounded-2xl p-4 card-holy shadow-xl group hover:shadow-2xl transition">
           <div className="flex justify-between items-center mb-3">
             <div>
               <p className="text-[10px] font-bold text-primary uppercase tracking-widest group-hover:text-amber-500 transition-colors">Your Grace Points & Rank</p>
@@ -186,7 +187,7 @@ export default async function DashboardPage() {
             <Progress value={progress} className="h-2 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full flex-1" />
             <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">{nextLevelXp - xp} to rank up</span>
           </div>
-        </a>
+        </Link>
       </div>
 
       {/* ── Admin Announcements ── */}
@@ -229,9 +230,9 @@ export default async function DashboardPage() {
               <Calendar className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Upcoming Events</h2>
             </div>
-            <a href="/events" className="text-xs font-bold text-primary flex items-center gap-0.5 hover:opacity-80 transition-opacity">
+            <Link href="/events" className="text-xs font-bold text-primary flex items-center gap-0.5 hover:opacity-80 transition-opacity">
               See all <ChevronRight className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           </div>
           <div className="space-y-2">
             {upcomingEvents.map((ev) => (
@@ -263,7 +264,7 @@ export default async function DashboardPage() {
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -271,7 +272,7 @@ export default async function DashboardPage() {
 
       {/* ── QR Check-in Card ── */}
       <div className="px-4 mb-5 relative z-20">
-        <a href="/scan" className="block rounded-2xl overflow-hidden card-holy card-holy-hover bg-gradient-to-r from-emerald-600 to-green-500 shadow-lg shadow-emerald-500/20 p-4">
+        <Link href="/scan" className="block rounded-2xl overflow-hidden card-holy card-holy-hover bg-gradient-to-r from-emerald-600 to-green-500 shadow-lg shadow-emerald-500/20 p-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
               <ScanLine className="w-6 h-6 text-white" />
@@ -282,7 +283,7 @@ export default async function DashboardPage() {
             </div>
             <ChevronRight className="w-5 h-5 text-white/70 ml-auto" />
           </div>
-        </a>
+        </Link>
       </div>
 
       <div className="px-4 space-y-5 pb-24 md:pb-8">
@@ -349,7 +350,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Quizzes */}
-        <a href="/quizzes" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
+        <Link href="/quizzes" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
           <div className="bg-gradient-to-r from-orange-700/10 to-amber-600/8 dark:from-orange-700/20 dark:to-amber-600/15 px-4 pt-4 pb-3 border-b border-orange-200/30 dark:border-orange-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -367,10 +368,10 @@ export default async function DashboardPage() {
               Test your knowledge of Scripture and Orthodox teaching. New quiz available every day.
             </p>
           </div>
-        </a>
+        </Link>
 
         {/* Prayer Wall */}
-        <a href="/prayer" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
+        <Link href="/prayer" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
           <div className="bg-gradient-to-r from-purple-700/10 to-violet-600/8 dark:from-purple-700/20 dark:to-violet-600/15 px-4 pt-4 pb-3 border-b border-purple-200/30 dark:border-purple-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -389,10 +390,10 @@ export default async function DashboardPage() {
             </p>
             <Badge className="text-[10px] bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 shrink-0 ml-2">Active</Badge>
           </div>
-        </a>
+        </Link>
 
         {/* Spiritual Guides */}
-        <a href="/guides" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
+        <Link href="/guides" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
           <div className="bg-gradient-to-r from-teal-700/10 to-emerald-600/8 dark:from-teal-700/20 dark:to-emerald-600/15 px-4 pt-4 pb-3 border-b border-teal-200/30 dark:border-teal-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -410,10 +411,10 @@ export default async function DashboardPage() {
               Examination of conscience, Orthodox prayers, and spiritual preparation for the Holy Mysteries.
             </p>
           </div>
-        </a>
+        </Link>
 
         {/* Book a Priest */}
-        <a href="/appointments" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
+        <Link href="/appointments" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
           <div className="bg-gradient-to-r from-indigo-700/10 to-blue-600/8 dark:from-indigo-700/20 dark:to-blue-600/15 px-4 pt-4 pb-3 border-b border-indigo-200/30 dark:border-indigo-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -431,7 +432,7 @@ export default async function DashboardPage() {
               Schedule a time for confession, spiritual guidance, or general counseling with a parish priest.
             </p>
           </div>
-        </a>
+        </Link>
 
         {/* Spiritual Stats */}
         <div>

@@ -32,13 +32,15 @@ export default function Template({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       <motion.div
         key={pathname}
         initial={variant.initial}
         animate={variant.animate}
+        exit={{ opacity: 0 }}
         transition={DEFAULT_TRANSITION}
         className="flex-1 flex flex-col w-full min-h-0"
+        style={{ willChange: "opacity, transform" }}
       >
         {children}
       </motion.div>
