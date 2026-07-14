@@ -1,15 +1,13 @@
+require('dotenv').config({ path: '.env' });
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { neon } = require('@neondatabase/serverless');
 
-async function test() {
-  try {
-    const userId = "test";
-    const x = await prisma.userJourneyNode.count({ where: { userId, completedAt: { not: null } } });
-    console.log("Success userJourneyNode");
-  } catch (e) {
-    console.error("ERROR in userJourneyNode:", e);
-  } finally {
-    await prisma.$disconnect();
-  }
+async function check() {
+  const messages = await prisma.chatMessage.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 5
+  });
+  console.log('Messages:', messages);
 }
-test();
+check().catch(console.error).finally(() => prisma.$disconnect());

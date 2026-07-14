@@ -19,19 +19,7 @@ const chatMessageSchema = z.object({
   content: z.string().trim().min(1, "Message cannot be empty").max(1000, "Message is too long"),
 });
 
-async function getSessionUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  if (!token) return null;
-
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "default_secret_key");
-    const { payload } = await jose.jwtVerify(token, secret);
-    return payload as { userId: string, role: string };
-  } catch {
-    return null;
-  }
-}
+import { getSession } from "@/lib/auth";
 
 export async function getMessages(limit = 50) {
   try {
@@ -61,8 +49,8 @@ export async function getMessages(limit = 50) {
 }
 
 export async function sendMessage(content: string) {
-  const session = await getSessionUser();
-  if (!session?.userId) return { success: false, error: "Not authenticated" };
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not authenticated" };
 
   // 1. Zod Input Validation
   const parseResult = chatMessageSchema.safeParse({ content });
@@ -71,16 +59,16 @@ export async function sendMessage(content: string) {
   }
 
   // 2. Rate Limiting Check
-  const lastRequest = rateLimitCache.get(session.userId);
+  const lastRequest = rateLimitCache.get(session.id);
   if (lastRequest && Date.now() - lastRequest < 3000) {
     return { success: false, error: "Please wait a few seconds before sending another message." };
   }
-  rateLimitCache.set(session.userId, Date.now());
+  rateLimitCache.set(session.id, Date.now());
 
   try {
     const message = await prisma.chatMessage.create({
       data: {
-        userId: session.userId,
+        userId: session.id,
         content: parseResult.data.content,
       },
     });
@@ -88,7 +76,7 @@ export async function sendMessage(content: string) {
     const oneMinuteAgo = new Date(Date.now() - 60000);
     const recentChatXP = await prisma.xPLog.findFirst({
       where: {
-        userId: session.userId,
+        userId: session.id,
         reason: { contains: "chat", mode: "insensitive" },
         awardedAt: { gte: oneMinuteAgo },
       },
@@ -97,12 +85,12 @@ export async function sendMessage(content: string) {
     if (!recentChatXP) {
       await prisma.$transaction([
         prisma.user.update({
-          where: { id: session.userId },
+          where: { id: session.id },
           data: { xp: { increment: 2 } },
         }),
         prisma.xPLog.create({
           data: {
-            userId: session.userId,
+            userId: session.id,
             amount: 2,
             reason: "Community Chat Participation",
           },
@@ -111,18 +99,18 @@ export async function sendMessage(content: string) {
     }
 
     // Log the action
-    await logAudit(session.userId, "SENT_CHAT_MESSAGE", { messageId: message.id, contentLength: parseResult.data.content.length });
+    await logAudit(session.id, "SENT_CHAT_MESSAGE", { messageId: message.id, contentLength: parseResult.data.content.length });
 
     return { success: true, messageId: message.id };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to send message:", error);
-    return { success: false, error: "Server error" };
+    return { success: false, error: error.message || "Server error" };
   }
 }
 
 export async function deleteMessage(messageId: string) {
-  const session = await getSessionUser();
-  if (!session?.userId) return { success: false, error: "Not authenticated" };
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not authenticated" };
 
   try {
     // Check if user is admin/priest or the owner of the message
@@ -130,7 +118,7 @@ export async function deleteMessage(messageId: string) {
     if (!message) return { success: false, error: "Message not found" };
 
     const isAdmin = ["ADMIN", "PRIEST"].includes(session.role);
-    const isOwner = message.userId === session.userId;
+    const isOwner = message.userId === session.id;
 
     if (!isAdmin && !isOwner) {
       return { success: false, error: "Unauthorized to delete this message" };
@@ -142,7 +130,7 @@ export async function deleteMessage(messageId: string) {
     });
 
     // Log the action
-    await logAudit(session.userId, "DELETED_CHAT_MESSAGE", { messageId, messageOwner: message.userId });
+    await logAudit(session.id, "DELETED_CHAT_MESSAGE", { messageId, messageOwner: message.userId });
 
     return { success: true };
   } catch (error) {

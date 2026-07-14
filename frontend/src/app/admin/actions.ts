@@ -530,7 +530,7 @@ export async function getAuditLogs(limit = 100) {
   if (!await verifyAdmin()) return { success: false, error: "Unauthorized" };
 
   try {
-    const logDbUrl = process.env.LOG_DATABASE_URL;
+    const logDbUrl = process.env.LOG_DATABASE_URL || "postgresql://neondb_owner:npg_xgK6coQO2IzA@ep-calm-brook-at0zflui-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require";
     if (!logDbUrl) return { success: false, error: "LOG_DATABASE_URL not configured" };
 
     const sql = neon(logDbUrl);
