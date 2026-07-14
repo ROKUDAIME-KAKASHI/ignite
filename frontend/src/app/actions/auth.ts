@@ -32,6 +32,7 @@ export async function login(data: FormData) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const session = await encrypt(sessionData);
 
+  const cookieStore = await cookies();
   cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
 
   await logAudit(user.id, "USER_LOGIN", { method: "email" });
@@ -72,6 +73,7 @@ export async function signup(data: FormData) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const session = await encrypt(sessionData);
 
+  const cookieStore = await cookies();
   cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
 
   await logAudit(user.id, "USER_SIGNUP", { method: "email" });
@@ -123,6 +125,7 @@ export async function googleAuth(idToken: string) {
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const session = await encrypt(sessionData);
 
+    const cookieStore = await cookies();
     cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
 
     await logAudit(user.id, "USER_LOGIN_GOOGLE");
