@@ -386,7 +386,7 @@ export default function BibleLudoPage() {
   };
 
   const handleRollClick = () => {
-    if (dice !== null || isRolling || winner) return;
+    if (dice !== null || isRolling || winner || trivia !== null) return;
     if (gameMode === "live" && turn !== myColor) return; // Only roll for yourself in live
 
     const isHuman = (gameMode === "local") || 
@@ -411,9 +411,8 @@ export default function BibleLudoPage() {
       
       setTrivia(selectedTrivia);
       
-      // Remove the selected question from the unused list
-      const updatedQuestions = [...questionsToUse];
-      updatedQuestions.splice(qIndex, 1);
+      // Remove the selected question (and any exact duplicates) from the unused list
+      const updatedQuestions = questionsToUse.filter(q => q.q !== selectedTrivia.q);
       setUnusedQuestions(updatedQuestions);
 
       // Track seen question in localStorage
