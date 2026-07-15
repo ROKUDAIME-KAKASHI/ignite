@@ -712,6 +712,12 @@ export default function BibleLudoPage() {
     if (!gameChannel) return;
     
     const nonHosts = lobbyPlayers.filter((p: any) => !p.isHost);
+    
+    if (nonHosts.length === 0) {
+      showToast("Waiting for at least one player to join!");
+      return;
+    }
+
     const allReady = nonHosts.every((p: any) => p.isReady);
     if (!allReady) {
       showToast("Waiting for all players to be Ready!");
