@@ -68,10 +68,9 @@ export default function BibleLudoPage() {
   
   // Game Setup
   const [gameMode, setGameMode] = useState<"setup" | "solo" | "team" | "local" | "live" | "lobby">("setup");
-  const [lobbyChannel, setLobbyChannel] = useState<any>(null);
   const [gameChannel, setGameChannel] = useState<any>(null);
-  const [liveRooms, setLiveRooms] = useState<any[]>([]);
   const [activeRoom, setActiveRoom] = useState<any>(null);
+  const [joinCode, setJoinCode] = useState("");
   const [lobbyPlayers, setLobbyPlayers] = useState<any[]>([]);
   const [myColor, setMyColor] = useState<Color | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -100,8 +99,7 @@ export default function BibleLudoPage() {
     }, 3000);
   };
 
-  const findFreeColorSlot = (playersList: any[], userId: string) => {
-    const isHost = activeRoom ? activeRoom.id === userId : true;
+  const findFreeColorSlot = (playersList: any[], userId: string, isHost: boolean) => {
     if (isHost) return "red" as Color;
 
     const takenColors = playersList
@@ -114,7 +112,7 @@ export default function BibleLudoPage() {
     }
     
     const freeColor = COLORS.find(c => !takenColors.includes(c));
-    return (freeColor || "green") as Color;
+    return (freeColor || null) as Color | null;
   };
 
   const updateLobbyPlayersList = (newList: any[]) => {
@@ -140,42 +138,7 @@ export default function BibleLudoPage() {
     setLobbyPlayers(newList);
   };
 
-  const selectColorSlot = async (color: Color) => {
-    console.log("selectColorSlot called with color:", color);
-    if (!user || !gameChannel) {
-      console.log("selectColorSlot missing user or gameChannel:", { user: !!user, gameChannel: !!gameChannel });
-      return;
-    }
-    
-    const state = gameChannel.presenceState();
-    const playersList = extractPresencePlayers(state);
-    const isTaken = playersList.some((p: any) => p.id !== user.id && p.colorSlot === color);
-    if (isTaken) {
-      console.log("selectColorSlot: color taken!");
-      showToast("Color slot is already taken!");
-      return;
-    }
-
-    const isHost = activeRoom?.host || false;
-    const ourPresence = playersList.find((p: any) => p.id === user.id);
-    const isReadyState = ourPresence?.isReady || isHost;
-    
-    console.log("selectColorSlot tracking:", { id: user.id, colorSlot: color, isHost, isReady: isReadyState });
-    setMyColor(color);
-    
-    try {
-      await gameChannel.track({
-        id: user.id,
-        name: `${user.firstName} ${user.lastName}`,
-        isHost,
-        colorSlot: color,
-        isReady: isReadyState
-      });
-      console.log("selectColorSlot track success");
-    } catch (err) {
-      console.error("selectColorSlot track error:", err);
-    }
-  };
+  // Manual color selection removed, auto-assign handled by presence sync
 
   const toggleReady = async () => {
     if (!user || !gameChannel || activeRoom?.host) return;
@@ -298,29 +261,42 @@ export default function BibleLudoPage() {
     }
   }, [user, gameMode, activeRoom]);
 
-  // Global lobby listing channel
-  useEffect(() => {
-    if (user && (gameMode === "setup" || gameMode === "lobby")) {
-      const channel = supabase.channel('ludo_lobby', {
-        config: { presence: { key: user.id } },
-      });
+  // Public lobby channel completely removed, using invite codes instead.
 
-      channel.on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        const rooms = [];
-        for (const userId in state) {
-          const p = (state[userId] as any)[0];
-          if (p && p.isHost) {
-            rooms.push({ id: userId, name: p.roomName, players: p.players || 1, max: 4, host: userId === user.id });
+  // Handle player disconnects during a live game
+  useEffect(() => {
+    if (gameMode === "live" && activeRoom?.host) {
+      // Check if any human player in roomPlayers is no longer in lobbyPlayers
+      const newRoomPlayers = { ...roomPlayers };
+      let updated = false;
+
+      COLORS.forEach(color => {
+        const rp = newRoomPlayers[color];
+        if (rp && !rp.isBot) {
+          // It's a human player. Check if they are still connected.
+          const stillConnected = lobbyPlayers.find(p => p.id === rp.id);
+          if (!stillConnected) {
+            // Player disconnected! Turn them into a bot.
+            newRoomPlayers[color] = { ...rp, name: `${rp.name} (Disconnected - Bot)`, isBot: true };
+            updated = true;
+            showToast(`${rp.name} disconnected. AI took over!`);
           }
         }
-        setLiveRooms(rooms);
-      }).subscribe();
+      });
 
-      setLobbyChannel(channel);
-      return () => { supabase.removeChannel(channel); };
+      if (updated) {
+        setRoomPlayers(newRoomPlayers);
+        // Broadcast the updated roomPlayers so everyone else updates it too
+        if (gameChannel) {
+          gameChannel.send({
+            type: 'broadcast',
+            event: 'update_room_players',
+            payload: { roomPlayers: newRoomPlayers }
+          });
+        }
+      }
     }
-  }, [user, gameMode]);
+  }, [lobbyPlayers, gameMode, activeRoom, roomPlayers, gameChannel]);
 
   // Auto-pass turn if no moves possible or if it's a Bot's turn
   useEffect(() => {
@@ -603,29 +579,42 @@ export default function BibleLudoPage() {
   // Lobby management logic
   const handleCreateRoom = () => {
     if (!user) return;
+    const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const roomName = `${user.firstName}'s Room`;
-    const roomData = { id: user.id, name: roomName, players: 1, max: 4, host: true };
+    const roomData = { id: roomCode, name: roomName, host: true, hostId: user.id };
     setActiveRoom(roomData);
     setMyColor("red");
     setGameMode("lobby");
     
-    const gChannel = supabase.channel(`ludo_room_${user.id}`, {
+    const gChannel = supabase.channel(`ludo_room_${roomCode}`, {
       config: { presence: { key: user.id } }
     });
     
-    gChannel.on('presence', { event: 'sync' }, () => {
+    gChannel.on('presence', { event: 'sync' }, async () => {
       const state = gChannel.presenceState();
       const playersList = extractPresencePlayers(state);
-      
       updateLobbyPlayersList(playersList);
       
       const me = playersList.find((p: any) => p.id === user.id);
-      if (me?.colorSlot) {
-        setMyColor(me.colorSlot);
-      }
-      
-      if (lobbyChannel) {
-        lobbyChannel.track({ isHost: true, roomName: roomName, players: playersList.length });
+      if (me) {
+        setMyColor(me.colorSlot || null);
+        setIsReady(me.isReady || false);
+
+        if (!me.colorSlot) {
+          const color = findFreeColorSlot(playersList, user.id, true);
+          if (color) {
+            await gChannel.track({ ...me, colorSlot: color });
+          }
+        } else {
+          // Resolve conflicts
+          const conflictingPlayer = playersList.find(p => p.id !== user.id && p.colorSlot === me.colorSlot);
+          if (conflictingPlayer && !me.isHost) {
+            const shouldIYield = conflictingPlayer.isHost || conflictingPlayer.id < user.id;
+            if (shouldIYield) {
+              await gChannel.track({ ...me, colorSlot: null, isReady: false });
+            }
+          }
+        }
       }
     }).subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
@@ -644,18 +633,18 @@ export default function BibleLudoPage() {
 
   const handleJoinRoomById = (roomId: string) => {
     if (!user) return;
-    const roomData = { id: roomId, name: "Joined Room", players: 1, max: 4, host: false };
+    const roomCode = roomId.toUpperCase();
+    const roomData = { id: roomCode, name: "Online Room", host: false };
     setActiveRoom(roomData);
     setGameMode("lobby");
     
-    const gChannel = supabase.channel(`ludo_room_${roomId}`, {
+    const gChannel = supabase.channel(`ludo_room_${roomCode}`, {
       config: { presence: { key: user.id } }
     });
     
     gChannel.on('presence', { event: 'sync' }, async () => {
       const state = gChannel.presenceState();
       const playersList = extractPresencePlayers(state);
-      
       updateLobbyPlayersList(playersList);
       
       const me = playersList.find((p: any) => p.id === user.id);
@@ -663,19 +652,22 @@ export default function BibleLudoPage() {
         setMyColor(me.colorSlot || null);
         setIsReady(me.isReady || false);
 
-        // Resolve color conflicts: If another player has my color
-        if (me.colorSlot) {
+        if (!me.colorSlot) {
+          const color = findFreeColorSlot(playersList, user.id, false);
+          if (color) {
+            await gChannel.track({ ...me, colorSlot: color });
+          } else {
+            showToast("Room is full!");
+            handleLeaveRoom(); // Escape hatch
+            return;
+          }
+        } else {
+          // Resolve conflicts
           const conflictingPlayer = playersList.find(p => p.id !== user.id && p.colorSlot === me.colorSlot);
-          if (conflictingPlayer && (!me.isHost)) {
-            // I should yield if the other player is host, or if their ID is smaller (deterministic)
+          if (conflictingPlayer && !me.isHost) {
             const shouldIYield = conflictingPlayer.isHost || conflictingPlayer.id < user.id;
             if (shouldIYield) {
-              await gChannel.track({
-                ...me,
-                colorSlot: null,
-                isReady: false
-              });
-              showToast("Your color was taken! Please pick another.");
+              await gChannel.track({ ...me, colorSlot: null, isReady: false });
             }
           }
         }
@@ -690,6 +682,9 @@ export default function BibleLudoPage() {
     })
     .on('broadcast', { event: 'roll_dice' }, ({ payload }) => {
       setDice(payload.result);
+    })
+    .on('broadcast', { event: 'update_room_players' }, ({ payload }) => {
+      setRoomPlayers(payload.roomPlayers);
     })
     .on('broadcast', { event: 'next_turn' }, ({ payload }) => {
       setTurn(payload.nextColor);
@@ -764,12 +759,10 @@ export default function BibleLudoPage() {
       await supabase.removeChannel(gameChannel);
       setGameChannel(null);
     }
-    if (activeRoom?.host && lobbyChannel) {
-      await lobbyChannel.track({ isHost: false });
-    }
     setActiveRoom(null);
     setLobbyPlayers([]);
     setIsReady(false);
+    setJoinCode("");
     setGameMode("setup");
   };
 
@@ -911,39 +904,58 @@ export default function BibleLudoPage() {
       ) : gameMode === "lobby" ? (
         <div className="flex-1 p-6 flex flex-col justify-center max-w-md mx-auto w-full space-y-6">
           <div className="text-center mb-4">
-            <h2 className="text-2xl font-extrabold font-serif mb-1 text-foreground">Live Lobbies</h2>
-            <p className="text-muted-foreground text-sm">Join a room or create your own</p>
+            <div className="w-16 h-16 rounded-full gradient-gold flex items-center justify-center mx-auto shadow-md mb-4 text-white">
+               <Users className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-extrabold font-serif mb-1 text-foreground">Play Online</h2>
+            <p className="text-muted-foreground text-sm">Join a friend's room or create a new one</p>
           </div>
           
           {!activeRoom ? (
-            <>
-              <Button onClick={handleCreateRoom} className="w-full h-12 rounded-xl gradient-gold text-white font-bold shadow-md halo-glow flex items-center justify-center">
-                <Plus className="w-4 h-4 mr-2" /> Create Ludo Room
+            <div className="space-y-6 bg-card rounded-3xl p-6 border shadow-sm">
+              <Button onClick={handleCreateRoom} className="w-full h-14 rounded-2xl gradient-gold text-white font-bold text-lg shadow-md halo-glow flex items-center justify-center transition-all hover:scale-[1.02]">
+                <Plus className="w-5 h-5 mr-2" /> Create Private Room
               </Button>
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Active Rooms</p>
-                {liveRooms.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground text-sm bg-card rounded-2xl border border-dashed p-4">
-                    No active rooms right now.<br />Create a room to invite others!
-                  </div>
-                ) : (
-                  liveRooms.map(room => (
-                    <div key={room.id} className="bg-card rounded-xl p-4 border border-border/60 flex items-center justify-between shadow-sm">
-                      <div>
-                        <p className="font-bold font-serif text-foreground">{room.name}</p>
-                        <p className="text-xs text-muted-foreground">{room.players}/4 Players</p>
-                      </div>
-                      <Button onClick={() => handleJoinRoomById(room.id)} variant="outline" className="h-8">Join</Button>
-                    </div>
-                  ))
-                )}
+              
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-border"></div>
+                <span className="flex-shrink-0 mx-4 text-muted-foreground text-xs uppercase font-bold tracking-wider">OR</span>
+                <div className="flex-grow border-t border-border"></div>
               </div>
-            </>
+              
+              <div className="space-y-3">
+                <input 
+                  type="text" 
+                  placeholder="Enter 6-digit Room Code"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  maxLength={6}
+                  className="w-full h-14 bg-muted border-2 border-border/60 rounded-2xl px-6 text-center text-xl font-bold tracking-widest uppercase focus:border-primary focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50 placeholder:font-normal placeholder:tracking-normal placeholder:text-base"
+                />
+                <Button 
+                  onClick={() => {
+                    if (joinCode.length >= 3) handleJoinRoomById(joinCode);
+                    else showToast("Please enter a valid room code");
+                  }} 
+                  variant="outline"
+                  className="w-full h-12 rounded-xl font-bold text-base"
+                >
+                  Join Room
+                </Button>
+              </div>
+            </div>
           ) : (
-            <div className="bg-card rounded-2xl border p-6 text-center card-holy relative overflow-hidden">
+            <div className="bg-card rounded-2xl border p-6 text-center card-holy relative overflow-hidden shadow-xl">
               <div className="absolute top-0 left-0 w-full h-2 gradient-gold" />
-              <h3 className="font-bold text-xl mb-1 mt-2 text-foreground">{activeRoom.name}</h3>
-              <p className="text-xs text-muted-foreground mb-6">Room Owner: {getPlayerName("red")}</p>
+              
+              <div className="mb-6 mt-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Room Code</p>
+                <div className="inline-flex items-center justify-center bg-muted border-2 border-border/80 rounded-xl px-6 py-3 cursor-pointer hover:bg-muted/80 transition-colors" onClick={shareRoomLink}>
+                   <span className="text-3xl font-black tracking-[0.2em] text-foreground">{activeRoom.id}</span>
+                   {inviteCopied ? <Check className="w-5 h-5 ml-4 text-green-500 animate-scale" /> : <Share2 className="w-5 h-5 ml-4 text-muted-foreground" />}
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">Share this code with your friends to invite them</p>
+              </div>
               
               {/* Connected Slots List */}
               <div className="space-y-3 mb-8 text-left">
@@ -953,8 +965,8 @@ export default function BibleLudoPage() {
                 {lobbyPlayers.filter((p: any) => !p.colorSlot).map((p: any) => (
                   <div key={p.id} className="flex items-center justify-between p-3 rounded-xl border bg-muted/20 border-dashed border-border/40">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold uppercase bg-stone-200 text-stone-500">?</div>
-                      <span className="text-sm font-semibold text-muted-foreground">{p.name} (Choosing color...)</span>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold uppercase bg-stone-200 text-stone-500">...</div>
+                      <span className="text-sm font-semibold text-muted-foreground">{p.name} (Joining...)</span>
                     </div>
                   </div>
                 ))}
@@ -965,23 +977,18 @@ export default function BibleLudoPage() {
                   const isUser = player?.id === user?.id;
                   
                   const colors = {
-                    red: "text-red-500 bg-red-500/10 border-red-500/20 hover:bg-red-500/20",
-                    green: "text-green-500 bg-green-500/10 border-green-500/20 hover:bg-green-500/20",
-                    yellow: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20",
-                    blue: "text-blue-500 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20"
+                    red: "text-red-500 bg-red-500/10 border-red-500/20",
+                    green: "text-green-500 bg-green-500/10 border-green-500/20",
+                    yellow: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
+                    blue: "text-blue-500 bg-blue-500/10 border-blue-500/20"
                   };
 
                   return (
                     <div 
                       key={color} 
-                      onClick={() => {
-                        if (!hasPlayer) {
-                          selectColorSlot(color);
-                        }
-                      }}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-xl border transition cursor-pointer",
-                        hasPlayer ? "bg-card border-border/80" : "bg-muted/40 border-dashed border-border/60 hover:bg-muted/60"
+                        "flex items-center justify-between p-3 rounded-xl border transition",
+                        hasPlayer ? "bg-card border-border/80" : "bg-muted/40 border-dashed border-border/60 opacity-50"
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -989,7 +996,7 @@ export default function BibleLudoPage() {
                           {color[0]}
                         </div>
                         <span className={cn("text-sm font-semibold", hasPlayer ? "text-foreground" : "text-muted-foreground")}>
-                          {hasPlayer ? `${player.name} ${isUser ? "(You)" : ""}` : `Empty Slot (Tap to select)`}
+                          {hasPlayer ? `${player.name} ${isUser ? "(You)" : ""}` : `Waiting for player...`}
                         </span>
                       </div>
                       
@@ -1011,7 +1018,7 @@ export default function BibleLudoPage() {
                           )}
                         </div>
                       ) : (
-                        <span className="text-[10px] text-muted-foreground font-medium">Click to claim</span>
+                        <span className="text-[10px] text-muted-foreground font-medium">Empty</span>
                       )}
                     </div>
                   );
@@ -1019,23 +1026,7 @@ export default function BibleLudoPage() {
               </div>
 
               {/* Lobby Action Buttons */}
-              <div className="space-y-2">
-                <Button 
-                  onClick={shareRoomLink} 
-                  variant="outline" 
-                  className="w-full h-11 rounded-xl flex items-center justify-center font-bold text-sm gap-2"
-                >
-                  {inviteCopied ? (
-                    <>
-                      <Check className="w-4 h-4 text-green-500 animate-scale" /> Link Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Share2 className="w-4 h-4" /> Share Invite Link
-                    </>
-                  )}
-                </Button>
-
+              <div className="space-y-3">
                 {!activeRoom.host && (
                   <Button 
                     onClick={toggleReady} 
@@ -1049,17 +1040,18 @@ export default function BibleLudoPage() {
                 )}
 
                 {activeRoom.host && (
-                  <Button onClick={startLiveGame} className="w-full h-12 rounded-xl gradient-gold text-white font-bold text-base shadow-md halo-glow">
+                  <Button onClick={startLiveGame} className="w-full h-12 rounded-xl gradient-gold text-white font-bold text-base shadow-md halo-glow hover:scale-[1.02] transition-transform">
                     Start Game Now
                   </Button>
                 )}
                 
-                <Button onClick={handleLeaveRoom} variant="ghost" className="w-full h-10 rounded-xl">
-                  Leave Lobby
+                <Button onClick={handleLeaveRoom} variant="ghost" className="w-full h-10 rounded-xl text-muted-foreground">
+                  Leave Room
                 </Button>
               </div>
             </div>
           )}
+
         </div>
       ) : (
         <>

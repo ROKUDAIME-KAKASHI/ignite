@@ -18,10 +18,16 @@ export async function logAudit(userId: string | null | undefined, action: string
 
     const sql = neon(logDbUrl);
     
-    await sql`
-      INSERT INTO audit_logs (user_id, action, details)
-      VALUES (${userId || 'anonymous'}, ${action}, ${JSON.stringify(details)}::jsonb)
-    `;
+    // Add a fast timeout so it doesn't block the server action if the DB is unreachable
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Audit log timeout")), 1500));
+    
+    await Promise.race([
+      sql`
+        INSERT INTO audit_logs (user_id, action, details)
+        VALUES (${userId || 'anonymous'}, ${action}, ${JSON.stringify(details)}::jsonb)
+      `,
+      timeout
+    ]);
   } catch (error) {
     console.error("Failed to write to audit log DB:", error);
   }
