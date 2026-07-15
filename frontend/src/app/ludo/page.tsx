@@ -82,8 +82,8 @@ export default function BibleLudoPage() {
     return Object.values(state)
       .map((arr: any) => {
         if (!arr || arr.length === 0) return null;
-        // Prioritize any entry that has a colorSlot selected
-        const withColor = arr.find((p: any) => p && p.colorSlot);
+        // Search backwards to get the most recent presence entry with a colorSlot
+        const withColor = [...arr].reverse().find((p: any) => p && p.colorSlot);
         if (withColor) return withColor;
         // Fallback to the latest tracked presence
         return arr[arr.length - 1] || arr[0];
