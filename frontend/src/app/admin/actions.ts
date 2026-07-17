@@ -562,7 +562,8 @@ export async function getAuditLogs(limit = 100) {
     if (!logs || logs.length === 0) return { success: true, logs: [] };
 
     // Fetch user details from Prisma
-    const userIds = Array.from(new Set(logs.map(log => log.user_id).filter(id => id && id !== 'anonymous')));
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const userIds = Array.from(new Set(logs.map(log => log.user_id).filter(id => id && id !== 'anonymous' && uuidRegex.test(id))));
     
     let userMap: Record<string, any> = {};
     if (userIds.length > 0) {
