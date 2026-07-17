@@ -305,15 +305,16 @@ export default function BibleLudoPage() {
     if (dice !== null && !trivia && !isRolling && !winner) {
       const hasMoves = tokens[turn].some((t, idx) => canMove(turn, idx, dice));
       
-      const isBotTurn = gameMode !== "local" && (
-        (gameMode === "solo" && turn !== "red") || 
-        (gameMode === "team" && turn !== "red") ||
-        (gameMode === "live" && activeRoom && activeRoom.host && roomPlayers[turn]?.isBot)
-      );
+      const isMyTurn = (gameMode === "live" && turn === myColor);
+      const isHostBot = (gameMode === "live" && activeRoom?.host && roomPlayers[turn]?.isBot);
+      const isLocalOrSoloOrTeam = (gameMode !== "live");
+      const shouldAct = isLocalOrSoloOrTeam || isMyTurn || isHostBot;
+
+      if (!shouldAct) return;
 
       if (!hasMoves) {
         setTimeout(() => nextTurn(false, gameMode === "live"), 1000);
-      } else if (isBotTurn) {
+      } else if (gameMode !== "local" && ((gameMode === "solo" && turn !== "red") || (gameMode === "team" && turn !== "red") || isHostBot)) {
         // AI Turn
         setTimeout(() => {
           const movable = tokens[turn].map((t, idx) => ({ idx, can: canMove(turn, idx, dice) })).filter(m => m.can);
@@ -326,17 +327,14 @@ export default function BibleLudoPage() {
       }
     } else if (dice === null && !winner) {
       // If it's a bot's turn to roll, do it automatically
-      const isBotTurn = gameMode !== "local" && (
-        (gameMode === "solo" && turn !== "red") || 
-        (gameMode === "team" && turn !== "red") ||
-        (gameMode === "live" && activeRoom && activeRoom.host && roomPlayers[turn]?.isBot)
-      );
+      const isHostBot = (gameMode === "live" && activeRoom?.host && roomPlayers[turn]?.isBot);
+      const isSoloOrTeamBot = (gameMode === "solo" && turn !== "red") || (gameMode === "team" && turn !== "red");
         
-      if (isBotTurn) {
+      if (isHostBot || isSoloOrTeamBot) {
         setTimeout(() => executeRoll(gameMode === "live"), 800);
       }
     }
-  }, [dice, turn, isRolling, trivia, winner, gameMode, tokens, roomPlayers, activeRoom]);
+  }, [dice, turn, isRolling, trivia, winner, gameMode, tokens, roomPlayers, activeRoom, myColor]);
 
   const canMove = (color: Color, tokenIdx: number, roll: number) => {
     const pos = tokens[color][tokenIdx];
@@ -368,19 +366,24 @@ export default function BibleLudoPage() {
   };
 
   const nextTurn = (extraTurn = false, sync = true) => {
-    let nextColor = turn;
+    let nextColorForBroadcast = turn;
     if (!extraTurn) {
       const idx = COLORS.indexOf(turn);
-      nextColor = COLORS[(idx + 1) % 4];
-      setTurn(nextColor);
+      nextColorForBroadcast = COLORS[(idx + 1) % 4];
     }
+
+    setTurn(prevTurn => {
+      if (extraTurn) return prevTurn;
+      const idx = COLORS.indexOf(prevTurn);
+      return COLORS[(idx + 1) % 4];
+    });
     setDice(null);
 
     if (sync && gameMode === "live" && gameChannel) {
       const isMyTurn = turn === myColor;
       const isBotHostTurn = activeRoom?.host && roomPlayers[turn]?.isBot;
       if (isMyTurn || isBotHostTurn) {
-        gameChannel.send({ type: 'broadcast', event: 'next_turn', payload: { extraTurn, nextColor } });
+        gameChannel.send({ type: 'broadcast', event: 'next_turn', payload: { extraTurn, nextColor: nextColorForBroadcast } });
       }
     }
   };
@@ -452,7 +455,11 @@ export default function BibleLudoPage() {
     setTokens(resultTokens);
     if (isWin) {
       setWinner(winnerColor);
-      if (winnerColor === "red") awardTeamXP();
+      if (gameMode === "live") {
+        if (winnerColor === myColor) awardTeamXP();
+      } else {
+        if (winnerColor === "red") awardTeamXP();
+      }
     } else {
       nextTurn(extraTurn, false);
     }
@@ -1063,44 +1070,54 @@ export default function BibleLudoPage() {
         <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center pb-32">
           
           {/* Status Bar */}
-          <div className="w-full max-w-[400px] mb-4 flex items-center justify-between bg-card rounded-2xl p-3 border shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-full ${BG_COLORS[turn]} shadow-inner border-2 border-black/10`} />
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Current Turn</p>
-                <p className="font-bold text-sm leading-none capitalize text-foreground">
-                  {getPlayerName(turn)} {gameMode === "live" && turn === myColor && " (You)"}
-                </p>
+          <div className="w-full max-w-[400px] mb-4 flex flex-col gap-2">
+            <div className="flex items-center justify-between bg-card rounded-2xl p-3 border shadow-sm">
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-full ${BG_COLORS[turn]} shadow-inner border-2 border-black/10`} />
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Current Turn</p>
+                  <p className="font-bold text-sm leading-none capitalize text-foreground">
+                    {getPlayerName(turn)} {gameMode === "live" && turn === myColor && " (You)"}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {isRolling ? (
+                  <motion.div 
+                    animate={{ rotateX: 360, rotateY: 360, scale: [1, 1.2, 1] }} 
+                    transition={{ repeat: Infinity, duration: 0.5, ease: "easeInOut" }}
+                  >
+                    <Dices className="w-10 h-10 text-primary drop-shadow-md" />
+                  </motion.div>
+                ) : dice ? (
+                  <motion.div 
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                    className="w-10 h-10 bg-gradient-to-br from-card to-muted border-2 border-primary rounded-xl flex items-center justify-center text-xl font-black text-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]"
+                  >
+                    {dice}
+                  </motion.div>
+                ) : (
+                  <Button 
+                    onClick={() => handleRollClick()} 
+                    disabled={gameMode === "live" && turn !== myColor}
+                    size="sm"
+                    className={`rounded-xl font-bold ${((gameMode === "local" || (gameMode !== "live" && turn === "red")) || (gameMode === "live" && turn === myColor)) ? "gradient-gold shadow-md halo-glow" : "bg-muted text-muted-foreground"}`}
+                  >
+                    Roll
+                  </Button>
+                )}
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
-              {isRolling ? (
-                <motion.div 
-                  animate={{ rotateX: 360, rotateY: 360, scale: [1, 1.2, 1] }} 
-                  transition={{ repeat: Infinity, duration: 0.5, ease: "easeInOut" }}
-                >
-                  <Dices className="w-10 h-10 text-primary drop-shadow-md" />
-                </motion.div>
-              ) : dice ? (
-                <motion.div 
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                  className="w-10 h-10 bg-gradient-to-br from-card to-muted border-2 border-primary rounded-xl flex items-center justify-center text-xl font-black text-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]"
-                >
-                  {dice}
-                </motion.div>
-              ) : (
-                <Button 
-                  onClick={() => handleRollClick()} 
-                  disabled={gameMode === "live" && turn !== myColor}
-                  size="sm"
-                  className={`rounded-xl font-bold ${((gameMode === "local" || (gameMode !== "live" && turn === "red")) || (gameMode === "live" && turn === myColor)) ? "gradient-gold shadow-md halo-glow" : "bg-muted text-muted-foreground"}`}
-                >
-                  Roll
-                </Button>
-              )}
+            <div className="flex items-center justify-end gap-2 px-2 opacity-80">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Up Next:</span>
+              <div className={`w-3 h-3 rounded-full ${BG_COLORS[COLORS[(COLORS.indexOf(turn) + 1) % 4]]} shadow-inner border border-black/10`} />
+              <span className="text-[11px] text-muted-foreground font-semibold capitalize">
+                {getPlayerName(COLORS[(COLORS.indexOf(turn) + 1) % 4])} {gameMode === "live" && COLORS[(COLORS.indexOf(turn) + 1) % 4] === myColor && "(You)"}
+              </span>
             </div>
           </div>
 
