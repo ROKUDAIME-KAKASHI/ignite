@@ -491,6 +491,7 @@ export async function sendDirectPushNotification(title: string, message: string)
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
   try {
+    // 1. Send OneSignal Push
     const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
     const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
@@ -509,6 +510,20 @@ export async function sendDirectPushNotification(title: string, message: string)
         })
       }).catch(err => console.error("Error in sending custom push notifications:", err));
     }
+
+    // 2. Create in-app Notification for all users
+    const allUsers = await prisma.user.findMany({ select: { id: true } });
+    if (allUsers.length > 0) {
+      await prisma.notification.createMany({
+        data: allUsers.map(u => ({
+          userId: u.id,
+          title: title,
+          message: message,
+          link: "/notifications"
+        }))
+      });
+    }
+
     return { success: true };
   } catch (error: any) {
     console.error("Direct push notification failed:", error);
