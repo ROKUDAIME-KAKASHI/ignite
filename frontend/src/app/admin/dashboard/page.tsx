@@ -207,8 +207,11 @@ export default function AdminDashboardPage() {
       
       // Fetch audit logs early too
       const logRes = await getAuditLogs(200);
+      console.log("Audit Logs Response:", logRes);
       if (logRes.success && logRes.logs) {
         setAuditLogs(logRes.logs);
+      } else {
+        console.error("Failed to load audit logs:", logRes);
       }
       fetchPrayers();
       fetchEventsAndNotices();
