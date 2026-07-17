@@ -77,7 +77,8 @@ export async function createAnnouncement(title: string, content: string) {
     const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
     if (appId && apiKey) {
-      await fetch('https://onesignal.com/api/v1/notifications', {
+      console.log("Sending OneSignal push with appId:", appId, "and title:", title);
+      const res = await fetch('https://onesignal.com/api/v1/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
@@ -87,11 +88,14 @@ export async function createAnnouncement(title: string, content: string) {
           app_id: appId,
           contents: { en: content },
           headings: { en: title },
-          included_segments: ["Subscribed Users"],
+          included_segments: ["Total Subscriptions"],
         })
-      }).catch(err => console.error("Error in sending OneSignal push:", err));
+      });
+      const data = await res.text();
+      console.log("OneSignal push response status:", res.status);
+      console.log("OneSignal push response data:", data);
     } else {
-      console.warn("OneSignal credentials not configured. Skipping push broadcast.");
+      console.warn("OneSignal credentials not configured. Skipping push broadcast.", { appId: !!appId, apiKey: !!apiKey });
     }
   } catch (pushError) {
     console.error("Failed to broadcast push notifications:", pushError);
@@ -496,7 +500,8 @@ export async function sendDirectPushNotification(title: string, message: string)
     const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
     if (appId && apiKey) {
-      await fetch('https://onesignal.com/api/v1/notifications', {
+      console.log("Sending direct push with appId:", appId, "and title:", title);
+      const res = await fetch('https://onesignal.com/api/v1/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
@@ -506,9 +511,14 @@ export async function sendDirectPushNotification(title: string, message: string)
           app_id: appId,
           contents: { en: message },
           headings: { en: title },
-          included_segments: ["Subscribed Users"],
+          included_segments: ["Total Subscriptions"],
         })
-      }).catch(err => console.error("Error in sending custom push notifications:", err));
+      });
+      const data = await res.text();
+      console.log("OneSignal direct push response status:", res.status);
+      console.log("OneSignal direct push response data:", data);
+    } else {
+      console.warn("OneSignal credentials not configured for direct push.", { appId: !!appId, apiKey: !!apiKey });
     }
 
     // 2. Create in-app Notification for all users
