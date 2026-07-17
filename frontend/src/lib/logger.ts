@@ -19,7 +19,7 @@ export async function logAudit(userId: string | null | undefined, action: string
     const sql = neon(logDbUrl);
     
     // Add a fast timeout so it doesn't block the server action if the DB is unreachable
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Audit log timeout")), 1500));
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Audit log timeout")), 5000));
     
     await Promise.race([
       sql`
