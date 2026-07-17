@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import webpush from "web-push";
-
 // Vercel Cron triggers GET by default
 export async function GET(req: Request) {
   // Check authorization header for Vercel Cron
@@ -11,17 +9,12 @@ export async function GET(req: Request) {
   }
 
   try {
-    webpush.setVapidDetails(
-      'mailto:admin@ignite.com',
-      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-      process.env.VAPID_PRIVATE_KEY!
-    );
+    const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
+    const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
-    const subscriptions = await prisma.pushSubscription.findMany();
-    
-    // Generate today's date at midnight for querying
+    // Generate today's date at midnight UTC for querying
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     // Try to find today's journey in the database
     let journey = await prisma.dailyJourney.findUnique({
@@ -32,31 +25,23 @@ export async function GET(req: Request) {
       ? `"${journey.verse}" - ${journey.verseRef}`
       : "This is the day the Lord has made; let us rejoice and be glad in it. - Psalm 118:24";
 
-    const payload = JSON.stringify({
-      title: "Daily Grace",
-      body: verseText,
-      icon: "/icon-192x192.png"
-    });
+    if (appId && apiKey) {
+      await fetch('https://onesignal.com/api/v1/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': `Basic ${apiKey}`
+        },
+        body: JSON.stringify({
+          app_id: appId,
+          contents: { en: verseText },
+          headings: { en: "Daily Grace" },
+          included_segments: ["Subscribed Users"],
+        })
+      });
+    }
 
-    const notifications = subscriptions.map(sub => 
-      webpush.sendNotification({
-        endpoint: sub.endpoint,
-        keys: {
-          p256dh: sub.p256dh,
-          auth: sub.auth
-        }
-      }, payload).catch(err => {
-        if (err.statusCode === 404 || err.statusCode === 410) {
-          // Clean up expired subscriptions
-          return prisma.pushSubscription.delete({ where: { id: sub.id } });
-        }
-        console.error('Error sending push', err);
-      })
-    );
-
-    await Promise.all(notifications);
-
-    return NextResponse.json({ success: true, count: subscriptions.length });
+    return NextResponse.json({ success: true, count: 1 });
   } catch (error) {
     console.error("Cron Error:", error);
     return NextResponse.json({ error: "Failed to send notifications" }, { status: 500 });

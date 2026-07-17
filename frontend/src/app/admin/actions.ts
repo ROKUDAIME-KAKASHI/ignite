@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { encrypt, decrypt } from "@/lib/auth";
-import webpush from "web-push";
 import { neon } from "@neondatabase/serverless";
 
 async function verifyAdmin() {
@@ -72,48 +71,28 @@ export async function createAnnouncement(title: string, content: string) {
     data: { title, content }
   });
 
-  // Broadcast Web Push notifications asynchronously
+  // Broadcast via OneSignal REST API asynchronously
   try {
-    webpush.setVapidDetails(
-      'mailto:admin@ignite.com',
-      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-      process.env.VAPID_PRIVATE_KEY!
-    );
+    const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
+    const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
-    const subscriptions = await prisma.pushSubscription.findMany();
-    
-    const payload = JSON.stringify({
-      title: title,
-      body: content,
-      icon: "/icon-192x192.png"
-    });
-
-    const sendPromises = subscriptions.map(sub => {
-      // If it's a standard webpush subscription
-      if (sub.p256dh !== "fcm") {
-        return webpush.sendNotification({
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth
-          }
-        }, payload).catch(err => {
-          if (err.statusCode === 404 || err.statusCode === 410) {
-            // Clean up expired subscriptions
-            return prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
-          }
-          console.error('Error sending push to subscription ID:', sub.id, err);
-        });
-      } else {
-        // FCM token fallback if someone registered through client Firebase getToken directly
-        // We log it or could trigger an HTTP POST request to Firebase FCM endpoint if key exists
-        console.log("FCM subscription token found (skipping direct webpush for FCM token):", sub.endpoint);
-        return Promise.resolve();
-      }
-    });
-
-    // Execute in the background without blocking the UI response
-    Promise.all(sendPromises).catch(err => console.error("Error in sending push notifications:", err));
+    if (appId && apiKey) {
+      fetch('https://onesignal.com/api/v1/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': `Basic ${apiKey}`
+        },
+        body: JSON.stringify({
+          app_id: appId,
+          contents: { en: content },
+          headings: { en: title },
+          included_segments: ["Subscribed Users"],
+        })
+      }).catch(err => console.error("Error in sending OneSignal push:", err));
+    } else {
+      console.warn("OneSignal credentials not configured. Skipping push broadcast.");
+    }
   } catch (pushError) {
     console.error("Failed to broadcast push notifications:", pushError);
   }
@@ -512,42 +491,24 @@ export async function sendDirectPushNotification(title: string, message: string)
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
   try {
-    webpush.setVapidDetails(
-      'mailto:admin@ignite.com',
-      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-      process.env.VAPID_PRIVATE_KEY!
-    );
+    const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
+    const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
-    const subscriptions = await prisma.pushSubscription.findMany();
-    
-    const payload = JSON.stringify({
-      title: title,
-      body: message,
-      icon: "/icon-192x192.png"
-    });
-
-    const sendPromises = subscriptions.map(sub => {
-      if (sub.p256dh !== "fcm") {
-        return webpush.sendNotification({
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth
-          }
-        }, payload).catch(err => {
-          if (err.statusCode === 404 || err.statusCode === 410) {
-            return prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
-          }
-          console.error('Error sending push to subscription ID:', sub.id, err);
-        });
-      } else {
-        console.log("FCM subscription token found:", sub.endpoint);
-        return Promise.resolve();
-      }
-    });
-
-    // Execute in the background and return immediately
-    Promise.all(sendPromises).catch(err => console.error("Error in sending custom push notifications:", err));
+    if (appId && apiKey) {
+      fetch('https://onesignal.com/api/v1/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': `Basic ${apiKey}`
+        },
+        body: JSON.stringify({
+          app_id: appId,
+          contents: { en: message },
+          headings: { en: title },
+          included_segments: ["Subscribed Users"],
+        })
+      }).catch(err => console.error("Error in sending custom push notifications:", err));
+    }
     return { success: true };
   } catch (error: any) {
     console.error("Direct push notification failed:", error);

@@ -9,34 +9,29 @@ import { getSession } from "@/lib/auth";
 async function getJourney() {
   try {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    let journey = await prisma.dailyJourney.findUnique({ 
+    today.setUTCHours(0, 0, 0, 0);
+    const verses = [
+      { verse: "I can do all things through Christ who strengthens me.", ref: "Philippians 4:13" },
+      { verse: "For God gave us a spirit not of fear but of power and love and self-control.", ref: "2 Timothy 1:7" },
+      { verse: "The Lord is my shepherd; I shall not want.", ref: "Psalm 23:1" },
+      { verse: "Cast all your anxieties on him, because he cares for you.", ref: "1 Peter 5:7" },
+      { verse: "Rejoice always, pray without ceasing, give thanks in all circumstances.", ref: "1 Thessalonians 5:16-18" },
+    ];
+    
+    const v = verses[Math.floor(Math.random() * verses.length)];
+
+    let journey = await prisma.dailyJourney.upsert({
       where: { date: today },
-      include: { mission: true, quiz: true } 
+      update: {},
+      create: {
+        date: today,
+        verse: v.verse,
+        verseRef: v.ref,
+        reflection: "Reflect on this scripture today. Allow God's word to guide your actions, thoughts, and words as you go about your daily life.",
+        prayer: "Lord, grant me the strength to overcome today's obstacles, knowing You are always with me.",
+      },
+      include: { mission: true, quiz: true }
     });
-
-    if (!journey) {
-      const verses = [
-        { verse: "I can do all things through Christ who strengthens me.", ref: "Philippians 4:13" },
-        { verse: "For God gave us a spirit not of fear but of power and love and self-control.", ref: "2 Timothy 1:7" },
-        { verse: "The Lord is my shepherd; I shall not want.", ref: "Psalm 23:1" },
-        { verse: "Cast all your anxieties on him, because he cares for you.", ref: "1 Peter 5:7" },
-        { verse: "Rejoice always, pray without ceasing, give thanks in all circumstances.", ref: "1 Thessalonians 5:16-18" },
-      ];
-      
-      const v = verses[Math.floor(Math.random() * verses.length)];
-
-      journey = await prisma.dailyJourney.create({
-        data: {
-          date: today,
-          verse: v.verse,
-          verseRef: v.ref,
-          reflection: "Reflect on this scripture today. Allow God's word to guide your actions, thoughts, and words as you go about your daily life.",
-          prayer: "Lord, grant me the strength to overcome today's obstacles, knowing You are always with me.",
-        },
-        include: { mission: true, quiz: true }
-      });
-    }
 
     return journey;
   } catch (e) {
