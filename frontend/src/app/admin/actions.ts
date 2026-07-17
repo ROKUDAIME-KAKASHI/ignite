@@ -77,7 +77,7 @@ export async function createAnnouncement(title: string, content: string) {
     const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
     if (appId && apiKey) {
-      fetch('https://onesignal.com/api/v1/notifications', {
+      await fetch('https://onesignal.com/api/v1/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
@@ -496,7 +496,7 @@ export async function sendDirectPushNotification(title: string, message: string)
     const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
     if (appId && apiKey) {
-      fetch('https://onesignal.com/api/v1/notifications', {
+      await fetch('https://onesignal.com/api/v1/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
