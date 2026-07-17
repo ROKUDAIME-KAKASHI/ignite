@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
