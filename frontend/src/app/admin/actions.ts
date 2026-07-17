@@ -589,7 +589,7 @@ export async function getAuditLogs(limit = 100) {
     }));
 
     return { success: true, logs: enrichedLogs };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to fetch audit logs:", error);
     return { success: false, error: error?.message || "Database error" };
   }
