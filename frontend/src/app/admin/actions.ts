@@ -524,6 +524,7 @@ export async function sendDirectPushNotification(title: string, message: string)
       });
     }
 
+    revalidatePath("/notifications");
     return { success: true };
   } catch (error: any) {
     console.error("Direct push notification failed:", error);
