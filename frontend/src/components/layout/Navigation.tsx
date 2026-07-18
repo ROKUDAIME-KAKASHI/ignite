@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy, MessageCircle } from "lucide-react";
@@ -86,6 +87,45 @@ export function Navigation() {
 
   const dailyVerse = getDailyVerse(user?.id);
 
+  const [hasUnreadFellowship, setHasUnreadFellowship] = useState(false);
+
+  useEffect(() => {
+    if (pathname === "/fellowship") {
+      localStorage.setItem("lastViewedFellowship", new Date().toISOString());
+      setHasUnreadFellowship(false);
+    } else if (user) {
+      import("@/app/actions/globalChat").then(({ getMessages }) => {
+        getMessages(1).then((msgs) => {
+          if (msgs && msgs.length > 0) {
+            const latestDate = new Date(msgs[0].createdAt).getTime();
+            const lastViewed = localStorage.getItem("lastViewedFellowship");
+            if (!lastViewed || latestDate > new Date(lastViewed).getTime()) {
+              setHasUnreadFellowship(true);
+            }
+          }
+        });
+      });
+    }
+  }, [pathname, user]);
+
+  useEffect(() => {
+    if (pathname === "/fellowship" || !user) return;
+    let channel: any;
+    import("@/lib/supabase").then(({ supabase }) => {
+      channel = supabase
+        .channel("global_fellowship_nav")
+        .on("broadcast", { event: "new_message" }, () => {
+          setHasUnreadFellowship(true);
+        })
+        .subscribe();
+    });
+    return () => {
+      if (channel) {
+        import("@/lib/supabase").then(({ supabase }) => supabase.removeChannel(channel));
+      }
+    };
+  }, [pathname, user]);
+
   return (
     <>
       {/* ── Mobile Bottom Navigation ── */}
@@ -106,7 +146,15 @@ export function Navigation() {
                         transition={{ type: "spring", stiffness: 400, damping: 35 }}
                       />
                     )}
-                    <Icon className={cn("w-5 h-5 transition duration-200", isActive ? "text-amber-700 scale-110" : "text-muted-foreground")} strokeWidth={isActive ? 2.5 : 1.8} />
+                    <div className="relative">
+                      <Icon className={cn("w-5 h-5 transition duration-200", isActive ? "text-amber-700 scale-110" : "text-muted-foreground")} strokeWidth={isActive ? 2.5 : 1.8} />
+                      {item.name === "Fellowship" && hasUnreadFellowship && (
+                        <span className="absolute -top-1 -right-1.5 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white dark:border-[#0f1229]"></span>
+                        </span>
+                      )}
+                    </div>
                     <span className={cn("text-[10px] font-semibold tracking-wide", isActive ? "text-amber-700" : "text-muted-foreground")}>
                       {item.name}
                     </span>
@@ -152,12 +200,20 @@ export function Navigation() {
                 <Link
                   href={item.href}
                   className={cn(
-                    "relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition duration-200",
+                    "relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition duration-200 justify-between",
                     isActive ? "text-amber-700 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   )}
                 >
-                  <Icon className={cn("w-4.5 h-4.5 relative z-10", isActive ? "text-amber-700" : "")} strokeWidth={isActive ? 2.5 : 1.8} />
-                  <span className="relative z-10">{item.name}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon className={cn("w-4.5 h-4.5 relative z-10", isActive ? "text-amber-700" : "")} strokeWidth={isActive ? 2.5 : 1.8} />
+                    <span className="relative z-10">{item.name}</span>
+                  </div>
+                  {item.name === "Fellowship" && hasUnreadFellowship && (
+                    <span className="relative flex h-2 w-2 mr-1">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                  )}
                 </Link>
               </li>
             );

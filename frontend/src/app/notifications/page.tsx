@@ -169,9 +169,14 @@ export default function NotificationsPage() {
       <div className="px-4 -mt-4 pb-8 space-y-4 relative z-20">
         {/* ── Parish Notices (from Admin) ── */}
         <div>
-          <div className="flex items-center gap-2 mb-3 px-1 pt-2">
-            <Megaphone className="w-4 h-4 text-primary" />
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Parish Notices</p>
+          <div className="flex items-center justify-between mb-4 bg-muted/40 backdrop-blur-xl p-3 rounded-2xl border border-border/60 shadow-sm relative overflow-hidden mt-4">
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-transparent to-transparent pointer-events-none" />
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center text-white shadow-md">
+                <Megaphone className="w-4 h-4" />
+              </div>
+              <h2 className="text-sm font-extrabold text-foreground uppercase tracking-widest">Parish Notices</h2>
+            </div>
           </div>
 
           {loadingAnn ? (
