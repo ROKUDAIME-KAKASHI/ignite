@@ -508,10 +508,12 @@ export default function PriestDashboardPage() {
                             >
                               Delete
                             </button>
-                            
-                      </div>
-                    </div>
-                  ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </motion.div>
