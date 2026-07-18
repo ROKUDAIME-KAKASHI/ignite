@@ -233,7 +233,23 @@ export default function MemoryMatchPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-2 md:gap-4 mb-8">
+          <>
+            {/* Flipped Cards Text Display */}
+            <div className="bg-muted/30 border border-border/50 rounded-2xl p-4 mb-6 min-h-[90px] flex flex-col justify-center items-center text-center transition-all duration-300">
+              {flippedIdx.length > 0 ? (
+                flippedIdx.map((idx, i) => (
+                  <p key={idx} className="text-sm md:text-base font-medium text-foreground mb-2 last:mb-0 animate-in fade-in zoom-in-95 duration-200" style={{ animationDelay: `${i * 100}ms` }}>
+                    {cards[idx].fullText}
+                  </p>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-sm flex items-center gap-2">
+                  <Brain className="w-4 h-4 opacity-50" /> Flip a card to read its full text here
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-4 gap-2 md:gap-4 mb-8">
             {cards.map((card, index) => (
               <div 
                 key={card.id} 
@@ -265,6 +281,7 @@ export default function MemoryMatchPage() {
               </div>
             ))}
           </div>
+          </>
         )}
       </div>
     </div>
