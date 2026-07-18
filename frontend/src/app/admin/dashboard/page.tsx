@@ -436,7 +436,7 @@ export default function AdminDashboardPage() {
                       if (confirm("End the current gamification season? This will award the 'Season Champion' badge to the top 3 players and reset EVERYONE's XP to zero!")) {
                         const res = await endSeason();
                         if (res.success) {
-                          alert(`Season ended! Champions: ${res.topUsers.map((u: any) => u.firstName).join(", ")}`);
+                          alert(`Season ended! Champions: ${res.topUsers?.map((u: any) => u.firstName).join(", ") || "None"}`);
                           window.location.reload();
                         } else {
                           alert(res.error);
