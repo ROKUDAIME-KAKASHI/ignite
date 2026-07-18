@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy, MessageCircle, ShieldCheck } from "lucide-react";
+import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy, MessageCircle, ShieldCheck, Heart, BookMarked } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLiturgicalSeason } from "@/lib/liturgy";
@@ -43,6 +43,8 @@ const navItems = [
   { name: "Scripture", href: "/bible",     icon: BookOpen   },
   { name: "Journeys",  href: "/journeys",  icon: Map        },
   { name: "Missions",  href: "/missions",  icon: Target     },
+  { name: "Prayer",    href: "/prayer",    icon: Heart      },
+  { name: "Journal",   href: "/journal",   icon: BookMarked },
   { name: "Fellowship",href: "/fellowship",icon: MessageCircle },
   { name: "Games",     href: "/quizzes",   icon: Gamepad2 },
   { name: "Events",    href: "/events",    icon: Calendar   },

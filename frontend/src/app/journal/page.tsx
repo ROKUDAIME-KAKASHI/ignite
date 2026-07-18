@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Heart, Lock, Send} from "lucide-react";
+import { Heart, Lock, Send, BookMarked } from "lucide-react";
 
 /* ─── Types ── */
 interface PrayerRequest {
@@ -20,7 +20,7 @@ interface PrayerRequest {
   time: string;
 }
 
-import { submitPrayer, getApprovedPrayers, incrementPrayerCount, getCategories } from "./actions";
+import { submitPrayer, getPrivatePrayers, incrementPrayerCount, getCategories } from "../prayer/actions";
 
 /* ─── Categories ── */
 // We now fetch these from the database, but we still define an "All" fallback for filtering
@@ -116,13 +116,12 @@ function PrayerCard({ req, onPray, catColor }: { req: PrayerRequest; onPray: (id
 }
 
 /* ─── Main Page ── */
-export default function PrayerWall() {
+export default function PrivateJournal() {
   const [filter, setFilter] = useState("All");
-  const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
+  const [privatePrayers, setPrivatePrayers] = useState<PrayerRequest[]>([]);
   const [dbCategories, setDbCategories] = useState<{name: string, color: string}[]>([]);
   
   const [text, setText] = useState("");
-  const [anonymous, setAnonymous] = useState(false);
   const [newCat, setNewCat] = useState("General");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -135,11 +134,11 @@ export default function PrayerWall() {
   const loadData = async () => {
     setRefreshing(true);
     try {
-      const [fetchedPrayers, fetchedCats] = await Promise.all([
-        getApprovedPrayers(),
+      const [fetchedPrivate, fetchedCats] = await Promise.all([
+        getPrivatePrayers(),
         getCategories()
       ]);
-      setPrayers(fetchedPrayers);
+      setPrivatePrayers(fetchedPrivate);
       setDbCategories(fetchedCats);
       if (fetchedCats.length > 0 && !fetchedCats.find(c => c.name === "General")) {
         setNewCat(fetchedCats[0].name);
@@ -154,7 +153,7 @@ export default function PrayerWall() {
   const categories = ["All", ...dbCategories.map(c => c.name)];
 
   const onPray = async (id: string) => {
-    setPrayers((prev) =>
+    setPrivatePrayers((prev) =>
       prev.map((r) => r.id === id ? { ...r, prayers: r.prayed ? r.prayers - 1 : r.prayers + 1, prayed: !r.prayed } : r)
     );
     await incrementPrayerCount(id);
@@ -163,7 +162,7 @@ export default function PrayerWall() {
   const handleSubmit = async () => {
     if (!text.trim()) return;
     setSubmitting(true);
-    await submitPrayer(text.trim(), anonymous, newCat);
+    await submitPrayer(text.trim(), false, newCat, true);
     setText("");
     setSubmitting(false);
     setSubmitted(true);
@@ -171,13 +170,13 @@ export default function PrayerWall() {
     setTimeout(() => setSubmitted(false), 5000);
   };
 
-  const totalPrayers = prayers.reduce((acc, r) => acc + r.prayers, 0);
+  const totalPrayers = privatePrayers.reduce((acc, r) => acc + r.prayers, 0);
 
   return (
     <div className="flex-1 overflow-y-auto">
 
       {/* ── Header ── */}
-      <div className="relative overflow-hidden px-5 pt-8 pb-10 gradient-lent">
+      <div className="relative overflow-hidden px-5 pt-8 pb-10 bg-gradient-to-br from-indigo-900 to-purple-800">
         <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
         <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-0 pointer-events-none flex flex-col items-center">
           <img src="/header-image.png" className="h-16 sm:h-24 w-auto rounded-2xl shadow-2xl border-[3px] border-white/20 opacity-95 object-contain rotate-3 drop-shadow-xl mb-2 sm:mb-3" alt="Church emblem" />
@@ -188,23 +187,19 @@ export default function PrayerWall() {
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl">🙏</div>
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl">📖</div>
             <div>
-              <h1 className="text-2xl font-extrabold text-white font-serif">Prayer Wall</h1>
-              <p className="text-purple-200 text-xs font-bold uppercase tracking-wider">Lift Each Other Up</p>
+              <h1 className="text-2xl font-extrabold text-white font-serif">My Journal</h1>
+              <p className="text-indigo-200 text-xs font-bold uppercase tracking-wider">Your Personal Space</p>
             </div>
           </div>
-          <p className="text-purple-100/80 text-sm mt-2 italic font-serif">
-            "Pray for one another, that you may be healed." — James 5:16
+          <p className="text-indigo-100/80 text-sm mt-2 italic font-serif">
+            "But when you pray, go into your room, close the door and pray to your Father, who is unseen." — Matthew 6:6
           </p>
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
-              <Heart className="w-3.5 h-3.5 text-white" />
-              <span className="text-white text-xs font-semibold">{totalPrayers} prayers offered</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
-              <span>✝️</span>
-              <span className="text-white text-xs font-semibold">{prayers.length} requests</span>
+              <span>📝</span>
+              <span className="text-white text-xs font-semibold">{privatePrayers.length} entries</span>
             </div>
           </div>
         </div>
@@ -214,9 +209,13 @@ export default function PrayerWall() {
 
         {/* ── Submit a request ── */}
         <div className="rounded-2xl bg-card border border-border/60 card-holy overflow-hidden">
-          <div className="px-4 pt-4 pb-3 border-b border-border/40 bg-gradient-to-r from-purple-600/8 to-violet-500/6 dark:from-purple-600/15 dark:to-violet-500/12">
-            <p className="font-bold text-foreground font-serif text-sm">Submit a Prayer Request</p>
-            <p className="text-xs text-muted-foreground mt-0.5">"Cast your burden on the Lord and He will sustain you." — Psalm 55:22</p>
+          <div className="px-4 pt-4 pb-3 border-b border-border/40 bg-gradient-to-r from-indigo-600/8 to-purple-500/6 dark:from-indigo-600/15 dark:to-purple-500/12">
+            <p className="font-bold text-foreground font-serif text-sm">
+              Write a Private Prayer
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Between you and God alone.
+            </p>
           </div>
           <div className="px-4 py-3 space-y-3">
             <Textarea
@@ -241,16 +240,11 @@ export default function PrayerWall() {
                 </select>
                 {/* Anonymous toggle */}
                 <button
-                  onClick={() => setAnonymous(!anonymous)}
-                  className={cn(
-                    "flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition",
-                    anonymous
-                      ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
-                      : "border-border/60 text-muted-foreground hover:text-foreground"
-                  )}
+                  disabled
+                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition opacity-50 cursor-not-allowed border-border/60 text-muted-foreground"
                 >
                   <Lock className="w-3 h-3" />
-                  {anonymous ? "Anonymous ✓" : "Anonymous"}
+                  Private
                 </button>
               </div>
               <Button
@@ -269,7 +263,7 @@ export default function PrayerWall() {
                   exit={{ opacity: 0 }}
                   className="text-xs text-green-600 dark:text-green-400 font-semibold text-center mt-3"
                 >
-                  ✓ Your prayer has been shared with the community. 🙏
+                  ✓ Added to your private journal. 🙏
                 </motion.p>
               )}
             </AnimatePresence>
@@ -298,14 +292,14 @@ export default function PrayerWall() {
         <div className="space-y-3">
           <AnimatePresence>
             {(() => {
-              let filtered = filter === "All" ? prayers : prayers.filter(p => p.category === filter);
+              let filtered = filter === "All" ? privatePrayers : privatePrayers.filter(p => p.category === filter);
               return filtered.map(req => {
                 const catDef = dbCategories.find(c => c.name === req.category);
                 return <PrayerCard key={req.id} req={req} onPray={onPray} catColor={catDef?.color || DEFAULT_CATEGORY_COLOR} />
               });
             })()}
           </AnimatePresence>
-          {prayers.length === 0 && !refreshing && (
+          {privatePrayers.length === 0 && !refreshing && (
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-3xl mb-2">🕊️</p>
               <p className="font-serif font-semibold">No requests in this category</p>
