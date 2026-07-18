@@ -11,10 +11,7 @@ export async function getQuizzes() {
 
   let quizzes = await prisma.quiz.findMany({
     where: {
-      OR: [
-        { churchId: null },
-        ...(userChurchId ? [{ churchId: userChurchId }] : [])
-      ]
+      churchId: null
     },
     include: {
       questions: {
