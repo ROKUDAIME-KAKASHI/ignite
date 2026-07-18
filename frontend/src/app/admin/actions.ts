@@ -49,6 +49,29 @@ async function verifySuperAdmin() {
   }
 }
 
+export async function awardGracePoints(userId: string, amount: number, reason: string) {
+  if (!(await verifySuperAdmin())) return { success: false, error: "Unauthorized" };
+  
+  try {
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: { xp: { increment: amount } },
+      }),
+      prisma.xPLog.create({
+        data: {
+          userId,
+          amount,
+          reason: `Admin Award: ${reason}`,
+        },
+      })
+    ]);
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
 export async function adminLogin(email: string, pass: string) {
   if (email === process.env.ADMIN_EMAIL && pass === process.env.ADMIN_PASS) {
     const cookieStore = await cookies();

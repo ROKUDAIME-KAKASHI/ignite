@@ -39,8 +39,10 @@ import {
   getAllUsers,
   getAuditLogs,
   awardBadge,
-  revokeBadge
+  revokeBadge,
+  awardGracePoints
 } from "../actions";
+import { getMessages, deleteMessage as deleteGlobalMessage } from "@/app/actions/globalChat";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 import { getMissions } from "@/app/missions/actions";
 import { useRouter } from "next/navigation";
@@ -48,7 +50,7 @@ import { useRouter } from "next/navigation";
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "trivia" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes" | "audit">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "trivia" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes" | "audit" | "moderation">("overview");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedUserForBadges, setSelectedUserForBadges] = useState<any>(null);
 
@@ -57,6 +59,7 @@ export default function AdminDashboardPage() {
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [triviaSearchQuery, setTriviaSearchQuery] = useState("");
   const [triviaPage, setTriviaPage] = useState(1);
+  const [globalMessages, setGlobalMessages] = useState<any[]>([]);
 
   // Real data state
   const [stats, setStats] = useState({
@@ -218,6 +221,7 @@ export default function AdminDashboardPage() {
       fetchChurches();
       fetchContent();
       getMissions().then(m => setMissions(m.missions));
+      getMessages(100).then(msgs => setGlobalMessages(msgs));
     }
     fetchData();
   }, []);
@@ -385,7 +389,7 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["overview", "audit", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
+          {(["overview", "audit", "moderation", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -595,6 +599,93 @@ export default function AdminDashboardPage() {
           </motion.div>
         )}
 
+        {/* ── Chat Moderation ── */}
+        {activeTab === "moderation" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold font-serif text-foreground">Fellowship Moderation</h2>
+                <p className="text-sm text-muted-foreground">Monitor global chat, delete inappropriate messages, and manage members.</p>
+              </div>
+              <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                {globalMessages.length} Recent Messages
+              </Badge>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-border/50 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-muted-foreground uppercase bg-slate-50 dark:bg-slate-950/50">
+                    <tr>
+                      <th className="px-6 py-4 font-bold tracking-wider">Timestamp</th>
+                      <th className="px-6 py-4 font-bold tracking-wider">User</th>
+                      <th className="px-6 py-4 font-bold tracking-wider">Message</th>
+                      <th className="px-6 py-4 font-bold tracking-wider text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {globalMessages.map((msg) => (
+                      <tr key={msg.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                        <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground whitespace-nowrap">
+                          {new Date(msg.createdAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-foreground flex items-center gap-2">
+                            {msg.user?.firstName} {msg.user?.lastName}
+                            <Badge className="text-[9px] border-0 bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-1 py-0">{msg.user?.role}</Badge>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-slate-800 dark:text-slate-200">
+                          {msg.content}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={async () => {
+                                if (confirm("Delete this message?")) {
+                                  const res = await deleteGlobalMessage(msg.id);
+                                  if (res.success) {
+                                    setGlobalMessages(prev => prev.filter(m => m.id !== msg.id));
+                                  } else {
+                                    alert(res.error);
+                                  }
+                                }
+                              }}
+                              className="text-[10px] bg-red-100 dark:bg-red-900/30 px-2 py-1.5 rounded text-red-700 dark:text-red-400 font-bold hover:bg-red-200 transition-colors"
+                            >
+                              Delete
+                            </button>
+                            {isSuperAdmin && (
+                              <button
+                                onClick={async () => {
+                                  if (confirm(`Ban ${msg.user?.firstName} ${msg.user?.lastName}?`)) {
+                                     // For now just alert, could implement a real ban.
+                                     alert("This would ban the user. Add ban field to User schema to implement fully.");
+                                  }
+                                }}
+                                className="text-[10px] bg-slate-200 dark:bg-slate-800 px-2 py-1.5 rounded text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-300 transition-colors"
+                              >
+                                Ban User
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {globalMessages.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
+                          No messages found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* ── Audit Logs ── */}
         {activeTab === "audit" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -716,6 +807,26 @@ export default function AdminDashboardPage() {
                         </button>
                         {isSuperAdmin && (
                           <>
+                            <button 
+                              onClick={async () => {
+                                const pts = prompt("How many Grace Points to grant?");
+                                if (pts && !isNaN(Number(pts))) {
+                                  const reason = prompt("Reason for grant?");
+                                  if (reason) {
+                                    const res = await awardGracePoints(user.id, Number(pts), reason);
+                                    if (res.success) {
+                                      alert("Points granted!");
+                                      await fetchAllUsersData();
+                                    } else {
+                                      alert(res.error);
+                                    }
+                                  }
+                                }
+                              }}
+                              className="text-xs bg-emerald-50 dark:bg-emerald-950 hover:bg-emerald-100 px-3 py-1.5 rounded-lg text-emerald-600 dark:text-emerald-400 font-bold transition-colors"
+                            >
+                              Grant XP
+                            </button>
                             <button 
                               onClick={async () => {
                                 const newRole = user.role === "ADMIN" ? "MEMBER" : "ADMIN";
