@@ -95,6 +95,25 @@ export default function ScanPage() {
                 styles={{ container: { width: "100%", height: "350px", position: "relative" } }}
               />
               <div className="absolute inset-0 border-[40px] border-black/40 pointer-events-none z-10" />
+              
+              {/* Corner brackets framing overlay */}
+              <div className="absolute top-16 left-16 right-16 bottom-16 pointer-events-none z-20">
+                {/* Top-Left */}
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-amber-400 rounded-tl-md" />
+                {/* Top-Right */}
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-amber-400 rounded-tr-md" />
+                {/* Bottom-Left */}
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-amber-400 rounded-bl-md" />
+                {/* Bottom-Right */}
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-amber-400 rounded-br-md" />
+                
+                {/* Red scanning line animation */}
+                <motion.div 
+                  animate={{ y: [0, 210] }}
+                  transition={{ repeat: Infinity, repeatType: "reverse", duration: 2, ease: "easeInOut" }}
+                  className="w-full h-0.5 bg-red-500 shadow-[0_0_8px_#ef4444] absolute left-0"
+                />
+              </div>
             </div>
             <div className="mt-8 flex flex-col items-center gap-2">
               <ScanLine className="w-8 h-8 text-amber-400 animate-pulse" />

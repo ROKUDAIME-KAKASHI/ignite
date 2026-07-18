@@ -211,8 +211,33 @@ export default function WordlePage() {
             </div>
             <h2 className="text-2xl font-extrabold font-serif mb-1">{won ? "You Won!" : "Game Over"}</h2>
             <p className="text-muted-foreground mb-4">The word was <strong className="text-foreground">{targetWord}</strong></p>
-            {won && <p className="text-amber-600 font-bold mb-4">+10 Grace Points Awarded!</p>}
-            <Button onClick={resetGame} className="mt-6 w-full h-11 rounded-xl gradient-royal text-white font-bold">
+            
+            <div className="bg-muted/50 rounded-2xl p-5 border border-border max-w-sm mx-auto mb-6 space-y-3 text-left">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground text-center">Grace Points Summary</p>
+              
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Status:</span>
+                <span className={won ? "font-bold text-green-500" : "font-bold text-red-500"}>
+                  {won ? "Solved" : "Failed"}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Attempts:</span>
+                <span className="font-bold text-foreground">{guesses.length} / 6</span>
+              </div>
+              
+              <div className="h-px bg-border/60 my-2" />
+              
+              <div className="flex justify-between items-center text-base font-extrabold">
+                <span className="text-foreground font-serif">Total Earned:</span>
+                <span className="text-gradient-gold">
+                  +{won ? "10 GP" : "0 GP"}
+                </span>
+              </div>
+            </div>
+
+            <Button onClick={resetGame} className="w-full h-11 rounded-xl gradient-royal text-white font-bold">
               <RotateCcw className="w-4 h-4 mr-2" /> Play Again
             </Button>
           </motion.div>

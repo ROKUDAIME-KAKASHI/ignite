@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { ChevronRight, ScanLine, Megaphone, Calendar, MapPin, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -117,12 +118,23 @@ export default async function DashboardPage() {
   const session = await getSession();
   const userId = session?.id;
 
-  const [dbUser, chaptersRead, prayersSaid, eventsAttended] = userId ? await Promise.all([
+  const today = new Date();
+  today.setUTCHours(0,0,0,0);
+  const lookbackLimit = new Date(today.getTime() - 12 * 60 * 60 * 1000); // 12h overlap to catch early morning timezones
+
+  const [dbUser, chaptersRead, prayersSaid, eventsAttended, isMissionCompleted] = userId ? await Promise.all([
     prisma.user.findUnique({ where: { id: userId }, select: { xp: true, streak: true, level: true } }),
     prisma.xPLog.count({ where: { userId, reason: { startsWith: "Read Scripture:" } } }),
     prisma.xPLog.count({ where: { userId, reason: { contains: "prayer" } } }), // Covers both submitting and praying for others
     prisma.attendance.count({ where: { userId } }),
-  ]) : [null, 0, 0, 0];
+    journey?.mission?.title ? prisma.xPLog.findFirst({
+      where: {
+        userId,
+        awardedAt: { gte: lookbackLimit },
+        reason: { startsWith: `Completed Mission: ${journey.mission.title}` }
+      }
+    }).then(Boolean) : Promise.resolve(false)
+  ]) : [null, 0, 0, 0, false];
 
   const xp = dbUser?.xp || 0;
   const streak = dbUser?.streak || 0;
@@ -326,7 +338,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Mission */}
-        <div className="rounded-2xl overflow-hidden card-holy card-holy-hover">
+        <Link href="/missions" className="block rounded-2xl overflow-hidden card-holy card-holy-hover">
           <div className="bg-gradient-to-r from-red-700/10 to-rose-600/8 dark:from-red-700/20 dark:to-rose-600/15 px-4 pt-4 pb-3 border-b border-red-200/30 dark:border-red-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -336,15 +348,46 @@ export default async function DashboardPage() {
                   <p className="text-xs text-red-600 dark:text-red-400 font-semibold">+{journey?.mission?.xpReward || 50} Grace Points</p>
                 </div>
               </div>
-              <Badge className="text-[10px] bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">Pending</Badge>
+              <Badge className={cn(
+                "text-[10px] border px-2 py-0.5",
+                isMissionCompleted 
+                  ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
+                  : "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800"
+              )}>
+                {isMissionCompleted ? "Completed" : "Pending"}
+              </Badge>
             </div>
           </div>
-          <div className="px-5 py-4 bg-card">
+          <div className="px-5 py-4 bg-card space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
               {journey?.mission?.description || "Reach out to a friend you haven't spoken to in a while and offer a prayer for them."}
             </p>
+            
+            {/* Status Tracking Bar */}
+            <div className="space-y-1.5 pt-2 border-t border-border/50">
+              <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                <span className={isMissionCompleted ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}>
+                  {isMissionCompleted ? "Status: Accomplished" : "Status: Active"}
+                </span>
+                <span className="text-muted-foreground">
+                  {isMissionCompleted ? "100%" : "0%"}
+                </span>
+              </div>
+              <Progress 
+                value={isMissionCompleted ? 100 : 0} 
+                className={cn(
+                  "h-1.5 rounded-full [&>div]:rounded-full",
+                  isMissionCompleted ? "[&>div]:bg-emerald-500 bg-emerald-100 dark:bg-emerald-950/30" : "[&>div]:bg-red-500 bg-red-100 dark:bg-red-950/20"
+                )}
+              />
+              <p className="text-[10px] text-muted-foreground italic mt-1">
+                {isMissionCompleted 
+                  ? "Deo Gratias! You have finished this daily mission." 
+                  : "Write a brief reflection in the Missions tab to complete this work."}
+              </p>
+            </div>
           </div>
-        </div>
+        </Link>
 
         {/* Quizzes */}
         <Link href="/quizzes" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">

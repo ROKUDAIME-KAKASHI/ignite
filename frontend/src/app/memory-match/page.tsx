@@ -206,8 +206,32 @@ export default function MemoryMatchPage() {
               <Trophy className="w-10 h-10" />
             </div>
             <h3 className="text-3xl font-bold font-serif text-green-500 mb-2">Great Memory!</h3>
-            <p className="text-muted-foreground mb-2">You matched all pairs in {moves} moves.</p>
-            <p className="text-primary font-bold mb-8">+{moves <= 12 ? 35 : moves <= 16 ? 30 : 20} XP</p>
+            <p className="text-muted-foreground mb-6">You matched all pairs in {moves} moves.</p>
+
+            <div className="bg-muted/50 rounded-2xl p-5 border border-border max-w-sm mx-auto mb-8 space-y-3 text-left">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground text-center">Grace Points Summary</p>
+              
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Match Completion:</span>
+                <span className="font-bold text-foreground">+20 GP</span>
+              </div>
+              
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Efficiency Bonus ({moves} moves):</span>
+                <span className="font-bold text-amber-500">
+                  +{moves <= 12 ? "15 GP" : moves <= 16 ? "10 GP" : "0 GP"}
+                </span>
+              </div>
+              
+              <div className="h-px bg-border/60 my-2" />
+              
+              <div className="flex justify-between items-center text-base font-extrabold">
+                <span className="text-foreground font-serif">Total Earned:</span>
+                <span className="text-gradient-gold">
+                  +{moves <= 12 ? "35 GP" : moves <= 16 ? "30 GP" : "20 GP"}
+                </span>
+              </div>
+            </div>
             
             <Button onClick={startNewGame} disabled={submitting} className="h-12 px-8 rounded-xl gradient-gold text-white font-bold">
               {submitting ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <RotateCcw className="w-5 h-5 mr-2" />}
