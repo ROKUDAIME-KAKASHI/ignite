@@ -18,16 +18,8 @@ if (BIBLICAL_WORDS.length === 0) {
   BIBLICAL_WORDS.push({ word: "GRACE", clue: "Unmerited favor from God" });
 }
 
-let initialWord = BIBLICAL_WORDS[0];
-if (typeof window !== "undefined") {
-  const played = JSON.parse(localStorage.getItem("ignite_wordle_played") || "[]");
-  let available = BIBLICAL_WORDS.filter(w => !played.includes(w.word));
-  if (available.length === 0) {
-    localStorage.removeItem("ignite_wordle_played");
-    available = BIBLICAL_WORDS;
-  }
-  initialWord = available[Math.floor(Math.random() * available.length)];
-}
+// Remove top-level dynamic initialWord to fix SPA navigation caching
+const initialWord = BIBLICAL_WORDS[0];
 const MAX_GUESSES = 6;
 
 const KEYBOARD_ROWS = [

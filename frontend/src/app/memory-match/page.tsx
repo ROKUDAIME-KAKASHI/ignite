@@ -193,12 +193,6 @@ export default function MemoryMatchPage() {
           </Button>
         </div>
 
-        {/* Display full text container for readability */}
-        <div className="min-h-[50px] bg-muted/40 rounded-xl p-3 border border-border/40 text-center mb-6 flex items-center justify-center">
-          <p className="text-xs font-medium text-muted-foreground font-serif">
-            {hoveredCardText || "Hover over or tap a card to read its full text."}
-          </p>
-        </div>
 
         {gameState === "won" ? (
           <div className="bg-card rounded-3xl p-10 border border-border/50 shadow-xl text-center card-holy mb-8 animate-in fade-in zoom-in duration-500">
@@ -244,14 +238,6 @@ export default function MemoryMatchPage() {
               <div 
                 key={card.id} 
                 onClick={() => handleCardClick(index)}
-                onMouseEnter={() => {
-                  if (card.isFlipped || card.isMatched) {
-                    setHoveredCardText(card.fullText);
-                  } else {
-                    setHoveredCardText("Flip to reveal text.");
-                  }
-                }}
-                onMouseLeave={() => setHoveredCardText("")}
                 className="aspect-square perspective-1000 cursor-pointer"
               >
                 <div className={cn(
