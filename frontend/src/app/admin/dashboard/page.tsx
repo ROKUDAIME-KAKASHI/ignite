@@ -425,8 +425,8 @@ export default function AdminDashboardPage() {
               <ShieldCheck className="w-5 h-5 text-white dark:text-slate-900" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Admin Console</h1>
-              <p className="text-xs text-muted-foreground font-medium">Ignite System Overview</p>
+              <h1 className="text-xl font-bold text-foreground">{isSuperAdmin ? "Admin Console" : "Priest Dashboard"}</h1>
+              <p className="text-xs text-muted-foreground font-medium">{isSuperAdmin ? "Ignite System Overview" : "Manage Your Parish"}</p>
             </div>
           </div>
           <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0">
@@ -439,7 +439,7 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["overview", "knowledge", "audit", "moderation", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).filter(t => isSuperAdmin ? true : ["users", "appointments", "notices", "events", "knowledge", "content"].includes(t)).map(t => (
+          {(["overview", "knowledge", "audit", "moderation", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).filter(t => isSuperAdmin ? true : ["users", "appointments", "notices", "events", "knowledge", "content", "moderation"].includes(t)).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"

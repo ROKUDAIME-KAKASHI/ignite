@@ -701,7 +701,7 @@ export async function getAuditLogs(limit = 100) {
 // ----------------------------------------------------------------------
 
 export async function toggleBanUser(userId: string) {
-  if (!(await verifySuperAdmin())) return { success: false, error: "Unauthorized" };
+  if (!(await verifyAdmin())) return { success: false, error: "Unauthorized" };
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return { success: false, error: "User not found" };
