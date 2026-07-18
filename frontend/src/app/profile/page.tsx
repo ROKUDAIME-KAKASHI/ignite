@@ -556,7 +556,7 @@ export default function ProfilePage() {
           </div>
           {/* Admin Dashboard Link (Mobile) */}
           {(user?.role === "ADMIN" || user?.role === "PRIEST") && (
-            <Link href="/admin/dashboard" className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer">
+            <Link href={user?.role === "PRIEST" ? "/priest/dashboard" : "/admin/dashboard"} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer">
               <div>
                 <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Management</p>
                 <p className="text-sm font-bold text-foreground mt-0.5">{user?.role === "PRIEST" ? "Priest Dashboard" : "Admin Dashboard"}</p>
