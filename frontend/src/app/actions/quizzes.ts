@@ -5,9 +5,6 @@ import { getSession } from "@/lib/auth";
 import { logAudit } from "@/lib/logger";
 
 export async function getQuizzes() {
-  const session = await getSession();
-  const user = session?.id ? await prisma.user.findUnique({ where: { id: session.id } }) : null;
-  const userChurchId = user?.churchId || null;
 
   let quizzes = await prisma.quiz.findMany({
     where: {
