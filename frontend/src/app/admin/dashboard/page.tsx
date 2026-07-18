@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle, Send, CalendarPlus, Loader2, CheckCircle2, BellRing } from "lucide-react";
+import { Users, Activity, Heart, BookOpen, ShieldCheck, TrendingUp, AlertTriangle, Send, CalendarPlus, Loader2, CheckCircle2, BellRing, Download, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import QRCode from "react-qr-code";
 import { 
@@ -47,7 +47,8 @@ import {
   createKnowledgeDocument,
   deleteKnowledgeDocument,
   sendTargetedPushNotification,
-  createCustomQuiz
+  createCustomQuiz,
+  getTodaysDataExport
 } from "../actions";
 import { getMessages, deleteMessage as deleteGlobalMessage } from "@/app/actions/globalChat";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
@@ -469,22 +470,43 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-between mb-3 px-1">
                 <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Key Metrics (All Time)</h2>
                 {isSuperAdmin && (
-                  <button 
-                    onClick={async () => {
-                      if (confirm("End the current gamification season? This will award the 'Season Champion' badge to the top 3 players and reset EVERYONE's XP to zero!")) {
-                        const res = await endSeason();
-                        if (res.success) {
-                          alert(`Season ended! Champions: ${res.topUsers?.map((u: any) => u.firstName).join(", ") || "None"}`);
-                          window.location.reload();
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={async () => {
+                        const res = await getTodaysDataExport();
+                        if (res.success && res.data) {
+                          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(res.data, null, 2));
+                          const downloadAnchorNode = document.createElement('a');
+                          downloadAnchorNode.setAttribute("href", dataStr);
+                          downloadAnchorNode.setAttribute("download", `ignite_export_${new Date().toISOString().split('T')[0]}.json`);
+                          document.body.appendChild(downloadAnchorNode); 
+                          downloadAnchorNode.click();
+                          downloadAnchorNode.remove();
                         } else {
-                          alert(res.error);
+                          alert(res.error || "Failed to download data.");
                         }
-                      }
-                    }}
-                    className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg font-bold hover:bg-amber-200 transition-colors"
-                  >
-                    🏆 End Season
-                  </button>
+                      }}
+                      className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-200 transition-colors flex items-center gap-1"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Today's Data
+                    </button>
+                    <button 
+                      onClick={async () => {
+                        if (confirm("End the current gamification season? This will award the 'Season Champion' badge to the top 3 players and reset EVERYONE's XP to zero!")) {
+                          const res = await endSeason();
+                          if (res.success) {
+                            alert(`Season ended! Champions: ${res.topUsers?.map((u: any) => u.firstName).join(", ") || "None"}`);
+                            window.location.reload();
+                          } else {
+                            alert(res.error);
+                          }
+                        }
+                      }}
+                      className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg font-bold hover:bg-amber-200 transition-colors flex items-center gap-1"
+                    >
+                      <Trophy className="w-3.5 h-3.5" /> End Season
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">

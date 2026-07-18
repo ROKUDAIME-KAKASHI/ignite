@@ -834,3 +834,51 @@ export async function sendTargetedPushNotification(title: string, message: strin
     return { success: false, error: "Failed to send notifications" };
   }
 }
+
+// ----------------------------------------------------------------------
+// 📊 DATA EXPORT
+// ----------------------------------------------------------------------
+
+export async function getTodaysDataExport() {
+  if (!(await verifyAdmin())) return { success: false, error: "Unauthorized" };
+
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const newUsers = await prisma.user.findMany({
+      where: { createdAt: { gte: startOfDay, lte: endOfDay } }
+    });
+
+    const newMessages = await prisma.chatMessage.findMany({
+      where: { createdAt: { gte: startOfDay, lte: endOfDay } },
+      include: { user: { select: { firstName: true, lastName: true } } }
+    });
+
+    const newPrayers = await prisma.prayerRequest.findMany({
+      where: { createdAt: { gte: startOfDay, lte: endOfDay } },
+      include: { user: { select: { firstName: true, lastName: true } } }
+    });
+    
+    const xpLogs = await prisma.xPLog.findMany({
+      where: { awardedAt: { gte: startOfDay, lte: endOfDay } },
+      include: { user: { select: { firstName: true, lastName: true } } }
+    });
+
+    return { 
+      success: true, 
+      data: {
+        users: newUsers,
+        messages: newMessages,
+        prayers: newPrayers,
+        xpLogs: xpLogs
+      }
+    };
+  } catch (error: any) {
+    console.error("Export error:", error);
+    return { success: false, error: error.message };
+  }
+}
