@@ -1,255 +1,5 @@
 export const TRIVIA_QUESTIONS = [
   {
-    "q": "Who is traditionally believed to have brought Christianity to Kerala?",
-    "options": [
-      "St. Peter",
-      "St. Paul",
-      "St. Thomas",
-      "St. Andrew"
-    ],
-    "a": "St. Thomas"
-  },
-  {
-    "q": "In which year is St. Thomas believed to have arrived in Kerala?",
-    "options": [
-      "AD 33",
-      "AD 40",
-      "AD 52",
-      "AD 72"
-    ],
-    "a": "AD 52"
-  },
-  {
-    "q": "How many churches are traditionally believed to have been established by St. Thomas in Kerala?",
-    "options": [
-      "Five",
-      "Seven and a Half",
-      "Nine",
-      "Twelve"
-    ],
-    "a": "Seven and a Half"
-  },
-  {
-    "q": "What is the official name of the Orthodox Church in India?",
-    "options": [
-      "Indian Orthodox Church",
-      "Syrian Orthodox Church",
-      "Malankara Orthodox Syrian Church",
-      "Orthodox Church of Kerala"
-    ],
-    "a": "Malankara Orthodox Syrian Church"
-  },
-  {
-    "q": "Who is the supreme head of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Patriarch of Antioch",
-      "Pope",
-      "Catholicos of the East and Malankara Metropolitan",
-      "Archbishop of Canterbury"
-    ],
-    "a": "Catholicos of the East and Malankara Metropolitan"
-  },
-  {
-    "q": "Where is the headquarters of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Kochi",
-      "Kottayam",
-      "Thrissur",
-      "Pathanamthitta"
-    ],
-    "a": "Kottayam"
-  },
-  {
-    "q": "What is the headquarters of the Church known as?",
-    "options": [
-      "Mount Zion",
-      "Bethany",
-      "Devalokam",
-      "Catholicate Hall"
-    ],
-    "a": "Devalokam"
-  },
-  {
-    "q": "Which language is traditionally used in the Holy Qurbana?",
-    "options": [
-      "Greek",
-      "Hebrew",
-      "Syriac",
-      "Latin"
-    ],
-    "a": "Syriac"
-  },
-  {
-    "q": "What is the Eucharistic celebration called?",
-    "options": [
-      "Holy Mass",
-      "Holy Qurbana",
-      "Divine Worship",
-      "Eucharistic Service"
-    ],
-    "a": "Holy Qurbana"
-  },
-  {
-    "q": "What does the word \"Orthodox\" mean?",
-    "options": [
-      "Ancient Church",
-      "Eastern Church",
-      "Right Belief and Right Worship",
-      "Universal Church"
-    ],
-    "a": "Right Belief and Right Worship"
-  },
-  {
-    "q": "Who is popularly known as Parumala Thirumeni?",
-    "options": [
-      "St. Dionysius",
-      "St. Gregorios of Parumala",
-      "St. Baselios",
-      "St. George"
-    ],
-    "a": "St. Gregorios of Parumala"
-  },
-  {
-    "q": "Where is St. Gregorios of Parumala entombed?",
-    "options": [
-      "Kottayam",
-      "Chengannur",
-      "Parumala",
-      "Niranam"
-    ],
-    "a": "Parumala"
-  },
-  {
-    "q": "Which saint is popularly known as Vattasseril Thirumeni?",
-    "options": [
-      "St. Gregorios",
-      "St. Dionysius Vattasseril",
-      "St. Thomas",
-      "St. Kuriakose"
-    ],
-    "a": "St. Dionysius Vattasseril"
-  },
-  {
-    "q": "What is the sanctuary of an Orthodox Church called?",
-    "options": [
-      "Nave",
-      "Madbaha",
-      "Chapel",
-      "Bema"
-    ],
-    "a": "Madbaha"
-  },
-  {
-    "q": "What does \"Shlomo\" mean?",
-    "options": [
-      "Mercy",
-      "Peace",
-      "Faith",
-      "Blessing"
-    ],
-    "a": "Peace"
-  },
-  {
-    "q": "What does \"Barekmor\" mean?",
-    "options": [
-      "Peace be with you",
-      "Bless, O Lord",
-      "Lord have mercy",
-      "Glory to God"
-    ],
-    "a": "Bless, O Lord"
-  },
-  {
-    "q": "What does \"Kurielaison\" mean?",
-    "options": [
-      "Holy God",
-      "Lord, Have Mercy",
-      "Thanks Be to God",
-      "Alleluia"
-    ],
-    "a": "Lord, Have Mercy"
-  },
-  {
-    "q": "What does \"Sleebo\" mean?",
-    "options": [
-      "Cross",
-      "Prayer",
-      "Church",
-      "Faith"
-    ],
-    "a": "Cross"
-  },
-  {
-    "q": "What is the Syriac word for the Holy Spirit?",
-    "options": [
-      "Aloho",
-      "Ruho Qadisho",
-      "Qurbono",
-      "Shmayo"
-    ],
-    "a": "Ruho Qadisho"
-  },
-  {
-    "q": "How many sacraments does the Orthodox Church recognize?",
-    "options": [
-      "Two",
-      "Five",
-      "Seven",
-      "Nine"
-    ],
-    "a": "Seven"
-  },
-  {
-    "q": "What is the first sacrament received by a Christian?",
-    "options": [
-      "Holy Qurbana",
-      "Confession",
-      "Baptism",
-      "Marriage"
-    ],
-    "a": "Baptism"
-  },
-  {
-    "q": "Which sacrament follows Baptism?",
-    "options": [
-      "Marriage",
-      "Holy Myron",
-      "Priesthood",
-      "Holy Qurbana"
-    ],
-    "a": "Holy Myron"
-  },
-  {
-    "q": "What is the holy oil used in Confirmation called?",
-    "options": [
-      "Olive Oil",
-      "Myron",
-      "Frankincense",
-      "Chrism Oil"
-    ],
-    "a": "Myron"
-  },
-  {
-    "q": "Which feast celebrates the Resurrection of Christ?",
-    "options": [
-      "Christmas",
-      "Easter",
-      "Pentecost",
-      "Denaha"
-    ],
-    "a": "Easter"
-  },
-  {
-    "q": "Which feast celebrates Christ's Baptism?",
-    "options": [
-      "Palm Sunday",
-      "Denaha",
-      "Ascension",
-      "Pentecost"
-    ],
-    "a": "Denaha"
-  },
-  {
     "q": "What is the 50-day fasting period before Easter called?",
     "options": [
       "Advent",
@@ -268,36 +18,6 @@ export const TRIVIA_QUESTIONS = [
       "Dormition Fast"
     ],
     "a": "Nineveh Fast"
-  },
-  {
-    "q": "What is the Malayalam name for Palm Sunday?",
-    "options": [
-      "Pesaha",
-      "Oshana",
-      "Suboro",
-      "Qyamtha"
-    ],
-    "a": "Oshana"
-  },
-  {
-    "q": "Which special bread is prepared on Maundy Thursday?",
-    "options": [
-      "Ney Appam",
-      "Pesaha Appam",
-      "Pathiri",
-      "Qurbana Bread"
-    ],
-    "a": "Pesaha Appam"
-  },
-  {
-    "q": "Which sweet dish accompanies Pesaha Appam?",
-    "options": [
-      "Payasam",
-      "Pesaha Paal",
-      "Honey",
-      "Milk"
-    ],
-    "a": "Pesaha Paal"
   },
   {
     "q": "Who baptized Jesus?",
@@ -1000,96 +720,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Two"
   },
   {
-    "q": "What is the highest office in the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Archbishop",
-      "Metropolitan",
-      "Catholicos of the East and Malankara Metropolitan",
-      "Patriarch"
-    ],
-    "a": "Metropolitan"
-  },
-  {
-    "q": "In which year was the Catholicate established in India?",
-    "options": [
-      "1889",
-      "1912",
-      "1925",
-      "1934"
-    ],
-    "a": "1912"
-  },
-  {
-    "q": "Who was the first Catholicos of the East in India?",
-    "options": [
-      "Baselios Geevarghese II",
-      "Baselios Paulose I",
-      "Baselios Augen I",
-      "Baselios Marthoma Mathews I"
-    ],
-    "a": "Baselios Paulose I"
-  },
-  {
-    "q": "Where is the Catholicate Palace located?",
-    "options": [
-      "Kochi",
-      "Parumala",
-      "Devalokam, Kottayam",
-      "Chengannur"
-    ],
-    "a": "Devalokam, Kottayam"
-  },
-  {
-    "q": "Which Apostle is regarded as the patron saint of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "St. Peter",
-      "St. Paul",
-      "St. Thomas",
-      "St. John"
-    ],
-    "a": "St. Thomas"
-  },
-  {
-    "q": "What is the governing body of the Malankara Orthodox Syrian Church called?",
-    "options": [
-      "Holy Synod",
-      "Church Council",
-      "Malankara Syrian Christian Association",
-      "Episcopal Assembly"
-    ],
-    "a": "Malankara Syrian Christian Association"
-  },
-  {
-    "q": "What is the executive body of the Church called?",
-    "options": [
-      "Holy Council",
-      "Malankara Managing Committee",
-      "Parish Assembly",
-      "Church Board"
-    ],
-    "a": "Malankara Managing Committee"
-  },
-  {
-    "q": "Who presides over the Holy Synod?",
-    "options": [
-      "Senior Metropolitan",
-      "Patriarch",
-      "Catholicos",
-      "Parish Priest"
-    ],
-    "a": "Catholicos"
-  },
-  {
-    "q": "What is the title commonly used for an Orthodox bishop?",
-    "options": [
-      "Father",
-      "Thirumeni",
-      "Reverend",
-      "Pastor"
-    ],
-    "a": "Thirumeni"
-  },
-  {
     "q": "What does the title \"Mar\" mean?",
     "options": [
       "Father",
@@ -1100,86 +730,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Saint or Lord"
   },
   {
-    "q": "Which saint is known as Pampady Thirumeni?",
-    "options": [
-      "St. Gregorios Geevarghese",
-      "St. Dionysius Vattasseril",
-      "St. Kuriakose Mar Gregorios",
-      "St. Thomas"
-    ],
-    "a": "St. Kuriakose Mar Gregorios"
-  },
-  {
-    "q": "Which saint is known as Parumala Thirumeni?",
-    "options": [
-      "St. Gregorios of Parumala",
-      "St. Dionysius",
-      "St. George",
-      "St. Baselios"
-    ],
-    "a": "St. Gregorios of Parumala"
-  },
-  {
-    "q": "Which saint is known as Vattasseril Thirumeni?",
-    "options": [
-      "St. Dionysius Vattasseril",
-      "St. Gregorios",
-      "St. Geevarghese",
-      "St. Baselios"
-    ],
-    "a": "St. Dionysius Vattasseril"
-  },
-  {
-    "q": "What is the liturgical language of the Malankara Orthodox Church?",
-    "options": [
-      "Hebrew",
-      "Greek",
-      "Syriac",
-      "Latin"
-    ],
-    "a": "Syriac"
-  },
-  {
-    "q": "Which liturgy is celebrated in the Malankara Orthodox Church?",
-    "options": [
-      "Liturgy of St. John Chrysostom",
-      "Liturgy of St. Basil",
-      "Liturgy of St. James",
-      "Roman Rite"
-    ],
-    "a": "Liturgy of St. James"
-  },
-  {
-    "q": "What is the altar area of the church called?",
-    "options": [
-      "Nave",
-      "Madbaha",
-      "Sanctuary Hall",
-      "Chapel"
-    ],
-    "a": "Madbaha"
-  },
-  {
-    "q": "What separates the Madbaha from the Nave?",
-    "options": [
-      "Wooden Door",
-      "Sanctuary Curtain",
-      "Glass Partition",
-      "Choir Stand"
-    ],
-    "a": "Sanctuary Curtain"
-  },
-  {
-    "q": "Which direction do Orthodox Christians traditionally face while praying?",
-    "options": [
-      "North",
-      "South",
-      "East",
-      "West"
-    ],
-    "a": "East"
-  },
-  {
     "q": "What does facing East symbolize?",
     "options": [
       "Jerusalem",
@@ -1188,56 +738,6 @@ export const TRIVIA_QUESTIONS = [
       "Bethlehem"
     ],
     "a": "Christ's Second Coming"
-  },
-  {
-    "q": "What is the Syriac word for \"Peace\"?",
-    "options": [
-      "Barekmor",
-      "Shlomo",
-      "Aloho",
-      "Sleebo"
-    ],
-    "a": "Shlomo"
-  },
-  {
-    "q": "What is the Syriac word for \"God\"?",
-    "options": [
-      "Aloho",
-      "Ruho",
-      "Qadisho",
-      "Shlomo"
-    ],
-    "a": "Aloho"
-  },
-  {
-    "q": "What is the Syriac word for \"Holy Spirit\"?",
-    "options": [
-      "Shmayo",
-      "Ruho Qadisho",
-      "Qurbono",
-      "Madbaha"
-    ],
-    "a": "Ruho Qadisho"
-  },
-  {
-    "q": "What is the Syriac word for \"Cross\"?",
-    "options": [
-      "Sleebo",
-      "Barekmor",
-      "Thronos",
-      "Kappa"
-    ],
-    "a": "Sleebo"
-  },
-  {
-    "q": "What is the Syriac word for \"Holy\"?",
-    "options": [
-      "Qadisho",
-      "Shlomo",
-      "Ruho",
-      "Aloho"
-    ],
-    "a": "Qadisho"
   },
   {
     "q": "What hymn begins with \"Holy God, Holy Mighty, Holy Immortal\"?",
@@ -1260,36 +760,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Thrice Holy"
   },
   {
-    "q": "What is the Eucharistic bread called?",
-    "options": [
-      "Pesaha Appam",
-      "Buhro",
-      "Pathiri",
-      "Manna"
-    ],
-    "a": "Buhro"
-  },
-  {
-    "q": "What is the sacred oil used in Baptism called?",
-    "options": [
-      "Olive Oil",
-      "Holy Myron",
-      "Frankincense Oil",
-      "Cedar Oil"
-    ],
-    "a": "Holy Myron"
-  },
-  {
-    "q": "What is the ceremonial lamp traditionally used in Kerala churches?",
-    "options": [
-      "Lantern",
-      "Nilavilakku",
-      "Menorah",
-      "Deepasthambham"
-    ],
-    "a": "Nilavilakku"
-  },
-  {
     "q": "What is burned during worship as a symbol of prayers rising to God?",
     "options": [
       "Candles",
@@ -1300,26 +770,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Incense"
   },
   {
-    "q": "What is the Malayalam word for fasting?",
-    "options": [
-      "Perunnal",
-      "Nombu",
-      "Qurbana",
-      "Prarthana"
-    ],
-    "a": "Nombu"
-  },
-  {
-    "q": "What is the Malayalam word for feast?",
-    "options": [
-      "Nombu",
-      "Perunnal",
-      "Namaskaram",
-      "Madbaha"
-    ],
-    "a": "Perunnal"
-  },
-  {
     "q": "What is celebrated on Palm Sunday?",
     "options": [
       "Resurrection",
@@ -1328,26 +778,6 @@ export const TRIVIA_QUESTIONS = [
       "Baptism of Jesus"
     ],
     "a": "Entry of Jesus into Jerusalem"
-  },
-  {
-    "q": "What is the Malayalam name for Palm Sunday?",
-    "options": [
-      "Denaha",
-      "Oshana",
-      "Pesaha",
-      "Suboro"
-    ],
-    "a": "Oshana"
-  },
-  {
-    "q": "What special bread is prepared on Maundy Thursday?",
-    "options": [
-      "Pathiri",
-      "Pesaha Appam",
-      "Appam",
-      "Qurbana Bread"
-    ],
-    "a": "Pesaha Appam"
   },
   {
     "q": "Which day commemorates the Last Supper?",
@@ -1368,16 +798,6 @@ export const TRIVIA_QUESTIONS = [
       "Pentecost"
     ],
     "a": "Good Friday"
-  },
-  {
-    "q": "Which feast celebrates Christ's Resurrection?",
-    "options": [
-      "Christmas",
-      "Easter",
-      "Denaha",
-      "Ascension"
-    ],
-    "a": "Easter"
   },
   {
     "q": "How many days after Easter is Ascension celebrated?",
@@ -1410,36 +830,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "OCYM"
   },
   {
-    "q": "What does OCYM stand for?",
-    "options": [
-      "Orthodox Christian Youth Movement",
-      "Oriental Christian Youth Mission",
-      "Orthodox Catholic Youth Ministry",
-      "Orthodox Community Youth Mission"
-    ],
-    "a": "Orthodox Christian Youth Movement"
-  },
-  {
-    "q": "What does MGOCSM stand for?",
-    "options": [
-      "Mar Gregorios Orthodox Christian Student Movement",
-      "Malankara Gospel Student Mission",
-      "Mar Gregorios Oriental Student Mission",
-      "Malankara General Orthodox Student Ministry"
-    ],
-    "a": "Mar Gregorios Orthodox Christian Student Movement"
-  },
-  {
-    "q": "Which organization serves Orthodox women?",
-    "options": [
-      "OCYM",
-      "Sunday School",
-      "Martha Mariam Samajam",
-      "MGOCSM"
-    ],
-    "a": "Martha Mariam Samajam"
-  },
-  {
     "q": "Which organization provides Christian education for children?",
     "options": [
       "OCYM",
@@ -1450,26 +840,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Sunday School"
   },
   {
-    "q": "What does OSSAE stand for?",
-    "options": [
-      "Orthodox Syrian Sunday School Association of the East",
-      "Orthodox Student Society of Asia and Europe",
-      "Oriental Sunday School Association",
-      "Orthodox School Service Association"
-    ],
-    "a": "Orthodox Syrian Sunday School Association of the East"
-  },
-  {
-    "q": "What is usually carried at the front of an Orthodox church procession?",
-    "options": [
-      "Bible",
-      "Holy Cross",
-      "Church Bell",
-      "Candlestick"
-    ],
-    "a": "Holy Cross"
-  },
-  {
     "q": "What is the decorated ceremonial umbrella used during processions called?",
     "options": [
       "Vilakku",
@@ -1478,26 +848,6 @@ export const TRIVIA_QUESTIONS = [
       "Marava"
     ],
     "a": "Muthukuda"
-  },
-  {
-    "q": "What is the mission of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Build Churches",
-      "Worship God, proclaim the Gospel, and serve humanity",
-      "Preserve Syriac Language",
-      "Conduct Festivals"
-    ],
-    "a": "Worship God, proclaim the Gospel, and serve humanity"
-  },
-  {
-    "q": "What is the highest form of worship in the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Morning Prayer",
-      "Holy Qurbana",
-      "Sunday School",
-      "Bible Study"
-    ],
-    "a": "Holy Qurbana"
   },
   {
     "q": "Which church is traditionally regarded as the first of the Seven and a Half Churches established by St. Thomas?",
@@ -1520,16 +870,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Niranam Church"
   },
   {
-    "q": "Which of the following is traditionally considered one of the Seven and a Half Churches?",
-    "options": [
-      "Parumala Church",
-      "Puthuppally Church",
-      "Kokkamangalam Church",
-      "Manarcad Church"
-    ],
-    "a": "Kokkamangalam Church"
-  },
-  {
     "q": "Which church is known as the \"Half Church\" established by St. Thomas?",
     "options": [
       "Thiruvithamcode Arappally",
@@ -1538,76 +878,6 @@ export const TRIVIA_QUESTIONS = [
       "Kollam Church"
     ],
     "a": "Thiruvithamcode Arappally"
-  },
-  {
-    "q": "In which state is St. Thomas believed to have been martyred?",
-    "options": [
-      "Kerala",
-      "Karnataka",
-      "Tamil Nadu",
-      "Andhra Pradesh"
-    ],
-    "a": "Tamil Nadu"
-  },
-  {
-    "q": "Where is the tomb of St. Thomas located?",
-    "options": [
-      "Bengaluru",
-      "Chennai (Santhome)",
-      "Kochi",
-      "Kottayam"
-    ],
-    "a": "Chennai (Santhome)"
-  },
-  {
-    "q": "What is the Malayalam word commonly used for Holy Qurbana?",
-    "options": [
-      "Namaskaram",
-      "Vishudha Qurbana",
-      "Perunnal",
-      "Madbaha"
-    ],
-    "a": "Vishudha Qurbana"
-  },
-  {
-    "q": "Which saint's feast attracts lakhs of pilgrims every year at Parumala?",
-    "options": [
-      "St. Thomas",
-      "St. Gregorios of Parumala",
-      "St. George",
-      "St. Dionysius"
-    ],
-    "a": "St. Gregorios of Parumala"
-  },
-  {
-    "q": "On which date is the main feast of St. Gregorios of Parumala usually observed?",
-    "options": [
-      "November 2",
-      "December 25",
-      "January 6",
-      "April 14"
-    ],
-    "a": "November 2"
-  },
-  {
-    "q": "Which saint is known for defending the faith and leading the Church during difficult times?",
-    "options": [
-      "St. Dionysius Vattasseril",
-      "St. Stephen",
-      "St. George",
-      "St. Luke"
-    ],
-    "a": "St. Dionysius Vattasseril"
-  },
-  {
-    "q": "What is the symbol found at the center of the Malankara Orthodox Church emblem?",
-    "options": [
-      "Dove",
-      "Holy Cross",
-      "Crown",
-      "Bible"
-    ],
-    "a": "Holy Cross"
   },
   {
     "q": "What does the Holy Cross symbolize for Christians?",
@@ -1620,16 +890,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Victory of Christ over sin and death"
   },
   {
-    "q": "What is the traditional color of clergy cassocks in the Malankara Orthodox Church?",
-    "options": [
-      "White",
-      "Red",
-      "Black",
-      "Blue"
-    ],
-    "a": "Black"
-  },
-  {
     "q": "What is the long black robe worn by priests called?",
     "options": [
       "Cassock",
@@ -1638,26 +898,6 @@ export const TRIVIA_QUESTIONS = [
       "Chasuble"
     ],
     "a": "Cassock"
-  },
-  {
-    "q": "Which book contains the prayers for Holy Qurbana?",
-    "options": [
-      "Psalter",
-      "Taksa",
-      "Synaxarion",
-      "Lectionary"
-    ],
-    "a": "Taksa"
-  },
-  {
-    "q": "What does the word \"Qurbana\" mean?",
-    "options": [
-      "Prayer",
-      "Offering or Sacrifice",
-      "Worship Hall",
-      "Thanksgiving Song"
-    ],
-    "a": "Offering or Sacrifice"
   },
   {
     "q": "Which Apostle wrote the Gospel bearing his own name and also the Book of Revelation?",
@@ -2000,56 +1240,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Resurrection of Jesus Christ"
   },
   {
-    "q": "What is the Malayalam term commonly used for an Orthodox priest?",
-    "options": [
-      "Methran",
-      "Achen",
-      "Ramban",
-      "Catholicos"
-    ],
-    "a": "Achen"
-  },
-  {
-    "q": "What is the Malayalam term commonly used for an Orthodox bishop?",
-    "options": [
-      "Achen",
-      "Kochamma",
-      "Methran",
-      "Kassessa"
-    ],
-    "a": "Methran"
-  },
-  {
-    "q": "Which organization is the official student movement of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "OCYM",
-      "MGOCSM",
-      "KCYM",
-      "Jesus Youth"
-    ],
-    "a": "MGOCSM"
-  },
-  {
-    "q": "Which organization is the official youth movement of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "MGOCSM",
-      "OCYM",
-      "Martha Mariam Samajam",
-      "Sunday School"
-    ],
-    "a": "OCYM"
-  },
-  {
-    "q": "What does MGOCSM stand for?",
-    "options": [
-      "Mar Gregorios Orthodox Christian Student Movement",
-      "Malankara General Orthodox Student Mission",
-      "Mar Gregorios Oriental Christian Society Mission",
-      "Malankara Gospel Outreach Student Ministry"
-    ],
-    "a": "Mar Gregorios Orthodox Christian Student Movement"
-  },
-  {
     "q": "Which organization is primarily for women in the Church?",
     "options": [
       "OCYM",
@@ -2068,16 +1258,6 @@ export const TRIVIA_QUESTIONS = [
       "Language Classes"
     ],
     "a": "Christian Faith Formation"
-  },
-  {
-    "q": "What does OSSAE stand for?",
-    "options": [
-      "Orthodox Syrian Sunday School Association of the East",
-      "Orthodox Student Society of Asia and Europe",
-      "Oriental Syrian School Association",
-      "Orthodox School Service Association"
-    ],
-    "a": "Orthodox Syrian Sunday School Association of the East"
   },
   {
     "q": "What is the main purpose of OCYM?",
@@ -2110,26 +1290,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Annunciation (Suboro)"
   },
   {
-    "q": "Which feast celebrates the birth of Jesus Christ?",
-    "options": [
-      "Easter",
-      "Christmas",
-      "Pentecost",
-      "Denaha"
-    ],
-    "a": "Christmas"
-  },
-  {
-    "q": "Which feast celebrates Christ's baptism?",
-    "options": [
-      "Easter",
-      "Denaha",
-      "Palm Sunday",
-      "Pentecost"
-    ],
-    "a": "Denaha"
-  },
-  {
     "q": "Which feast celebrates the Resurrection of Christ?",
     "options": [
       "Ascension",
@@ -2140,16 +1300,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Easter"
   },
   {
-    "q": "Which feast celebrates Christ's Ascension into Heaven?",
-    "options": [
-      "Pentecost",
-      "Ascension",
-      "Palm Sunday",
-      "Denaha"
-    ],
-    "a": "Ascension"
-  },
-  {
     "q": "Which feast commemorates the descent of the Holy Spirit?",
     "options": [
       "Easter",
@@ -2158,16 +1308,6 @@ export const TRIVIA_QUESTIONS = [
       "Christmas"
     ],
     "a": "Pentecost"
-  },
-  {
-    "q": "Which day commemorates Christ's entry into Jerusalem?",
-    "options": [
-      "Good Friday",
-      "Palm Sunday (Oshana)",
-      "Easter",
-      "Maundy Thursday"
-    ],
-    "a": "Palm Sunday (Oshana)"
   },
   {
     "q": "Which day commemorates the Last Supper?",
@@ -2220,26 +1360,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "I believe in one God"
   },
   {
-    "q": "What is the central sacrament of Orthodox worship?",
-    "options": [
-      "Baptism",
-      "Holy Qurbana",
-      "Marriage",
-      "Priesthood"
-    ],
-    "a": "Holy Qurbana"
-  },
-  {
-    "q": "What is distributed to the faithful after Holy Qurbana?",
-    "options": [
-      "Bread and Fish",
-      "Blessed Bread",
-      "Honey",
-      "Grapes"
-    ],
-    "a": "Blessed Bread"
-  },
-  {
     "q": "What symbolizes the prayers of the faithful rising to God?",
     "options": [
       "Candles",
@@ -2258,16 +1378,6 @@ export const TRIVIA_QUESTIONS = [
       "Candle"
     ],
     "a": "Censer"
-  },
-  {
-    "q": "What is the primary symbol found on Orthodox church altars?",
-    "options": [
-      "Crown",
-      "Holy Cross",
-      "Dove",
-      "Olive Branch"
-    ],
-    "a": "Holy Cross"
   },
   {
     "q": "What does the Holy Cross symbolize?",
@@ -2300,56 +1410,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Black"
   },
   {
-    "q": "What is the Syriac word for God?",
-    "options": [
-      "Ruho",
-      "Aloho",
-      "Sleebo",
-      "Qadisho"
-    ],
-    "a": "Aloho"
-  },
-  {
-    "q": "What is the Syriac word for Peace?",
-    "options": [
-      "Barekmor",
-      "Shlomo",
-      "Madbaha",
-      "Qurbono"
-    ],
-    "a": "Shlomo"
-  },
-  {
-    "q": "What is the Syriac word for Resurrection?",
-    "options": [
-      "Qyamtha",
-      "Denaha",
-      "Sleebo",
-      "Shmayo"
-    ],
-    "a": "Qyamtha"
-  },
-  {
-    "q": "What is the Syriac word for Holy Spirit?",
-    "options": [
-      "Ruho Qadisho",
-      "Aloho",
-      "Barekmor",
-      "Qurbono"
-    ],
-    "a": "Ruho Qadisho"
-  },
-  {
-    "q": "What is the Syriac word for Cross?",
-    "options": [
-      "Shlomo",
-      "Sleebo",
-      "Ruho",
-      "Aloho"
-    ],
-    "a": "Sleebo"
-  },
-  {
     "q": "What does \"Qadisho\" mean?",
     "options": [
       "Holy",
@@ -2358,16 +1418,6 @@ export const TRIVIA_QUESTIONS = [
       "Heaven"
     ],
     "a": "Holy"
-  },
-  {
-    "q": "Which direction do Orthodox Christians traditionally face during prayer?",
-    "options": [
-      "North",
-      "East",
-      "South",
-      "West"
-    ],
-    "a": "East"
   },
   {
     "q": "Facing East during prayer symbolizes waiting for what?",
@@ -2380,16 +1430,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Christ's Second Coming"
   },
   {
-    "q": "Which saint is the patron of many churches in Kerala?",
-    "options": [
-      "St. George",
-      "St. Luke",
-      "St. Mark",
-      "St. Philip"
-    ],
-    "a": "St. George"
-  },
-  {
     "q": "What is the Malayalam name for the feast of a saint?",
     "options": [
       "Nombu",
@@ -2398,16 +1438,6 @@ export const TRIVIA_QUESTIONS = [
       "Namaskaram"
     ],
     "a": "Perunnal"
-  },
-  {
-    "q": "What decorative umbrella is used during Orthodox processions?",
-    "options": [
-      "Nilavilakku",
-      "Muthukuda",
-      "Marava",
-      "Deepam"
-    ],
-    "a": "Muthukuda"
   },
   {
     "q": "What is usually carried at the front of a church procession?",
@@ -2450,16 +1480,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Sunday"
   },
   {
-    "q": "What is the purpose of fasting in the Orthodox Church?",
-    "options": [
-      "Weight Loss",
-      "Spiritual Growth and Repentance",
-      "Tradition Only",
-      "Social Practice"
-    ],
-    "a": "Spiritual Growth and Repentance"
-  },
-  {
     "q": "Which virtue is especially emphasized during Great Lent?",
     "options": [
       "Wealth",
@@ -2480,36 +1500,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Love God and Love Your Neighbor"
   },
   {
-    "q": "What is the ultimate goal of every Orthodox Christian?",
-    "options": [
-      "Earthly Success",
-      "Eternal Life with God",
-      "Wealth",
-      "Fame"
-    ],
-    "a": "Eternal Life with God"
-  },
-  {
-    "q": "What is the mission of every Orthodox Christian?",
-    "options": [
-      "To worship God, live according to the Gospel, and serve others",
-      "To become a priest",
-      "To visit every church",
-      "To learn Syriac"
-    ],
-    "a": "To worship God, live according to the Gospel, and serve others"
-  },
-  {
-    "q": "Which Ecumenical Council is accepted as the first by the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Council of Chalcedon",
-      "Council of Nicaea",
-      "Council of Trent",
-      "Council of Vatican I"
-    ],
-    "a": "Council of Nicaea"
-  },
-  {
     "q": "In which year was the First Council of Nicaea held?",
     "options": [
       "AD 1054",
@@ -2528,36 +1518,6 @@ export const TRIVIA_QUESTIONS = [
       "Emperor Nero"
     ],
     "a": "Emperor Constantine"
-  },
-  {
-    "q": "Which creed is recited during every Holy Qurbana?",
-    "options": [
-      "Apostles' Creed",
-      "Nicene Creed",
-      "Athanasian Creed",
-      "Westminster Creed"
-    ],
-    "a": "Nicene Creed"
-  },
-  {
-    "q": "How many Ecumenical Councils are accepted by the Oriental Orthodox Churches?",
-    "options": [
-      "Two",
-      "Three",
-      "Four",
-      "Seven"
-    ],
-    "a": "Three"
-  },
-  {
-    "q": "Which council is NOT accepted by the Oriental Orthodox Churches?",
-    "options": [
-      "Nicaea",
-      "Constantinople",
-      "Ephesus",
-      "Chalcedon"
-    ],
-    "a": "Chalcedon"
   },
   {
     "q": "Which council condemned the teachings of Nestorius?",
@@ -2610,16 +1570,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Matthew"
   },
   {
-    "q": "What is the first season of the Orthodox liturgical calendar?",
-    "options": [
-      "Great Lent",
-      "Pentecost",
-      "Koodosh Eetho",
-      "Denaha"
-    ],
-    "a": "Koodosh Eetho"
-  },
-  {
     "q": "What does Koodosh Eetho mean?",
     "options": [
       "Resurrection",
@@ -2638,16 +1588,6 @@ export const TRIVIA_QUESTIONS = [
       "Pentecost"
     ],
     "a": "Suboro (Annunciation)"
-  },
-  {
-    "q": "Which feast celebrates the birth of St. John the Baptist?",
-    "options": [
-      "Feast of the Nativity of St. John",
-      "Denaha",
-      "Easter",
-      "Pentecost"
-    ],
-    "a": "Feast of the Nativity of St. John"
   },
   {
     "q": "Which saint is known as the first Christian martyr?",
@@ -3020,46 +1960,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Twin"
   },
   {
-    "q": "Which city in Kerala is believed to be the landing place of St. Thomas?",
-    "options": [
-      "Kochi",
-      "Kodungallur (Muziris)",
-      "Kollam",
-      "Alappuzha"
-    ],
-    "a": "Kodungallur (Muziris)"
-  },
-  {
-    "q": "Which church is associated with St. Thomas at Niranam?",
-    "options": [
-      "St. Mary's Orthodox Syrian Church",
-      "St. George Orthodox Church",
-      "St. Peter's Church",
-      "St. Paul's Church"
-    ],
-    "a": "St. Mary's Orthodox Syrian Church"
-  },
-  {
-    "q": "Which church is associated with St. Thomas at Kokkamangalam?",
-    "options": [
-      "St. Thomas Orthodox Syrian Church",
-      "St. Mary's Cathedral",
-      "St. George Church",
-      "Mar Baselios Church"
-    ],
-    "a": "St. Thomas Orthodox Syrian Church"
-  },
-  {
-    "q": "Which ancient port welcomed St. Thomas to Kerala?",
-    "options": [
-      "Beypore",
-      "Muziris",
-      "Vizhinjam",
-      "Neendakara"
-    ],
-    "a": "Muziris"
-  },
-  {
     "q": "What is another historical name for Kodungallur?",
     "options": [
       "Muziris",
@@ -3078,16 +1978,6 @@ export const TRIVIA_QUESTIONS = [
       "James"
     ],
     "a": "Thomas"
-  },
-  {
-    "q": "Which organization conducts Bible competitions for Orthodox children?",
-    "options": [
-      "OCYM",
-      "OSSAE",
-      "MGOCSM",
-      "Martha Mariam Samajam"
-    ],
-    "a": "OSSAE"
   },
   {
     "q": "Which organization mainly focuses on spiritual formation for women?",
@@ -3118,26 +2008,6 @@ export const TRIVIA_QUESTIONS = [
       "Priesthood"
     ],
     "a": "Holy Confession"
-  },
-  {
-    "q": "Who alone has the authority to celebrate Holy Qurbana?",
-    "options": [
-      "Sunday School Teacher",
-      "Priest",
-      "Choir Leader",
-      "Parish Trustee"
-    ],
-    "a": "Priest"
-  },
-  {
-    "q": "Who ordains a priest in the Orthodox Church?",
-    "options": [
-      "Parish Assembly",
-      "Metropolitan (Bishop)",
-      "OCYM President",
-      "Sunday School Headmaster"
-    ],
-    "a": "Metropolitan (Bishop)"
   },
   {
     "q": "What is the symbol of the Holy Trinity?",
@@ -3188,16 +2058,6 @@ export const TRIVIA_QUESTIONS = [
       "Ascension"
     ],
     "a": "Christmas"
-  },
-  {
-    "q": "Which feast celebrates Christ's victory over death?",
-    "options": [
-      "Easter",
-      "Palm Sunday",
-      "Christmas",
-      "Denaha"
-    ],
-    "a": "Easter"
   },
   {
     "q": "What is the Malayalam word for church?",
@@ -3270,16 +2130,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Evil"
   },
   {
-    "q": "What is the main symbol placed above Orthodox church altars?",
-    "options": [
-      "Bible",
-      "Holy Cross",
-      "Dove",
-      "Crown"
-    ],
-    "a": "Holy Cross"
-  },
-  {
     "q": "What is the purpose of lighting candles in church?",
     "options": [
       "Decoration",
@@ -3298,56 +2148,6 @@ export const TRIVIA_QUESTIONS = [
       "Wisdom"
     ],
     "a": "Prayers ascending to God"
-  },
-  {
-    "q": "Which prayer is repeated frequently during Orthodox worship?",
-    "options": [
-      "Glory Be",
-      "Lord, Have Mercy",
-      "Psalm 23",
-      "Magnificat"
-    ],
-    "a": "Lord, Have Mercy"
-  },
-  {
-    "q": "Which Syriac phrase means \"Lord, Have Mercy\"?",
-    "options": [
-      "Barekmor",
-      "Kurielaison",
-      "Shlomo",
-      "Aloho"
-    ],
-    "a": "Kurielaison"
-  },
-  {
-    "q": "Which Syriac phrase means \"Peace\"?",
-    "options": [
-      "Shlomo",
-      "Sleebo",
-      "Aloho",
-      "Qadisho"
-    ],
-    "a": "Shlomo"
-  },
-  {
-    "q": "Which Syriac phrase means \"Bless, O Lord\"?",
-    "options": [
-      "Barekmor",
-      "Qyamtha",
-      "Ruho",
-      "Shmayo"
-    ],
-    "a": "Barekmor"
-  },
-  {
-    "q": "What is the liturgical language inherited from the ancient Church of Antioch?",
-    "options": [
-      "Hebrew",
-      "Syriac",
-      "Greek",
-      "Latin"
-    ],
-    "a": "Syriac"
   },
   {
     "q": "Which bird symbolizes the Holy Spirit?",
@@ -3490,116 +2290,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Revelation"
   },
   {
-    "q": "Which event is celebrated as the greatest feast of the Christian Church?",
-    "options": [
-      "Christmas",
-      "Easter",
-      "Pentecost",
-      "Denaha"
-    ],
-    "a": "Easter"
-  },
-  {
-    "q": "What is the official name of the supreme legislative body of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Holy Synod",
-      "Malankara Syrian Christian Association",
-      "Parish Assembly",
-      "Diocesan Council"
-    ],
-    "a": "Malankara Syrian Christian Association"
-  },
-  {
-    "q": "Which body is responsible for the day-to-day administration of the Church?",
-    "options": [
-      "Sunday School Association",
-      "Holy Synod",
-      "Malankara Managing Committee",
-      "OCYM"
-    ],
-    "a": "Malankara Managing Committee"
-  },
-  {
-    "q": "What is the highest rank among bishops in the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Metropolitan",
-      "Archbishop",
-      "Catholicos of the East and Malankara Metropolitan",
-      "Patriarch"
-    ],
-    "a": "Metropolitan"
-  },
-  {
-    "q": "Who ordained the first Catholicos in India in 1912?",
-    "options": [
-      "Patriarch Ignatius Abdul Masih II",
-      "Pope Pius X",
-      "Patriarch Ignatius Aphrem I",
-      "Archbishop of Canterbury"
-    ],
-    "a": "Patriarch Ignatius Abdul Masih II"
-  },
-  {
-    "q": "Which city is considered the spiritual headquarters of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Kochi",
-      "Kottayam",
-      "Kollam",
-      "Thiruvananthapuram"
-    ],
-    "a": "Kottayam"
-  },
-  {
-    "q": "Which church is famous as the tomb church of St. Gregorios of Parumala?",
-    "options": [
-      "St. Mary's Cathedral, Kottayam",
-      "St. Peter's and St. Paul's Orthodox Church, Parumala",
-      "St. George Orthodox Church, Puthuppally",
-      "St. Thomas Church, Niranam"
-    ],
-    "a": "St. Peter's and St. Paul's Orthodox Church, Parumala"
-  },
-  {
-    "q": "Which saint is remembered on November 2 by the Malankara Orthodox Church?",
-    "options": [
-      "St. George",
-      "St. Gregorios of Parumala",
-      "St. Thomas",
-      "St. Stephen"
-    ],
-    "a": "St. Gregorios of Parumala"
-  },
-  {
-    "q": "Which saint is commemorated on September 15 in the Malankara Orthodox Church?",
-    "options": [
-      "St. Dionysius Vattasseril",
-      "St. Gregorios of Parumala",
-      "St. Baselios Yeldo",
-      "St. Peter"
-    ],
-    "a": "St. Dionysius Vattasseril"
-  },
-  {
-    "q": "Which saint is known for defending the autonomy of the Malankara Church?",
-    "options": [
-      "St. George",
-      "St. Dionysius Vattasseril",
-      "St. Thomas",
-      "St. Stephen"
-    ],
-    "a": "St. Dionysius Vattasseril"
-  },
-  {
-    "q": "What is the traditional greeting exchanged during Holy Qurbana?",
-    "options": [
-      "Hallelujah",
-      "Shlomo",
-      "Amen",
-      "Hosanna"
-    ],
-    "a": "Shlomo"
-  },
-  {
     "q": "What does \"Amen\" mean?",
     "options": [
       "Peace",
@@ -3608,16 +2298,6 @@ export const TRIVIA_QUESTIONS = [
       "Blessing"
     ],
     "a": "Truly or So Be It"
-  },
-  {
-    "q": "Which prayer begins every Orthodox worship service?",
-    "options": [
-      "Nicene Creed",
-      "Trisagion Prayer",
-      "Psalm 23",
-      "Apostles' Creed"
-    ],
-    "a": "Trisagion Prayer"
   },
   {
     "q": "What does the Trisagion proclaim?",
@@ -3670,16 +2350,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Holy Saturday"
   },
   {
-    "q": "What is celebrated on Holy Saturday night?",
-    "options": [
-      "Christmas Vigil",
-      "Easter Vigil",
-      "Denaha Prayer",
-      "Palm Procession"
-    ],
-    "a": "Easter Vigil"
-  },
-  {
     "q": "What is the central message of Easter?",
     "options": [
       "Birth of Christ",
@@ -3688,16 +2358,6 @@ export const TRIVIA_QUESTIONS = [
       "Ascension of Christ"
     ],
     "a": "Resurrection of Christ"
-  },
-  {
-    "q": "Which feast marks the completion of the Easter season?",
-    "options": [
-      "Christmas",
-      "Ascension",
-      "Pentecost",
-      "Denaha"
-    ],
-    "a": "Pentecost"
   },
   {
     "q": "Which bird announced the end of the Flood to Noah?",
@@ -4000,56 +2660,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "The Pure in Heart"
   },
   {
-    "q": "Which city is home to the Orthodox Theological Seminary, one of the oldest seminaries in India?",
-    "options": [
-      "Kochi",
-      "Kottayam",
-      "Kollam",
-      "Thrissur"
-    ],
-    "a": "Kottayam"
-  },
-  {
-    "q": "What is the commonly used name of the Orthodox Theological Seminary in Kottayam?",
-    "options": [
-      "Mar Athanasius Seminary",
-      "Old Seminary",
-      "Bethany Seminary",
-      "Devalokam Seminary"
-    ],
-    "a": "Old Seminary"
-  },
-  {
-    "q": "In which year was the Orthodox Theological Seminary established?",
-    "options": [
-      "1750",
-      "1815",
-      "1889",
-      "1912"
-    ],
-    "a": "1815"
-  },
-  {
-    "q": "Who founded the Orthodox Theological Seminary at Kottayam?",
-    "options": [
-      "Pulikkottil Joseph Mar Dionysius II",
-      "St. Gregorios of Parumala",
-      "Baselios Paulose I",
-      "Geevarghese Mar Ivanios"
-    ],
-    "a": "Pulikkottil Joseph Mar Dionysius II"
-  },
-  {
-    "q": "Which Syriac word is used to refer to the altar throne?",
-    "options": [
-      "Madbaha",
-      "Thronos",
-      "Sleebo",
-      "Kappa"
-    ],
-    "a": "Thronos"
-  },
-  {
     "q": "Which liturgical book contains the prayers for the Daily Offices?",
     "options": [
       "Taksa",
@@ -4068,16 +2678,6 @@ export const TRIVIA_QUESTIONS = [
       "Funeral Service"
     ],
     "a": "Daily Prayer"
-  },
-  {
-    "q": "How many canonical Gospels are accepted by the Orthodox Church?",
-    "options": [
-      "Three",
-      "Four",
-      "Five",
-      "Six"
-    ],
-    "a": "Four"
   },
   {
     "q": "Which Gospel begins with the genealogy of Jesus?",
@@ -4150,26 +2750,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "The Good News of Jesus Christ"
   },
   {
-    "q": "Which feast celebrates the manifestation of Christ to the world?",
-    "options": [
-      "Denaha",
-      "Easter",
-      "Pentecost",
-      "Palm Sunday"
-    ],
-    "a": "Denaha"
-  },
-  {
-    "q": "During Denaha, which event is especially remembered?",
-    "options": [
-      "Crucifixion",
-      "Baptism of Jesus",
-      "Ascension",
-      "Resurrection"
-    ],
-    "a": "Baptism of Jesus"
-  },
-  {
     "q": "Which bird is a symbol of the Holy Spirit in Christian iconography?",
     "options": [
       "Eagle",
@@ -4198,16 +2778,6 @@ export const TRIVIA_QUESTIONS = [
       "The Priest's Hand Cross"
     ],
     "a": "The Priest's Hand Cross"
-  },
-  {
-    "q": "Which saint's feast is especially celebrated at Puthuppally?",
-    "options": [
-      "St. Thomas",
-      "St. George",
-      "St. Gregorios",
-      "St. Stephen"
-    ],
-    "a": "St. George"
   },
   {
     "q": "Which saint is often depicted riding a white horse?",
@@ -4240,16 +2810,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Entry into the Body of Christ"
   },
   {
-    "q": "Which sacrament is usually received immediately after Baptism in the Orthodox Church?",
-    "options": [
-      "Marriage",
-      "Holy Myron",
-      "Holy Confession",
-      "Priesthood"
-    ],
-    "a": "Holy Myron"
-  },
-  {
     "q": "What is the visible sign used in Holy Baptism?",
     "options": [
       "Bread",
@@ -4258,16 +2818,6 @@ export const TRIVIA_QUESTIONS = [
       "Incense"
     ],
     "a": "Water"
-  },
-  {
-    "q": "During Baptism, how many times is the candidate immersed according to Orthodox tradition?",
-    "options": [
-      "One",
-      "Two",
-      "Three",
-      "Seven"
-    ],
-    "a": "Three"
   },
   {
     "q": "The three immersions in Baptism symbolize what?",
@@ -4280,16 +2830,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Holy Trinity"
   },
   {
-    "q": "Which sacrament strengthens the baptized through the gift of the Holy Spirit?",
-    "options": [
-      "Marriage",
-      "Holy Myron",
-      "Holy Qurbana",
-      "Confession"
-    ],
-    "a": "Holy Myron"
-  },
-  {
     "q": "What is the primary purpose of Holy Confession?",
     "options": [
       "Joining OCYM",
@@ -4298,26 +2838,6 @@ export const TRIVIA_QUESTIONS = [
       "Becoming a member"
     ],
     "a": "Forgiveness of sins through repentance"
-  },
-  {
-    "q": "Which sacrament unites a man and woman in Christian marriage?",
-    "options": [
-      "Holy Myron",
-      "Holy Matrimony",
-      "Priesthood",
-      "Confession"
-    ],
-    "a": "Holy Matrimony"
-  },
-  {
-    "q": "Which sacrament ordains bishops, priests, and deacons?",
-    "options": [
-      "Matrimony",
-      "Holy Orders",
-      "Baptism",
-      "Holy Myron"
-    ],
-    "a": "Holy Orders"
   },
   {
     "q": "What is the primary ministry of a deacon?",
@@ -4350,26 +2870,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Crosier"
   },
   {
-    "q": "What is the black head covering worn by Orthodox bishops called?",
-    "options": [
-      "Mitre",
-      "Masnaphto",
-      "Phaino",
-      "Zunoro"
-    ],
-    "a": "Masnaphto"
-  },
-  {
-    "q": "What is the long outer vestment worn by Orthodox priests during Holy Qurbana called?",
-    "options": [
-      "Phaino",
-      "Cassock",
-      "Mitre",
-      "Alb"
-    ],
-    "a": "Phaino"
-  },
-  {
     "q": "What is the girdle worn around the waist by clergy called?",
     "options": [
       "Zunoro",
@@ -4398,46 +2898,6 @@ export const TRIVIA_QUESTIONS = [
       "Cruet"
     ],
     "a": "Thurible (Censer)"
-  },
-  {
-    "q": "What metal is most commonly used to make Orthodox censers?",
-    "options": [
-      "Iron",
-      "Brass",
-      "Gold or Brass",
-      "Silver only"
-    ],
-    "a": "Brass"
-  },
-  {
-    "q": "During Holy Qurbana, what does incense symbolize?",
-    "options": [
-      "Wealth",
-      "Prayer rising to God",
-      "Victory",
-      "Wisdom"
-    ],
-    "a": "Prayer rising to God"
-  },
-  {
-    "q": "Which feast follows Great Lent?",
-    "options": [
-      "Christmas",
-      "Easter",
-      "Denaha",
-      "Pentecost"
-    ],
-    "a": "Easter"
-  },
-  {
-    "q": "Which is the longest fasting season in the Orthodox Church?",
-    "options": [
-      "Apostles' Fast",
-      "Great Lent",
-      "Dormition Fast",
-      "Nineveh Fast"
-    ],
-    "a": "Great Lent"
   },
   {
     "q": "How many days does the Nineveh Fast last?",
@@ -4480,16 +2940,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Spiritual Renewal"
   },
   {
-    "q": "What should accompany fasting according to Orthodox teaching?",
-    "options": [
-      "Entertainment",
-      "Prayer and Charity",
-      "Silence Only",
-      "Travel"
-    ],
-    "a": "Prayer and Charity"
-  },
-  {
     "q": "Which virtue is especially cultivated during fasting?",
     "options": [
       "Pride",
@@ -4500,36 +2950,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Humility"
   },
   {
-    "q": "Which saint is known as the \"Father of Monasticism\" in Christianity?",
-    "options": [
-      "St. Basil the Great",
-      "St. Anthony the Great",
-      "St. Athanasius",
-      "St. Ephrem the Syrian"
-    ],
-    "a": "St. Anthony the Great"
-  },
-  {
-    "q": "Which saint wrote many hymns in the Syriac language?",
-    "options": [
-      "St. Basil",
-      "St. Ephrem the Syrian",
-      "St. Ignatius",
-      "St. Cyril"
-    ],
-    "a": "St. Ephrem the Syrian"
-  },
-  {
-    "q": "Which Church Father is known as the \"Harp of the Holy Spirit\"?",
-    "options": [
-      "St. John Chrysostom",
-      "St. Ephrem the Syrian",
-      "St. Gregory Nazianzen",
-      "St. Basil"
-    ],
-    "a": "St. Ephrem the Syrian"
-  },
-  {
     "q": "Which saint defended the divinity of Christ against Arianism?",
     "options": [
       "St. Athanasius",
@@ -4538,26 +2958,6 @@ export const TRIVIA_QUESTIONS = [
       "St. Basil"
     ],
     "a": "St. Athanasius"
-  },
-  {
-    "q": "What does the word \"Catholicos\" mean?",
-    "options": [
-      "Universal",
-      "Shepherd",
-      "Teacher",
-      "Apostle"
-    ],
-    "a": "Universal"
-  },
-  {
-    "q": "What is the title of the spiritual head of the Malankara Orthodox Syrian Church?",
-    "options": [
-      "Pope",
-      "Patriarch",
-      "Catholicos of the East and Malankara Metropolitan",
-      "Archbishop"
-    ],
-    "a": "Catholicos of the East and Malankara Metropolitan"
   },
   {
     "q": "Which Apostle preached in Mesopotamia before coming to India?",
@@ -4830,36 +3230,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Mark"
   },
   {
-    "q": "Which city became the center of the early Syriac Christian tradition?",
-    "options": [
-      "Rome",
-      "Edessa",
-      "Athens",
-      "Corinth"
-    ],
-    "a": "Edessa"
-  },
-  {
-    "q": "Which language was primarily spoken in Edessa?",
-    "options": [
-      "Latin",
-      "Syriac",
-      "Greek",
-      "Hebrew"
-    ],
-    "a": "Syriac"
-  },
-  {
-    "q": "What is the Syriac Bible commonly called?",
-    "options": [
-      "Septuagint",
-      "Vulgate",
-      "Peshitta",
-      "Targum"
-    ],
-    "a": "Peshitta"
-  },
-  {
     "q": "What does the word \"Peshitta\" mean?",
     "options": [
       "Sacred Scripture",
@@ -4878,36 +3248,6 @@ export const TRIVIA_QUESTIONS = [
       "Gospels"
     ],
     "a": "Old Testament"
-  },
-  {
-    "q": "Which sacrament is called the \"Mystery of Mysteries\" in Orthodox tradition?",
-    "options": [
-      "Baptism",
-      "Holy Qurbana",
-      "Holy Myron",
-      "Marriage"
-    ],
-    "a": "Holy Qurbana"
-  },
-  {
-    "q": "What is the chalice used for during Holy Qurbana?",
-    "options": [
-      "Holding incense",
-      "Holding the consecrated wine",
-      "Holding holy water",
-      "Holding oil"
-    ],
-    "a": "Holding the consecrated wine"
-  },
-  {
-    "q": "What is the paten used for during Holy Qurbana?",
-    "options": [
-      "Holding the bread",
-      "Holding incense",
-      "Holding candles",
-      "Holding oil"
-    ],
-    "a": "Holding the bread"
   },
   {
     "q": "What is the principal purpose of the Holy Gospel Book on the altar?",
@@ -4930,16 +3270,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "The presence of Christ"
   },
   {
-    "q": "Why do Orthodox Christians venerate the Holy Cross?",
-    "options": [
-      "It is a historical artifact",
-      "It is the instrument of Christ's salvation",
-      "It represents Jerusalem",
-      "It symbolizes the Apostles"
-    ],
-    "a": "It is the instrument of Christ's salvation"
-  },
-  {
     "q": "Which virtue is considered the foundation of Christian life?",
     "options": [
       "Wealth",
@@ -4960,26 +3290,6 @@ export const TRIVIA_QUESTIONS = [
     "a": "Love"
   },
   {
-    "q": "According to Orthodox teaching, what is the greatest gift of God?",
-    "options": [
-      "Wisdom",
-      "Eternal Life through Jesus Christ",
-      "Wealth",
-      "Power"
-    ],
-    "a": "Eternal Life through Jesus Christ"
-  },
-  {
-    "q": "Which prayer concludes most Orthodox services?",
-    "options": [
-      "The Lord's Prayer",
-      "Final Blessing",
-      "Nicene Creed",
-      "Psalm 150"
-    ],
-    "a": "Final Blessing"
-  },
-  {
     "q": "What is the mission of the Church according to Christ's Great Commission?",
     "options": [
       "Build churches",
@@ -4988,18 +3298,9 @@ export const TRIVIA_QUESTIONS = [
       "Preserve traditions only"
     ],
     "a": "Make disciples of all nations"
-  },
-  {
-    "q": "According to Orthodox Christianity, who is the Head of the Church?",
-    "options": [
-      "The Catholicos",
-      "The Patriarch",
-      "Jesus Christ",
-      "The Apostles"
-    ],
-    "a": "Jesus Christ"
   }
 ];
+
 
 export function getRandomTrivia() {
   const randomIndex = Math.floor(Math.random() * TRIVIA_QUESTIONS.length);
