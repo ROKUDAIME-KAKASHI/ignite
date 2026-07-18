@@ -181,6 +181,7 @@ export default function BibleLudoPage() {
   const [winner, setWinner] = useState<Color | null>(null);
   const [triviaResult, setTriviaResult] = useState<"correct" | "wrong" | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [gameEvent, setGameEvent] = useState<{ type: "capture" | "home"; color: Color; message: string } | null>(null);
 
   // Initialize room players depending on mode
   const initializeRoomPlayers = (mode: typeof gameMode, playersList: any[] = []) => {
@@ -319,7 +320,110 @@ export default function BibleLudoPage() {
         setTimeout(() => {
           const movable = tokens[turn].map((t, idx) => ({ idx, can: canMove(turn, idx, dice) })).filter(m => m.can);
           if (movable.length > 0) {
-            moveToken(turn, movable[0].idx, dice, gameMode === "live");
+            // Smart AI Path Selection
+            let bestMoveIdx = movable[0].idx;
+            let highestScore = -1000;
+
+            for (const { idx } of movable) {
+              let score = 0;
+              const currentPos = tokens[turn][idx];
+              let nextPos = currentPos;
+
+              if (currentPos === -1) {
+                score += 150; // Leaving base is great
+                nextPos = START_INDEX[turn];
+              } else if (currentPos >= 0 && currentPos < 52) {
+                const start = START_INDEX[turn];
+                let relativeMoved = (currentPos - start + 52) % 52;
+                let nextRelative = relativeMoved + dice;
+                if (nextRelative >= 51) {
+                  const stretchIdx = nextRelative - 51;
+                  if (stretchIdx === 5) {
+                    score += 300; // Reaching home
+                    nextPos = 200;
+                  } else {
+                    score += 100; // Entering home stretch
+                    nextPos = 100 + stretchIdx;
+                  }
+                } else {
+                  nextPos = (currentPos + dice) % 52;
+                  
+                  // Capture check
+                  let wouldCapture = false;
+                  COLORS.forEach(c => {
+                    if (c !== turn) {
+                      const isTeammate = gameMode === "team" && 
+                        ((turn === "red" && c === "yellow") || (turn === "yellow" && c === "red") || 
+                         (turn === "green" && c === "blue") || (turn === "blue" && c === "green"));
+                      if (!isTeammate) {
+                        if (tokens[c].some(p => p === nextPos)) wouldCapture = true;
+                      }
+                    }
+                  });
+                  if (wouldCapture) score += 250;
+                }
+              } else if (currentPos >= 100 && currentPos < 105) {
+                const stretchIdx = currentPos - 100;
+                if (stretchIdx + dice === 5) {
+                  score += 300;
+                  nextPos = 200;
+                } else {
+                  score += 50;
+                  nextPos = currentPos + dice;
+                }
+              }
+
+              // Prefer tokens further along the path
+              if (currentPos >= 0 && currentPos < 52) {
+                const start = START_INDEX[turn];
+                const relativeMoved = (currentPos - start + 52) % 52;
+                score += relativeMoved;
+              } else if (currentPos >= 100 && currentPos < 105) {
+                score += 52 + (currentPos - 100);
+              }
+
+              // Danger evaluation (opponent close behind)
+              let inDangerBefore = false;
+              let inDangerAfter = false;
+              COLORS.forEach(c => {
+                if (c !== turn) {
+                  const isTeammate = gameMode === "team" && 
+                    ((turn === "red" && c === "yellow") || (turn === "yellow" && c === "red") || 
+                     (turn === "green" && c === "blue") || (turn === "blue" && c === "green"));
+                  if (!isTeammate) {
+                    if (currentPos >= 0 && currentPos < 52) {
+                      tokens[c].forEach(p => {
+                        if (p >= 0 && p < 52) {
+                          const dist = (currentPos - p + 52) % 52;
+                          if (dist > 0 && dist <= 6) inDangerBefore = true;
+                        }
+                      });
+                    }
+                    if (nextPos >= 0 && nextPos < 52) {
+                      tokens[c].forEach(p => {
+                        if (p >= 0 && p < 52) {
+                          const dist = (nextPos - p + 52) % 52;
+                          if (dist > 0 && dist <= 6) inDangerAfter = true;
+                        }
+                      });
+                    }
+                  }
+                }
+              });
+
+              if (inDangerBefore && !inDangerAfter) {
+                score += 80; // Escaped danger
+              } else if (!inDangerBefore && inDangerAfter) {
+                const isSafeCell = (nextPos === 1) || (nextPos === 14) || (nextPos === 27) || (nextPos === 40);
+                if (!isSafeCell) score -= 40; // Moving into danger zone
+              }
+
+              if (score > highestScore) {
+                highestScore = score;
+                bestMoveIdx = idx;
+              }
+            }
+            moveToken(turn, bestMoveIdx, dice, gameMode === "live");
           } else {
             nextTurn(false, gameMode === "live");
           }
@@ -486,6 +590,8 @@ export default function BibleLudoPage() {
         if (stretchIdx === 5) {
           newTokens[color][tokenIdx] = 200; // Finished
           extraTurn = true;
+          setGameEvent({ type: "home", color, message: `${getPlayerName(color)} reached Emmaus!` });
+          setTimeout(() => setGameEvent(null), 2500);
         } else {
           newTokens[color][tokenIdx] = 100 + stretchIdx;
         }
@@ -504,6 +610,8 @@ export default function BibleLudoPage() {
               newTokens[c] = newTokens[c].map(p => {
                 if (p === nextPos) {
                   extraTurn = true;
+                  setGameEvent({ type: "capture", color: c, message: `${getPlayerName(color)} captured ${getPlayerName(c)}!` });
+                  setTimeout(() => setGameEvent(null), 2500);
                   return -1; // Send back to base
                 }
                 return p;
@@ -517,6 +625,8 @@ export default function BibleLudoPage() {
       if (stretchIdx + roll === 5) {
         newTokens[color][tokenIdx] = 200;
         extraTurn = true;
+        setGameEvent({ type: "home", color, message: `${getPlayerName(color)} reached Emmaus!` });
+        setTimeout(() => setGameEvent(null), 2500);
       } else {
         newTokens[color][tokenIdx] = pos + roll;
       }
@@ -1328,8 +1438,9 @@ export default function BibleLudoPage() {
                   >
                     {isStart && <span className="absolute inset-0 flex items-center justify-center text-[10px] opacity-25 select-none">⭐️</span>}
                     {cellTokens.map((t, tokenIdx) => (
-                      <button
+                      <motion.button
                         key={`${t.color}-${t.idx}`}
+                        layoutId={`token-${t.color}-${t.idx}`}
                         onClick={() => {
                           const canPlayerClick = gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor);
                           if (canPlayerClick && turn === t.color && dice !== null && !trivia && canMove(turn, t.idx, dice)) {
@@ -1346,7 +1457,7 @@ export default function BibleLudoPage() {
                         }}
                       >
                         {t.idx + 1}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 );
@@ -1371,8 +1482,9 @@ export default function BibleLudoPage() {
                       className={`relative flex items-center justify-center border border-black/5 ${homeStretchClasses[color]}`}
                     >
                       {cellTokens.map((t, tokenIdx) => (
-                        <button
+                        <motion.button
                           key={`${t.color}-${t.idx}`}
+                          layoutId={`token-${t.color}-${t.idx}`}
                           onClick={() => {
                             const canPlayerClick = gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor);
                             if (canPlayerClick && turn === t.color && dice !== null && !trivia && canMove(turn, t.idx, dice)) {
@@ -1389,7 +1501,7 @@ export default function BibleLudoPage() {
                           }}
                         >
                           {t.idx + 1}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   );
@@ -1486,6 +1598,28 @@ export default function BibleLudoPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Game Event Overlay */}
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+          <AnimatePresence>
+            {gameEvent && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                className={cn(
+                  "px-6 py-3 rounded-full shadow-2xl border backdrop-blur-sm flex items-center gap-2 font-bold text-sm text-white",
+                  gameEvent.type === "capture" 
+                    ? "bg-red-600/90 border-red-500/50" 
+                    : "bg-emerald-600/90 border-emerald-500/50"
+                )}
+              >
+                <span>{gameEvent.type === "capture" ? "⚔️" : "🎉"}</span>
+                <span>{gameEvent.message}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Live Toasts */}
         <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-xs pointer-events-none">
