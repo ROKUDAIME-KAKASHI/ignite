@@ -441,17 +441,11 @@ export default function AdminDashboardPage() {
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             )}>
               {t} 
-              {t === "prayers" && allPrayers.length > 0 && (
-                <span className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{allPrayers.length}</span>
-              )}
               {t === "appointments" && appointments.filter(a => a.status === "PENDING").length > 0 && (
                 <span className="ml-2 bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{appointments.filter(a => a.status === "PENDING").length}</span>
               )}
               {t === "users" && allUsers.length > 0 && (
                 <span className="ml-2 bg-blue-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{allUsers.length}</span>
-              )}
-              {t === "trivia" && (
-                <span className="ml-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm">{TRIVIA_QUESTIONS.length}</span>
               )}
             </button>
           ))}
