@@ -244,8 +244,22 @@ export async function getAdminDashboardData() {
 export async function getAllUsers() {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
+  const isSuper = await verifySuperAdmin();
+  let whereClause = {};
+  
+  if (!isSuper) {
+    const session = await getSession();
+    if (session?.id) {
+      const u = await prisma.user.findUnique({ where: { id: session.id } });
+      if (u?.churchId) {
+        whereClause = { churchId: u.churchId };
+      }
+    }
+  }
+
   try {
     const usersData = await prisma.user.findMany({
+      where: whereClause,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -509,8 +523,21 @@ export async function getAnnouncements() {
 }
 
 export async function getUpcomingEvents() {
+  const session = await getSession();
+  const u = session?.id ? await prisma.user.findUnique({ where: { id: session.id } }) : null;
+  const isSuper = await verifySuperAdmin();
+  
+  let whereClause: any = { date: { gte: new Date() } };
+  
+  if (!isSuper && u?.churchId) {
+    whereClause.OR = [
+      { churchId: u.churchId },
+      { churchId: null }
+    ];
+  }
+
   const events = await prisma.event.findMany({
-    where: { date: { gte: new Date() } },
+    where: whereClause,
     orderBy: { date: "asc" },
     include: { attendances: true },
     take: 20,
@@ -528,7 +555,21 @@ export async function getUpcomingEvents() {
 export async function getAppointments() {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
+  const isSuper = await verifySuperAdmin();
+  let whereClause = {};
+  
+  if (!isSuper) {
+    const session = await getSession();
+    if (session?.id) {
+      const u = await prisma.user.findUnique({ where: { id: session.id } });
+      if (u?.churchId) {
+        whereClause = { userId: { in: (await prisma.user.findMany({ where: { churchId: u.churchId }, select: { id: true } })).map(x => x.id) } };
+      }
+    }
+  }
+
   const appointments = await prisma.appointment.findMany({
+    where: whereClause,
     orderBy: { createdAt: "desc" },
     include: {
       user: {
