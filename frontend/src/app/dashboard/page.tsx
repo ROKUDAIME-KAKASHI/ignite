@@ -201,13 +201,18 @@ export default async function DashboardPage() {
 
       {/* ── Admin Announcements ── */}
       {announcements.length > 0 && (
-        <div className="px-4 mb-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Megaphone className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Parish Notices</h2>
+        <div className="px-4 mb-6">
+          <div className="flex items-center justify-between mb-4 bg-muted/40 backdrop-blur-xl p-3 rounded-2xl border border-border/60 shadow-sm relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-transparent to-transparent pointer-events-none" />
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center text-white shadow-md">
+                <Megaphone className="w-4 h-4" />
+              </div>
+              <h2 className="text-sm font-extrabold text-foreground uppercase tracking-widest">Parish Notices</h2>
             </div>
-            <Badge className="text-[10px] bg-primary/10 text-primary border-0">{announcements.length} new</Badge>
+            <Badge className="text-[10px] font-bold bg-background/80 dark:bg-background/80 text-amber-600 dark:text-amber-400 border border-amber-500/30 backdrop-blur-md shadow-sm relative z-10 px-2.5 py-0.5">
+              {announcements.length} New
+            </Badge>
           </div>
           <div className="space-y-2">
             {announcements.map((ann) => (

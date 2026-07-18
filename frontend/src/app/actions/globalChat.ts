@@ -61,6 +61,10 @@ export async function sendMessage(content: string) {
     return { success: false, error: parseResult.error.issues[0].message };
   }
 
+  // 1.5 Check if banned
+  const user = await prisma.user.findUnique({ where: { id: session.id } });
+  if (user?.isBanned) return { success: false, error: "Your account is temporarily suspended from chat." };
+
   // 2. Rate Limiting Check
   const lastRequest = rateLimitCache.get(session.id);
   if (lastRequest && Date.now() - lastRequest < 3000) {

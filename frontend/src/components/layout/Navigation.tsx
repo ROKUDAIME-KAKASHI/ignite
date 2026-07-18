@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy, MessageCircle } from "lucide-react";
+import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy, MessageCircle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLiturgicalSeason } from "@/lib/liturgy";
@@ -222,6 +222,17 @@ export function Navigation() {
 
         {/* Footer */}
         <div className="mt-auto px-3">
+          {(user?.role === "ADMIN" || user?.role === "PRIEST") && (
+            <div className="mb-4">
+              <Link
+                href="/admin/dashboard"
+                className="flex items-center gap-2 justify-center w-full py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold shadow-md hover:scale-[1.02] transition-transform"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                {user?.role === "PRIEST" ? "Priest Dashboard" : "Admin Dashboard"}
+              </Link>
+            </div>
+          )}
           <div className="border-t border-gray-100 dark:border-gray-800 my-4" />
           <div className="rounded-xl p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
             <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1">Verse of the Day</p>

@@ -40,7 +40,13 @@ import {
   getAuditLogs,
   awardBadge,
   revokeBadge,
-  awardGracePoints
+  awardGracePoints,
+  toggleBanUser,
+  endSeason,
+  getKnowledgeDocuments,
+  createKnowledgeDocument,
+  deleteKnowledgeDocument,
+  sendTargetedPushNotification
 } from "../actions";
 import { getMessages, deleteMessage as deleteGlobalMessage } from "@/app/actions/globalChat";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
@@ -50,7 +56,7 @@ import { useRouter } from "next/navigation";
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "trivia" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes" | "audit" | "moderation">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "trivia" | "prayers" | "notices" | "events" | "parishes" | "appointments" | "content" | "qrcodes" | "audit" | "moderation" | "knowledge">("overview");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedUserForBadges, setSelectedUserForBadges] = useState<any>(null);
 
@@ -60,6 +66,7 @@ export default function AdminDashboardPage() {
   const [triviaSearchQuery, setTriviaSearchQuery] = useState("");
   const [triviaPage, setTriviaPage] = useState(1);
   const [globalMessages, setGlobalMessages] = useState<any[]>([]);
+  const [knowledgeDocs, setKnowledgeDocs] = useState<any[]>([]);
 
   // Real data state
   const [stats, setStats] = useState({
@@ -222,6 +229,7 @@ export default function AdminDashboardPage() {
       fetchContent();
       getMissions().then(m => setMissions(m.missions));
       getMessages(100).then(msgs => setGlobalMessages(msgs));
+      getKnowledgeDocuments().then(res => res.success && setKnowledgeDocs(res.documents || []));
     }
     fetchData();
   }, []);
@@ -233,6 +241,7 @@ export default function AdminDashboardPage() {
 
   const [directTitle, setDirectTitle] = useState("");
   const [directMessage, setDirectMessage] = useState("");
+  const [directTarget, setDirectTarget] = useState("ALL");
   const [directStatus, setDirectStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const [evTitle, setEvTitle] = useState("");
@@ -246,6 +255,9 @@ export default function AdminDashboardPage() {
   const [churchName, setChurchName] = useState("");
   const [churchLoc, setChurchLoc] = useState("");
   const [churchStatus, setChurchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const [newKnowledgeTitle, setNewKnowledgeTitle] = useState("");
+  const [newKnowledgeContent, setNewKnowledgeContent] = useState("");
 
   useEffect(() => {
     setBaseUrl(window.location.origin);
@@ -276,7 +288,7 @@ export default function AdminDashboardPage() {
     if (!directTitle || !directMessage) return;
     setDirectStatus("loading");
     try {
-      const res = await sendDirectPushNotification(directTitle, directMessage);
+      const res = await sendTargetedPushNotification(directTitle, directMessage, directTarget);
       if (res && 'success' in res && res.success) {
         setDirectStatus("success");
         setDirectTitle(""); setDirectMessage("");
@@ -389,7 +401,7 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["overview", "audit", "moderation", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
+          {(["overview", "knowledge", "audit", "moderation", "users", "trivia", "prayers", "appointments", "notices", "events", "parishes", "content", "qrcodes"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -416,7 +428,27 @@ export default function AdminDashboardPage() {
 
             {/* ── Key Metrics ── */}
             <div>
-              <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Key Metrics (All Time)</h2>
+              <div className="flex items-center justify-between mb-3 px-1">
+                <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Key Metrics (All Time)</h2>
+                {isSuperAdmin && (
+                  <button 
+                    onClick={async () => {
+                      if (confirm("End the current gamification season? This will award the 'Season Champion' badge to the top 3 players and reset EVERYONE's XP to zero!")) {
+                        const res = await endSeason();
+                        if (res.success) {
+                          alert(`Season ended! Champions: ${res.topUsers.map((u: any) => u.firstName).join(", ")}`);
+                          window.location.reload();
+                        } else {
+                          alert(res.error);
+                        }
+                      }
+                    }}
+                    className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg font-bold hover:bg-amber-200 transition-colors"
+                  >
+                    🏆 End Season
+                  </button>
+                )}
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 {[
                   { label: "Total Users", value: stats.totalUsers.toLocaleString(), icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
@@ -659,8 +691,13 @@ export default function AdminDashboardPage() {
                               <button
                                 onClick={async () => {
                                   if (confirm(`Ban ${msg.user?.firstName} ${msg.user?.lastName}?`)) {
-                                     // For now just alert, could implement a real ban.
-                                     alert("This would ban the user. Add ban field to User schema to implement fully.");
+                                     const res = await toggleBanUser(msg.user.id);
+                                     if (res.success) {
+                                       alert(`User is now ${res.isBanned ? 'banned' : 'unbanned'}.`);
+                                       await fetchDashboardData();
+                                     } else {
+                                       alert(res.error);
+                                     }
                                   }
                                 }}
                                 className="text-[10px] bg-slate-200 dark:bg-slate-800 px-2 py-1.5 rounded text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-300 transition-colors"
@@ -681,6 +718,83 @@ export default function AdminDashboardPage() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── AI Knowledge Base ── */}
+        {activeTab === "knowledge" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold font-serif text-foreground">AI Director Knowledge Base</h2>
+                <p className="text-sm text-muted-foreground">Upload documents (Sermons, schedules) to give Abba custom context.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-1 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm space-y-4">
+                <h3 className="font-bold">Add Document</h3>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">Title / Reference</label>
+                  <Input value={newKnowledgeTitle} onChange={e => setNewKnowledgeTitle(e.target.value)} placeholder="e.g. Easter Sermon 2026" className="bg-slate-50 dark:bg-slate-950" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">Content</label>
+                  <Textarea value={newKnowledgeContent} onChange={e => setNewKnowledgeContent(e.target.value)} placeholder="Paste sermon notes, schedule, or guidelines here..." className="bg-slate-50 dark:bg-slate-950 min-h-[200px]" />
+                </div>
+                <button 
+                  onClick={async () => {
+                    if (!newKnowledgeTitle || !newKnowledgeContent) return;
+                    const res = await createKnowledgeDocument(newKnowledgeTitle, newKnowledgeContent);
+                    if (res.success) {
+                      setNewKnowledgeTitle(""); setNewKnowledgeContent("");
+                      const r = await getKnowledgeDocuments();
+                      if (r.success) setKnowledgeDocs(r.documents || []);
+                    }
+                  }}
+                  className="w-full bg-purple-600 text-white font-bold py-2 rounded-xl hover:bg-purple-700 transition"
+                >
+                  Save to Knowledge Base
+                </button>
+              </div>
+
+              <div className="md:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-border/50 shadow-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-border/50">
+                  <h3 className="font-bold">Existing Documents ({knowledgeDocs.length})</h3>
+                </div>
+                <div className="divide-y divide-border/50 max-h-[500px] overflow-y-auto">
+                  {knowledgeDocs.map(doc => (
+                    <div key={doc.id} className="p-4 flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h4 className="font-bold text-sm">{doc.title}</h4>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{doc.content}</p>
+                        <p className="text-[10px] text-slate-400 mt-2">Added: {new Date(doc.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <button 
+                        onClick={async () => {
+                          if (confirm("Delete this document? Abba will no longer reference it.")) {
+                            await deleteKnowledgeDocument(doc.id);
+                            const r = await getKnowledgeDocuments();
+                            if (r.success) setKnowledgeDocs(r.documents || []);
+                          }
+                        }}
+                        className="text-[10px] bg-red-50 text-red-600 px-2 py-1 rounded font-bold hover:bg-red-100"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                  {knowledgeDocs.length === 0 && (
+                    <div className="p-8 text-center text-muted-foreground text-sm">
+                      No documents added yet.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -753,9 +867,30 @@ export default function AdminDashboardPage() {
                 <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center shadow-md">
                   <Users className="w-5 h-5 text-white dark:text-slate-900" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="font-bold font-serif text-lg text-foreground">Parishioner Directory</h2>
-                  <p className="text-xs text-muted-foreground font-medium">Manage and search all registered parishioners and youth members.</p>
+                <div className="flex-1 flex justify-between items-start">
+                  <div>
+                    <h2 className="font-bold font-serif text-lg text-foreground">Parishioner Directory</h2>
+                    <p className="text-xs text-muted-foreground font-medium">Manage and search all registered parishioners and youth members.</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (allUsers.length === 0) return;
+                      const headers = ["ID", "Name", "Email", "Role", "Joined", "Stars", "XP", "Level"];
+                      const csvContent = "data:text/csv;charset=utf-8," 
+                        + headers.join(",") + "\n"
+                        + allUsers.map(u => `${u.id},"${u.name}","${u.email}",${u.role},"${u.joined}",${u.stars || 0},${u.xp || 0},${u.level || 1}`).join("\n");
+                      const encodedUri = encodeURI(csvContent);
+                      const link = document.createElement("a");
+                      link.setAttribute("href", encodedUri);
+                      link.setAttribute("download", `ignite_users_${new Date().toISOString().split('T')[0]}.csv`);
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-3 py-1.5 rounded-lg hover:bg-slate-200 transition-colors"
+                  >
+                    📥 Export CSV
+                  </button>
                 </div>
               </div>
 
@@ -799,11 +934,33 @@ export default function AdminDashboardPage() {
                       </div>
 
                       <div className="flex gap-2 self-end sm:self-center">
+                        <select
+                          value=""
+                          onChange={async (e) => {
+                            const badgeId = e.target.value;
+                            if (!badgeId) return;
+                            const badge = badges.find(b => b.id === badgeId);
+                            if (confirm(`Award ${badge?.name} to ${user.name}?`)) {
+                              await handleAwardBadge(user.id, badgeId);
+                              await fetchAllUsersData();
+                            }
+                          }}
+                          className="text-xs bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 px-3 py-1.5 rounded-lg text-amber-600 dark:text-amber-400 font-bold transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-amber-500 appearance-none"
+                        >
+                          <option value="">+ Award Badge</option>
+                          {badges.map(b => {
+                            const hasBadge = user.badges?.find((ub: any) => ub.badgeId === b.id || ub.id === b.id);
+                            if (hasBadge) return null; // Don't show badges they already have
+                            return (
+                              <option key={b.id} value={b.id}>{b.imageUrl} {b.name}</option>
+                            );
+                          })}
+                        </select>
                         <button 
                           onClick={() => setSelectedUserForBadges(user)}
-                          className="text-xs bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 px-3 py-1.5 rounded-lg text-amber-600 dark:text-amber-400 font-bold transition-colors"
+                          className="text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 font-bold transition-colors"
                         >
-                          Badges
+                          Manage
                         </button>
                         {isSuperAdmin && (
                           <>
@@ -827,9 +984,10 @@ export default function AdminDashboardPage() {
                             >
                               Grant XP
                             </button>
-                            <button 
-                              onClick={async () => {
-                                const newRole = user.role === "ADMIN" ? "MEMBER" : "ADMIN";
+                            <select
+                              value={user.role}
+                              onChange={async (e) => {
+                                const newRole = e.target.value;
                                 if (confirm(`Change ${user.name}'s role to ${newRole}?`)) {
                                   const res = await updateUserRole(user.id, newRole);
                                   if (res.success) {
@@ -840,10 +998,13 @@ export default function AdminDashboardPage() {
                                   }
                                 }
                               }}
-                              className="text-xs bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 font-bold transition-colors"
+                              className="text-xs bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 font-bold transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
                             >
-                              {user.role === "ADMIN" ? "Demote" : "Make Admin"}
-                            </button>
+                              <option value="MEMBER">Role: MEMBER</option>
+                              <option value="LEADER">Role: LEADER</option>
+                              <option value="PRIEST">Role: PRIEST</option>
+                              <option value="ADMIN">Role: ADMIN</option>
+                            </select>
                             <button 
                               onClick={async () => {
                                 if (confirm(`Log in as ${user.name}?`)) {
@@ -874,6 +1035,22 @@ export default function AdminDashboardPage() {
                               className="text-xs bg-red-50 dark:bg-red-950 hover:bg-red-100 px-3 py-1.5 rounded-lg text-red-600 dark:text-red-400 font-bold transition-colors"
                             >
                               Delete
+                            </button>
+                            <button 
+                              onClick={async () => {
+                                if (confirm(`${user.isBanned ? 'Unban' : 'Ban'} ${user.name}?`)) {
+                                  const res = await toggleBanUser(user.id);
+                                  if (res.success) {
+                                    alert(`User is now ${res.isBanned ? 'banned' : 'unbanned'}.`);
+                                    await fetchAllUsersData();
+                                  } else {
+                                    alert(res.error);
+                                  }
+                                }
+                              }}
+                              className="text-xs bg-orange-50 dark:bg-orange-950 hover:bg-orange-100 px-3 py-1.5 rounded-lg text-orange-600 dark:text-orange-400 font-bold transition-colors"
+                            >
+                              {user.isBanned ? 'Unban' : 'Ban'}
                             </button>
                           </>
                         )}
@@ -1101,6 +1278,19 @@ export default function AdminDashboardPage() {
                     <div>
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Alert Title</label>
                       <Input value={directTitle} onChange={e => setDirectTitle(e.target.value)} placeholder="e.g. Daily Devotion Ready!" className="bg-slate-50 dark:bg-slate-950" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Target Audience</label>
+                      <select 
+                        value={directTarget} 
+                        onChange={e => setDirectTarget(e.target.value)}
+                        className="w-full bg-slate-50 dark:bg-slate-950 border border-border/50 rounded-md px-3 py-2 text-sm"
+                      >
+                        <option value="ALL">Everyone</option>
+                        <option value="MEMBER">Members Only</option>
+                        <option value="LEADER">Leaders Only</option>
+                        <option value="ADMIN">Admins Only</option>
+                      </select>
                     </div>
                     <div>
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Alert Message</label>

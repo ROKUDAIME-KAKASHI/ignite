@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { LogOut, ChevronRight, Edit3, Check, X, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, urlB64ToUint8Array } from "@/lib/utils";
-import { useEffect } from "react";
+import Link from "next/link";
 import { getProfileStats, joinParish, saveFCMToken } from "@/app/actions/profile";
 import { getUserAwardsProgress } from "@/app/actions/gamificationAwards";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -535,6 +535,16 @@ export default function ProfilePage() {
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </div>
+          {/* Admin Dashboard Link (Mobile) */}
+          {(user?.role === "ADMIN" || user?.role === "PRIEST") && (
+            <Link href="/admin/dashboard" className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer">
+              <div>
+                <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Management</p>
+                <p className="text-sm font-bold text-foreground mt-0.5">{user?.role === "PRIEST" ? "Priest Dashboard" : "Admin Dashboard"}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+          )}
         </div>
       </div>
 

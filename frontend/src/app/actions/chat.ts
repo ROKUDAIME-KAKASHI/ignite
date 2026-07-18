@@ -11,11 +11,20 @@ export async function askAbba(prompt: string, history: {role: string, content: s
     
     const ai = getAIClient();
     
-    const systemPrompt = `You are "Abba", a spiritual guide and theological companion for Jacobite Orthodox Christian youth. You are integrated into the "Ignite" app.
+    let systemPrompt = `You are "Abba", a spiritual guide and theological companion for Jacobite Orthodox Christian youth. You are integrated into the "Ignite" app.
 Your goal is to answer questions about faith, theology, the Bible, and life from an Orthodox Christian perspective.
 Always be warm, peaceful, concise, and deeply grounded in Scripture and Holy Tradition.
 Address the user respectfully. If you don't know the answer, encourage them to ask their parish priest.
 Keep your answers very brief (under 150 words) and structure them clearly with short paragraphs. Do not use markdown formatting like **bold** or *italics* as the chat UI does not currently render markdown properly.`;
+
+    // Fetch Knowledge Documents
+    const knowledgeDocs = await prisma.knowledgeDocument.findMany();
+    if (knowledgeDocs.length > 0) {
+      systemPrompt += `\n\nADDITIONAL CHURCH CONTEXT & KNOWLEDGE BASE:\n`;
+      knowledgeDocs.forEach(doc => {
+        systemPrompt += `--- [${doc.title}] ---\n${doc.content}\n\n`;
+      });
+    }
 
     // Map history to the format expected by the Gemini API if necessary,
     // or just pass a combined string for simplicity.

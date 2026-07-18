@@ -29,7 +29,7 @@ async function verifyAdmin() {
           where: { id: payload.id },
           select: { role: true }
         });
-        if (user?.role === "ADMIN") return true;
+        if (user?.role === "ADMIN" || user?.role === "PRIEST") return true;
       }
     } catch {}
   }
@@ -615,5 +615,149 @@ export async function getAuditLogs(limit = 100) {
   } catch (error: any) {
     console.error("Failed to fetch audit logs:", error);
     return { success: false, error: error?.message || "Database error" };
+  }
+}
+
+// ----------------------------------------------------------------------
+// 🛑 BANNING / SUSPENSION
+// ----------------------------------------------------------------------
+
+export async function toggleBanUser(userId: string) {
+  if (!(await verifySuperAdmin())) return { success: false, error: "Unauthorized" };
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return { success: false, error: "User not found" };
+    
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isBanned: !user.isBanned }
+    });
+    return { success: true, isBanned: !user.isBanned };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+// ----------------------------------------------------------------------
+// 🍂 GAMIFICATION SEASONS
+// ----------------------------------------------------------------------
+
+export async function endSeason() {
+  if (!(await verifySuperAdmin())) return { success: false, error: "Unauthorized" };
+  try {
+    // Get top 3 users by XP
+    const topUsers = await prisma.user.findMany({
+      orderBy: { xp: 'desc' },
+      take: 3,
+      select: { id: true, firstName: true }
+    });
+
+    // Ensure a "Season Champion" badge exists
+    let championBadge = await prisma.badge.findFirst({ where: { name: "Season Champion" } });
+    if (!championBadge) {
+      championBadge = await prisma.badge.create({
+        data: { name: "Season Champion", description: "Top 3 Finish in a Season", imageUrl: "🏆" }
+      });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Award badge to top 3
+      for (const u of topUsers) {
+        // Only award if they don't already have one, or just let it fail silently on unique constraint
+        const exists = await tx.userBadge.findUnique({ where: { userId_badgeId: { userId: u.id, badgeId: championBadge!.id } } });
+        if (!exists) {
+          await tx.userBadge.create({ data: { userId: u.id, badgeId: championBadge!.id } });
+        }
+      }
+      
+      // Reset everyone's XP to 0
+      await tx.user.updateMany({ data: { xp: 0 } });
+      
+      // We could also clear xpLogs but usually better to keep them for history, 
+      // or delete them if we want to save space. We'll just reset the total.
+    });
+
+    return { success: true, topUsers };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+// ----------------------------------------------------------------------
+// 🧠 AI DIRECTOR (KNOWLEDGE BASE)
+// ----------------------------------------------------------------------
+
+export async function getKnowledgeDocuments() {
+  if (!(await verifyAdmin())) return { success: false, error: "Unauthorized" };
+  try {
+    const docs = await prisma.knowledgeDocument.findMany({ orderBy: { createdAt: "desc" } });
+    return { success: true, documents: docs };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function createKnowledgeDocument(title: string, content: string) {
+  if (!(await verifyAdmin())) return { success: false, error: "Unauthorized" };
+  try {
+    const doc = await prisma.knowledgeDocument.create({ data: { title, content } });
+    return { success: true, document: doc };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteKnowledgeDocument(id: string) {
+  if (!(await verifyAdmin())) return { success: false, error: "Unauthorized" };
+  try {
+    await prisma.knowledgeDocument.delete({ where: { id } });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+// ----------------------------------------------------------------------
+// 📣 TARGETED NOTIFICATIONS
+// ----------------------------------------------------------------------
+
+export async function sendTargetedPushNotification(title: string, message: string, targetRole: string) {
+  if (!(await verifyAdmin())) return { success: false, error: "Unauthorized" };
+
+  try {
+    const webpush = require("web-push");
+    webpush.setVapidDetails(
+      "mailto:admin@ignite.com",
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
+    );
+
+    let whereClause = {};
+    if (targetRole !== "ALL") {
+      whereClause = { user: { role: targetRole } };
+    }
+
+    const subscriptions = await prisma.pushSubscription.findMany({
+      where: whereClause
+    });
+
+    const payload = JSON.stringify({ title, body: message });
+
+    const results = await Promise.allSettled(
+      subscriptions.map(sub => 
+        webpush.sendNotification({
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth
+          }
+        }, payload)
+      )
+    );
+
+    return { success: true, sent: results.filter(r => r.status === "fulfilled").length };
+  } catch (error: any) {
+    console.error("Targeted push error:", error);
+    return { success: false, error: "Failed to send notifications" };
   }
 }
