@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { awardXP } from "@/app/actions/gamification";
 
-export async function submitPrayer(content: string, isAnonymous: boolean, categoryName: string) {
+export async function submitPrayer(content: string, isAnonymous: boolean, categoryName: string, isPrivate: boolean = false) {
   const session = await getSession();
   
   const category = await prisma.prayerCategory.findUnique({ where: { name: categoryName } });
@@ -16,12 +16,13 @@ export async function submitPrayer(content: string, isAnonymous: boolean, catego
       content,
       isAnonymous,
       isApproved: true,
+      isPrivate,
       categoryId: category?.id || null,
     }
   });
 
   if (session?.id) {
-    await awardXP(10, "Submitted a prayer request");
+    await awardXP(10, isPrivate ? "Wrote a private prayer" : "Submitted a prayer request");
   }
 
   revalidatePath("/prayer");
@@ -49,13 +50,40 @@ export async function getCategories() {
 
 export async function getApprovedPrayers() {
   const prayers = await prisma.prayerRequest.findMany({
-    where: { isApproved: true },
+    where: { isApproved: true, isPrivate: false },
     orderBy: { createdAt: "desc" },
     include: {
       user: {
         select: { firstName: true, lastName: true }
       },
       category: true
+    }
+  });
+
+  return prayers.map(p => ({
+    id: p.id,
+    text: p.content,
+    author: p.isAnonymous ? "Anonymous" : (p.user ? `${p.user.firstName} ${p.user.lastName}` : "Anonymous"),
+    anonymous: p.isAnonymous,
+    prayers: p.prayCount,
+    prayed: false,
+    category: p.category?.name || "General",
+    time: p.createdAt.toISOString(),
+  }));
+}
+
+export async function getPrivatePrayers() {
+  const session = await getSession();
+  if (!session?.id) return [];
+
+  const prayers = await prisma.prayerRequest.findMany({
+    where: { userId: session.id, isPrivate: true },
+    orderBy: { createdAt: "desc" },
+    include: {
+      category: true,
+      user: {
+        select: { firstName: true, lastName: true }
+      }
     }
   });
 

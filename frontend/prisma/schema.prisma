@@ -236,6 +236,7 @@ model PrayerRequest {
   isAnonymous Boolean  @default(false)
   isApproved  Boolean  @default(false)
   prayCount   Int      @default(0)
+  isPrivate   Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
 

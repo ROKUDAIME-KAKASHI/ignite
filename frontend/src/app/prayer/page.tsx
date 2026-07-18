@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Heart, Lock, Send} from "lucide-react";
+import { Heart, Lock, Send, BookMarked, Globe } from "lucide-react";
 
 /* ─── Types ── */
 interface PrayerRequest {
@@ -20,7 +20,7 @@ interface PrayerRequest {
   time: string;
 }
 
-import { submitPrayer, getApprovedPrayers, incrementPrayerCount, getCategories } from "./actions";
+import { submitPrayer, getApprovedPrayers, getPrivatePrayers, incrementPrayerCount, getCategories } from "./actions";
 
 /* ─── Categories ── */
 // We now fetch these from the database, but we still define an "All" fallback for filtering
@@ -118,11 +118,14 @@ function PrayerCard({ req, onPray, catColor }: { req: PrayerRequest; onPray: (id
 /* ─── Main Page ── */
 export default function PrayerWall() {
   const [filter, setFilter] = useState("All");
+  const [activeTab, setActiveTab] = useState<"wall" | "journal">("wall");
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
+  const [privatePrayers, setPrivatePrayers] = useState<PrayerRequest[]>([]);
   const [dbCategories, setDbCategories] = useState<{name: string, color: string}[]>([]);
   
   const [text, setText] = useState("");
   const [anonymous, setAnonymous] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [newCat, setNewCat] = useState("General");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -135,11 +138,13 @@ export default function PrayerWall() {
   const loadData = async () => {
     setRefreshing(true);
     try {
-      const [fetchedPrayers, fetchedCats] = await Promise.all([
+      const [fetchedPrayers, fetchedPrivate, fetchedCats] = await Promise.all([
         getApprovedPrayers(),
+        getPrivatePrayers(),
         getCategories()
       ]);
       setPrayers(fetchedPrayers);
+      setPrivatePrayers(fetchedPrivate);
       setDbCategories(fetchedCats);
       if (fetchedCats.length > 0 && !fetchedCats.find(c => c.name === "General")) {
         setNewCat(fetchedCats[0].name);
@@ -163,7 +168,7 @@ export default function PrayerWall() {
   const handleSubmit = async () => {
     if (!text.trim()) return;
     setSubmitting(true);
-    await submitPrayer(text.trim(), anonymous, newCat);
+    await submitPrayer(text.trim(), anonymous, newCat, isPrivate);
     setText("");
     setSubmitting(false);
     setSubmitted(true);
@@ -211,12 +216,37 @@ export default function PrayerWall() {
       </div>
 
       <div className="px-4 pt-4 pb-8 space-y-4">
+        {/* ── Tabs ── */}
+        <div className="flex bg-card p-1 rounded-xl border border-border/60">
+          <button
+            onClick={() => { setActiveTab("wall"); setIsPrivate(false); }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 text-xs font-bold py-2 rounded-lg transition",
+              activeTab === "wall" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Globe className="w-3.5 h-3.5" /> Public Wall
+          </button>
+          <button
+            onClick={() => { setActiveTab("journal"); setIsPrivate(true); }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 text-xs font-bold py-2 rounded-lg transition",
+              activeTab === "journal" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <BookMarked className="w-3.5 h-3.5" /> My Journal
+          </button>
+        </div>
 
         {/* ── Submit a request ── */}
         <div className="rounded-2xl bg-card border border-border/60 card-holy overflow-hidden">
           <div className="px-4 pt-4 pb-3 border-b border-border/40 bg-gradient-to-r from-purple-600/8 to-violet-500/6 dark:from-purple-600/15 dark:to-violet-500/12">
-            <p className="font-bold text-foreground font-serif text-sm">Submit a Prayer Request</p>
-            <p className="text-xs text-muted-foreground mt-0.5">"Cast your burden on the Lord and He will sustain you." — Psalm 55:22</p>
+            <p className="font-bold text-foreground font-serif text-sm">
+              {activeTab === "journal" ? "Write a Private Prayer" : "Submit a Prayer Request"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {activeTab === "journal" ? "Between you and God alone." : '"Cast your burden on the Lord and He will sustain you." — Psalm 55:22'}
+            </p>
           </div>
           <div className="px-4 py-3 space-y-3">
             <Textarea
@@ -242,15 +272,17 @@ export default function PrayerWall() {
                 {/* Anonymous toggle */}
                 <button
                   onClick={() => setAnonymous(!anonymous)}
+                  disabled={activeTab === "journal"}
                   className={cn(
                     "flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition",
+                    activeTab === "journal" ? "opacity-50 cursor-not-allowed border-border/60 text-muted-foreground" :
                     anonymous
                       ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
                       : "border-border/60 text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <Lock className="w-3 h-3" />
-                  {anonymous ? "Anonymous ✓" : "Anonymous"}
+                  {activeTab === "journal" ? "Private" : anonymous ? "Anonymous ✓" : "Anonymous"}
                 </button>
               </div>
               <Button
@@ -269,7 +301,7 @@ export default function PrayerWall() {
                   exit={{ opacity: 0 }}
                   className="text-xs text-green-600 dark:text-green-400 font-semibold text-center mt-3"
                 >
-                  ✓ Your prayer has been shared with the community. 🙏
+                  {activeTab === "journal" ? "✓ Added to your private journal. 🙏" : "✓ Your prayer has been shared with the community. 🙏"}
                 </motion.p>
               )}
             </AnimatePresence>
@@ -298,14 +330,15 @@ export default function PrayerWall() {
         <div className="space-y-3">
           <AnimatePresence>
             {(() => {
-              let filtered = filter === "All" ? prayers : prayers.filter(p => p.category === filter);
+              const currentList = activeTab === "wall" ? prayers : privatePrayers;
+              let filtered = filter === "All" ? currentList : currentList.filter(p => p.category === filter);
               return filtered.map(req => {
                 const catDef = dbCategories.find(c => c.name === req.category);
                 return <PrayerCard key={req.id} req={req} onPray={onPray} catColor={catDef?.color || DEFAULT_CATEGORY_COLOR} />
               });
             })()}
           </AnimatePresence>
-          {prayers.length === 0 && !refreshing && (
+          {(activeTab === "wall" ? prayers : privatePrayers).length === 0 && !refreshing && (
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-3xl mb-2">🕊️</p>
               <p className="font-serif font-semibold">No requests in this category</p>
