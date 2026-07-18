@@ -24,7 +24,7 @@ const protectedRoutes = [
   "/chess"
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const session = request.cookies.get("session")?.value;
   const adminSession = request.cookies.get("admin_session")?.value;
   const path = request.nextUrl.pathname;
