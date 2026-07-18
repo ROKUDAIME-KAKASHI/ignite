@@ -1,6 +1,7 @@
 {
   "buildCommand": "next build --webpack",
   "framework": "nextjs",
+  "regions": ["bom1"],
   "crons": [
     {
       "path": "/api/cron/daily-notify",
