@@ -303,6 +303,8 @@ export default function BibleLudoPage() {
   useEffect(() => {
     if (gameMode === "setup" || gameMode === "lobby") return;
     
+    let timeoutId: NodeJS.Timeout;
+
     if (dice !== null && !trivia && !isRolling && !winner) {
       const hasMoves = tokens[turn].some((t, idx) => canMove(turn, idx, dice));
       
@@ -314,10 +316,10 @@ export default function BibleLudoPage() {
       if (!shouldAct) return;
 
       if (!hasMoves) {
-        setTimeout(() => nextTurn(false, gameMode === "live"), 1000);
+        timeoutId = setTimeout(() => nextTurn(false, gameMode === "live"), 1000);
       } else if (gameMode !== "local" && ((gameMode === "solo" && turn !== "red") || (gameMode === "team" && turn !== "red") || isHostBot)) {
         // AI Turn
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           const movable = tokens[turn].map((t, idx) => ({ idx, can: canMove(turn, idx, dice) })).filter(m => m.can);
           if (movable.length > 0) {
             // Smart AI Path Selection
@@ -429,15 +431,19 @@ export default function BibleLudoPage() {
           }
         }, 1200);
       }
-    } else if (dice === null && !winner) {
+    } else if (dice === null && !winner && !isRolling) {
       // If it's a bot's turn to roll, do it automatically
       const isHostBot = (gameMode === "live" && activeRoom?.host && roomPlayers[turn]?.isBot);
       const isSoloOrTeamBot = (gameMode === "solo" && turn !== "red") || (gameMode === "team" && turn !== "red");
         
       if (isHostBot || isSoloOrTeamBot) {
-        setTimeout(() => executeRoll(gameMode === "live"), 800);
+        timeoutId = setTimeout(() => executeRoll(gameMode === "live"), 800);
       }
     }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [dice, turn, isRolling, trivia, winner, gameMode, tokens, roomPlayers, activeRoom, myColor]);
 
   const canMove = (color: Color, tokenIdx: number, roll: number) => {
@@ -572,7 +578,13 @@ export default function BibleLudoPage() {
   const moveToken = (color: Color, tokenIdx: number, roll: number, sync = true) => {
     if (!canMove(color, tokenIdx, roll)) return;
     
-    const newTokens = { ...tokens };
+    // Deep copy token arrays to prevent React state mutation
+    const newTokens = {
+      red: [...tokens.red],
+      green: [...tokens.green],
+      yellow: [...tokens.yellow],
+      blue: [...tokens.blue]
+    };
     const pos = newTokens[color][tokenIdx];
     let extraTurn = roll === 6;
 
