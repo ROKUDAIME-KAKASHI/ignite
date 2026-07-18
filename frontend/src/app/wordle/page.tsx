@@ -20,7 +20,13 @@ if (BIBLICAL_WORDS.length === 0) {
 
 let initialWord = BIBLICAL_WORDS[0];
 if (typeof window !== "undefined") {
-  initialWord = BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)];
+  const played = JSON.parse(localStorage.getItem("ignite_wordle_played") || "[]");
+  let available = BIBLICAL_WORDS.filter(w => !played.includes(w.word));
+  if (available.length === 0) {
+    localStorage.removeItem("ignite_wordle_played");
+    available = BIBLICAL_WORDS;
+  }
+  initialWord = available[Math.floor(Math.random() * available.length)];
 }
 const MAX_GUESSES = 6;
 
@@ -59,7 +65,13 @@ export default function WordlePage() {
       }
     }
     // Random select on client mount to avoid hydration mismatch
-    setTargetWordObj(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
+    const played = JSON.parse(localStorage.getItem("ignite_wordle_played") || "[]");
+    let available = BIBLICAL_WORDS.filter(w => !played.includes(w.word));
+    if (available.length === 0) {
+      localStorage.removeItem("ignite_wordle_played");
+      available = BIBLICAL_WORDS;
+    }
+    setTargetWordObj(available[Math.floor(Math.random() * available.length)]);
   }, []);
 
   // Save state
@@ -78,7 +90,13 @@ export default function WordlePage() {
 
   const resetGame = () => {
     localStorage.removeItem("ignite_wordle_state");
-    setTargetWordObj(BIBLICAL_WORDS[Math.floor(Math.random() * BIBLICAL_WORDS.length)]);
+    const played = JSON.parse(localStorage.getItem("ignite_wordle_played") || "[]");
+    let available = BIBLICAL_WORDS.filter(w => !played.includes(w.word));
+    if (available.length === 0) {
+      localStorage.removeItem("ignite_wordle_played");
+      available = BIBLICAL_WORDS;
+    }
+    setTargetWordObj(available[Math.floor(Math.random() * available.length)]);
     setGuesses([]);
     setCurrentGuess("");
     setGameOver(false);
@@ -96,6 +114,7 @@ export default function WordlePage() {
     if (currentGuess === targetWord) {
       setWon(true);
       setGameOver(true);
+      
       if (user && !awarded) {
         setAwarded(true);
         const res = await awardXP(10, "Won Scripture Wordle");
@@ -103,6 +122,14 @@ export default function WordlePage() {
       }
     } else if (newGuesses.length >= MAX_GUESSES) {
       setGameOver(true);
+    }
+    
+    // Add to played list if game is over (won or lost)
+    if (currentGuess === targetWord || newGuesses.length >= MAX_GUESSES) {
+      const played = JSON.parse(localStorage.getItem("ignite_wordle_played") || "[]");
+      if (!played.includes(targetWord)) {
+        localStorage.setItem("ignite_wordle_played", JSON.stringify([...played, targetWord]));
+      }
     }
   }, [currentGuess, guesses, user, awarded, setUser, targetWord]);
 

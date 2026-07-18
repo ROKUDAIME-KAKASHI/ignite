@@ -244,7 +244,13 @@ export default function MemoryMatchPage() {
               <div 
                 key={card.id} 
                 onClick={() => handleCardClick(index)}
-                onMouseEnter={() => setHoveredCardText(card.fullText)}
+                onMouseEnter={() => {
+                  if (card.isFlipped || card.isMatched) {
+                    setHoveredCardText(card.fullText);
+                  } else {
+                    setHoveredCardText("Flip to reveal text.");
+                  }
+                }}
                 onMouseLeave={() => setHoveredCardText("")}
                 className="aspect-square perspective-1000 cursor-pointer"
               >

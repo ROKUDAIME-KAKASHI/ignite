@@ -425,8 +425,8 @@ export default function AdminDashboardPage() {
               <ShieldCheck className="w-5 h-5 text-white dark:text-slate-900" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">{isSuperAdmin ? "Admin Console" : "Priest Dashboard"}</h1>
-              <p className="text-xs text-muted-foreground font-medium">{isSuperAdmin ? "Ignite System Overview" : "Manage Your Parish"}</p>
+              <h1 className="text-xl font-bold text-foreground">Admin Console</h1>
+              <p className="text-xs text-muted-foreground font-medium">Ignite System Overview</p>
             </div>
           </div>
           <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0">
