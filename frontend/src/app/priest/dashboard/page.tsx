@@ -48,7 +48,7 @@ import {
   deleteKnowledgeDocument,
   sendTargetedPushNotification,
   createCustomQuiz
-} from "../actions";
+} from "@/app/admin/actions";
 import { getMessages, deleteMessage as deleteGlobalMessage } from "@/app/actions/globalChat";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
 import { getMissions } from "@/app/missions/actions";
