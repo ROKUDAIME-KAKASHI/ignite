@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { encrypt, decrypt } from "@/lib/auth";
+import { encrypt, decrypt, getSession } from "@/lib/auth";
 import { neon } from "@neondatabase/serverless";
 
 async function verifyAdmin() {
