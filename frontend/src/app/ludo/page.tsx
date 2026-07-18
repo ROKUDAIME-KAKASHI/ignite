@@ -392,48 +392,7 @@ export default function BibleLudoPage() {
     if (dice !== null || isRolling || winner || trivia !== null) return;
     if (gameMode === "live" && turn !== myColor) return; // Only roll for yourself in live
 
-    const isHuman = (gameMode === "local") || 
-                    (gameMode === "live" && turn === myColor) || 
-                    (gameMode === "solo" && turn === "red") ||
-                    (gameMode === "team" && turn === "red");
-
-    if (isHuman) {
-      // Trigger trivia before rolling
-      let questionsToUse = unusedQuestions;
-      if (questionsToUse.length === 0) {
-        questionsToUse = [...TRIVIA_QUESTIONS];
-        if (typeof window !== "undefined") {
-          try {
-            localStorage.removeItem("ludo_seen_questions");
-          } catch {}
-        }
-      }
-      
-      const qIndex = Math.floor(Math.random() * questionsToUse.length);
-      const selectedTrivia = questionsToUse[qIndex];
-      
-      setTrivia(selectedTrivia);
-      
-      // Remove the selected question (and any exact duplicates) from the unused list
-      const updatedQuestions = questionsToUse.filter(q => q.q !== selectedTrivia.q);
-      setUnusedQuestions(updatedQuestions);
-
-      // Track seen question in localStorage
-      if (typeof window !== "undefined") {
-        try {
-          const storedSeen = localStorage.getItem("ludo_seen_questions");
-          const seenList = storedSeen ? JSON.parse(storedSeen) : [];
-          if (!seenList.includes(selectedTrivia.q)) {
-            seenList.push(selectedTrivia.q);
-            localStorage.setItem("ludo_seen_questions", JSON.stringify(seenList));
-          }
-        } catch (e) {
-          console.error("Error saving seen question:", e);
-        }
-      }
-    } else {
-      executeRoll(true);
-    }
+    executeRoll(gameMode === "live");
   };
 
   const executeRoll = (sync = true) => {
@@ -447,6 +406,47 @@ export default function BibleLudoPage() {
       
       if (sync && gameMode === "live" && gameChannel) {
         gameChannel.send({ type: 'broadcast', event: 'roll_dice', payload: { result } });
+      }
+
+      // If it's a human player and they roll a 6, trigger trivia
+      const isHuman = (gameMode === "local") || 
+                      (gameMode === "live" && turn === myColor) || 
+                      (gameMode === "solo" && turn === "red") ||
+                      (gameMode === "team" && turn === "red");
+
+      if (isHuman && result === 6) {
+        let questionsToUse = unusedQuestions;
+        if (questionsToUse.length === 0) {
+          questionsToUse = [...TRIVIA_QUESTIONS];
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.removeItem("ludo_seen_questions");
+            } catch {}
+          }
+        }
+        
+        const qIndex = Math.floor(Math.random() * questionsToUse.length);
+        const selectedTrivia = questionsToUse[qIndex];
+        
+        setTrivia(selectedTrivia);
+        
+        // Remove the selected question from the unused list
+        const updatedQuestions = questionsToUse.filter(q => q.q !== selectedTrivia.q);
+        setUnusedQuestions(updatedQuestions);
+
+        // Track seen question in localStorage
+        if (typeof window !== "undefined") {
+          try {
+            const storedSeen = localStorage.getItem("ludo_seen_questions");
+            const seenList = storedSeen ? JSON.parse(storedSeen) : [];
+            if (!seenList.includes(selectedTrivia.q)) {
+              seenList.push(selectedTrivia.q);
+              localStorage.setItem("ludo_seen_questions", JSON.stringify(seenList));
+            }
+          } catch (e) {
+            console.error("Error saving seen question:", e);
+          }
+        }
       }
     }, 600);
   };
@@ -570,7 +570,6 @@ export default function BibleLudoPage() {
       setTimeout(() => {
         setTriviaResult(null);
         setTrivia(null);
-        executeRoll(true);
       }, 1500);
     } else {
       setTriviaResult("wrong");
@@ -1079,6 +1078,11 @@ export default function BibleLudoPage() {
                   <p className="font-bold text-sm leading-none capitalize text-foreground">
                     {getPlayerName(turn)} {gameMode === "live" && turn === myColor && " (You)"}
                   </p>
+                  {dice === 6 && (
+                    <p className="text-[10px] text-amber-500 font-bold mt-1 animate-pulse">
+                      📖 Answering Trivia...
+                    </p>
+                  )}
                 </div>
               </div>
               
