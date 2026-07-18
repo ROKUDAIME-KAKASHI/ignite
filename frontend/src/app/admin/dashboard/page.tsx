@@ -684,7 +684,8 @@ export default function AdminDashboardPage() {
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-border/50 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
+                <div className="overflow-x-auto w-full">
+                    <table className="w-full text-sm text-left">
                   <thead className="text-xs text-muted-foreground uppercase bg-slate-50 dark:bg-slate-950/50">
                     <tr>
                       <th className="px-6 py-4 font-bold tracking-wider">Timestamp</th>
@@ -756,6 +757,7 @@ export default function AdminDashboardPage() {
                     )}
                   </tbody>
                 </table>
+                  </div>
               </div>
             </div>
           </motion.div>
@@ -853,7 +855,8 @@ export default function AdminDashboardPage() {
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-border/50 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
+                <div className="overflow-x-auto w-full">
+                    <table className="w-full text-sm text-left">
                   <thead className="text-xs text-muted-foreground uppercase bg-slate-50 dark:bg-slate-950/50">
                     <tr>
                       <th className="px-6 py-4 font-bold tracking-wider">Timestamp</th>
@@ -893,6 +896,7 @@ export default function AdminDashboardPage() {
                     )}
                   </tbody>
                 </table>
+                  </div>
               </div>
             </div>
           </motion.div>

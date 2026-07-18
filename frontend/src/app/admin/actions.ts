@@ -250,18 +250,7 @@ export async function getAdminDashboardData() {
 export async function getAllUsers() {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
-  const isSuper = await verifySuperAdmin();
   let whereClause = {};
-  
-  if (!isSuper) {
-    const session = await getSession();
-    if (session?.id) {
-      const u = await prisma.user.findUnique({ where: { id: session.id } });
-      if (u?.churchId) {
-        whereClause = { churchId: u.churchId };
-      }
-    }
-  }
 
   try {
     const usersData = await prisma.user.findMany({
