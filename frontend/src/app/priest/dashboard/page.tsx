@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const isSuperAdmin = false;
 
-  const [activeTab, setActiveTab] = useState<"users" | "prayers" | "notices" | "events" | "appointments" | "content" | "moderation" | "knowledge">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "prayers" | "notices" | "events" | "appointments" | "moderation" | "knowledge">("users");
   const [selectedUserForBadges, setSelectedUserForBadges] = useState<any>(null);
 
   // New search & pagination states
@@ -435,7 +435,7 @@ export default function AdminDashboardPage() {
         
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-x-auto scrollbar-hide snap-x">
-          {(["users", "appointments", "notices", "events", "knowledge", "content", "moderation"] as const).map(t => (
+          {(["users", "appointments", "notices", "events", "knowledge", "moderation"] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} className={cn(
               "flex-1 py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-lg transition whitespace-nowrap snap-center",
               activeTab === t ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md scale-[1.02]" : "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -747,27 +747,7 @@ export default function AdminDashboardPage() {
                             >
                               Grant XP
                             </button>
-                            <select
-                              value={user.role}
-                              onChange={async (e) => {
-                                const newRole = e.target.value;
-                                if (confirm(`Change ${user.name}'s role to ${newRole}?`)) {
-                                  const res = await updateUserRole(user.id, newRole);
-                                  if (res.success) {
-                                    await fetchAllUsersData();
-                                    await fetchDashboardData();
-                                  } else {
-                                    alert(res.error);
-                                  }
-                                }
-                              }}
-                              className="text-xs bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 font-bold transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-                            >
-                              <option value="MEMBER">Role: MEMBER</option>
-                              <option value="LEADER">Role: LEADER</option>
-                              <option value="PRIEST">Role: PRIEST</option>
-                              <option value="ADMIN">Role: ADMIN</option>
-                            </select>
+
                             <button 
                               onClick={async () => {
                                 if (confirm(`Log in as ${user.name}?`)) {
@@ -1143,191 +1123,12 @@ export default function AdminDashboardPage() {
           </motion.div>
         )}
 
-        {activeTab === "content" && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            
-            {/* ── Quotes Management ── */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
-              <h2 className="text-lg font-bold text-foreground mb-4">Quotes of the Day</h2>
-              
-              <div className="space-y-4 mb-6">
-                <Input value={newQuoteText} onChange={e => setNewQuoteText(e.target.value)} placeholder="Quote text (e.g. Do small things with great love.)" />
-                <Input value={newQuoteAuthor} onChange={e => setNewQuoteAuthor(e.target.value)} placeholder="Author (e.g. St. Teresa of Calcutta)" />
-                <button onClick={handleCreateQuote} disabled={creatingQuote} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold w-full">
-                  {creatingQuote ? "Adding..." : "Add Quote"}
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {quotes.map(q => (
-                  <div key={q.id} className="p-4 border rounded-xl flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-bold">"{q.quote}"</p>
-                      <p className="text-xs text-muted-foreground">— {q.author}</p>
-                    </div>
-                    <button 
-                      onClick={() => handleToggleQuote(q.id)}
-                      className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase", q.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500 hover:bg-slate-200")}
-                    >
-                      {q.isActive ? "Active" : "Set Active"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── Chat Suggestions ── */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
-              <h2 className="text-lg font-bold text-foreground mb-4">AI Chat Suggestions</h2>
-              
-              <div className="flex gap-2 mb-6">
-                <Input value={newSuggestionText} onChange={e => setNewSuggestionText(e.target.value)} placeholder="e.g. Explain the Holy Trinity" className="flex-1" />
-                <button onClick={handleCreateSuggestion} disabled={creatingSuggestion} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold">
-                  {creatingSuggestion ? "Adding..." : "Add"}
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                {chatSuggestions.map(s => (
-                  <div key={s.id} className="p-3 border rounded-xl flex items-center justify-between bg-slate-50 dark:bg-slate-950">
-                    <p className="text-sm font-medium">{s.text}</p>
-                    <button onClick={() => handleDeleteSuggestion(s.id)} className="text-red-500 text-xs font-bold hover:underline">
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── Badges Management ── */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
-              <h2 className="text-lg font-bold text-foreground mb-4">Badges & Medals</h2>
-              
-              <div className="space-y-4 mb-6">
-                <Input value={newBadgeName} onChange={e => setNewBadgeName(e.target.value)} placeholder="Badge Name (e.g. Gospel Pilgrim)" />
-                <Input value={newBadgeDesc} onChange={e => setNewBadgeDesc(e.target.value)} placeholder="Description (e.g. Read all Gospels)" />
-                <Input value={newBadgeUrl} onChange={e => setNewBadgeUrl(e.target.value)} placeholder="Emoji Icon or Image URL (defaults to 🏅)" />
-                <button onClick={handleCreateBadge} disabled={creatingBadge} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold w-full">
-                  {creatingBadge ? "Adding..." : "Add Badge"}
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {badges.map(b => (
-                  <div key={b.id} className="p-4 border rounded-xl flex items-center justify-between bg-slate-50 dark:bg-slate-950">
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">{b.imageUrl && b.imageUrl.length < 5 ? b.imageUrl : "🏅"}</span>
-                      <div>
-                        <p className="text-sm font-bold">{b.name}</p>
-                        <p className="text-xs text-muted-foreground">{b.description}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => handleDeleteBadge(b.id)} className="text-red-500 text-xs font-bold hover:underline shrink-0 ml-2">
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── Custom Quizzes ── */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
-              <h2 className="text-lg font-bold text-foreground mb-4">Custom Parish Quizzes</h2>
-              <p className="text-xs text-muted-foreground mb-4">Create a custom quiz exclusively for your parish members.</p>
-              
-              <div className="space-y-4 mb-6 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-border/50">
-                <Input value={newQuizTitle} onChange={e => setNewQuizTitle(e.target.value)} placeholder="Quiz Title (e.g. Parish History)" className="bg-white dark:bg-slate-900" />
-                <Input value={newQuizDesc} onChange={e => setNewQuizDesc(e.target.value)} placeholder="Description (e.g. Weekly Sunday School Quiz)" className="bg-white dark:bg-slate-900" />
-                
-                <div className="pt-2 border-t border-border/50">
-                  <p className="text-xs font-bold text-muted-foreground mb-3">Add Question</p>
-                  <Input value={newQuizQuestion} onChange={e => setNewQuizQuestion(e.target.value)} placeholder="Question Text" className="mb-2 bg-white dark:bg-slate-900" />
-                  <Input value={newQuizAnswer} onChange={e => setNewQuizAnswer(e.target.value)} placeholder="Correct Answer" className="mb-2 border-green-500 bg-white dark:bg-slate-900" />
-                  <Input value={newQuizOption1} onChange={e => setNewQuizOption1(e.target.value)} placeholder="Wrong Option 1" className="mb-2 bg-white dark:bg-slate-900" />
-                  <Input value={newQuizOption2} onChange={e => setNewQuizOption2(e.target.value)} placeholder="Wrong Option 2" className="mb-2 bg-white dark:bg-slate-900" />
-                  <Input value={newQuizOption3} onChange={e => setNewQuizOption3(e.target.value)} placeholder="Wrong Option 3" className="mb-3 bg-white dark:bg-slate-900" />
-                </div>
-
-                <button onClick={handleCreateQuiz} disabled={creatingQuiz} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold w-full shadow-md transition-colors">
-                  {creatingQuiz ? "Creating..." : "Publish Custom Quiz"}
-                </button>
-              </div>
-            </div>
-
-            {/* ── Spiritual Missions View ── */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
-              <h2 className="text-lg font-bold text-foreground mb-4">Active Spiritual Missions</h2>
-              <p className="text-xs text-muted-foreground mb-4">Active missions youth can complete to earn Grace Points.</p>
-              
-              <div className="space-y-3">
-                {missions.map(m => (
-                  <div key={m.id} className="p-4 border rounded-xl flex items-center justify-between bg-slate-50 dark:bg-slate-950">
-                    <div>
-                      <p className="font-bold text-sm text-foreground flex items-center gap-2">⚔️ {m.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{m.description}</p>
-                    </div>
-                    <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 font-bold shrink-0 ml-3 border-0">
-                      +{m.xpReward} GP
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </motion.div>
-        )}
+        
 
                 
       </div>
 
-      {/* Badge Management Modal */}
-      {selectedUserForBadges && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="p-5 border-b border-border/50 flex items-center justify-between">
-              <h3 className="font-bold font-serif text-lg text-foreground">Manage Badges</h3>
-              <button onClick={() => setSelectedUserForBadges(null)} className="text-slate-400 hover:text-slate-600">✕</button>
-            </div>
-            <div className="p-5">
-              <p className="text-xs text-muted-foreground mb-4">Editing badges for <span className="font-bold text-foreground">{selectedUserForBadges.name}</span></p>
-              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-                {badges.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No badges exist in the system yet. Create them in the Content tab.</p>
-                ) : (
-                  badges.map(b => {
-                    const hasBadge = selectedUserForBadges.badges?.find((ub: any) => ub.id === b.id);
-                    return (
-                      <div key={b.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-slate-50 dark:bg-slate-800/50">
-                        <div className="flex items-center gap-3">
-                          <div className="text-2xl">{b.imageUrl}</div>
-                          <div>
-                            <p className="text-sm font-bold text-foreground leading-none">{b.name}</p>
-                            <p className="text-[10px] text-muted-foreground mt-1">{b.description}</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={async () => {
-                            if (hasBadge) {
-                              await handleRevokeBadge(selectedUserForBadges.id, b.id);
-                              setSelectedUserForBadges({...selectedUserForBadges, badges: selectedUserForBadges.badges.filter((x:any) => x.id !== b.id)});
-                            } else {
-                              await handleAwardBadge(selectedUserForBadges.id, b.id);
-                              setSelectedUserForBadges({...selectedUserForBadges, badges: [...(selectedUserForBadges.badges || []), b]});
-                            }
-                          }}
-                          className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition-colors", hasBadge ? "bg-red-100 text-red-600 hover:bg-red-200" : "bg-green-100 text-green-700 hover:bg-green-200")}
-                        >
-                          {hasBadge ? "Revoke" : "Award"}
-                        </button>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }
