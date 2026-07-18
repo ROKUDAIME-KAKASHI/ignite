@@ -852,11 +852,6 @@ export default function BibleLudoPage() {
     if (!gameChannel) return;
     
     const nonHosts = lobbyPlayers.filter((p: any) => !p.isHost);
-    
-    if (nonHosts.length === 0) {
-      showToast("Waiting for at least one player to join!");
-      return;
-    }
 
     const allReady = nonHosts.every((p: any) => p.isReady);
     if (!allReady) {
@@ -1142,7 +1137,7 @@ export default function BibleLudoPage() {
                           {color[0]}
                         </div>
                         <span className={cn("text-sm font-semibold", hasPlayer ? "text-foreground" : "text-muted-foreground")}>
-                          {hasPlayer ? `${player.name} ${isUser ? "(You)" : ""}` : `Waiting for player...`}
+                          {hasPlayer ? `${player.name} ${isUser ? "(You)" : ""}` : `Open (AI will play)`}
                         </span>
                       </div>
                       
