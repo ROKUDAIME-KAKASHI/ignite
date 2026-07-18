@@ -12,6 +12,64 @@ export async function GET(request: Request) {
   }
 
   const query = `${book} ${chapter}`;
+
+  if (version === 'MAL') {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const { BIBLE_BOOKS } = require('@/lib/bible-books');
+      
+      const filePath = path.join(process.cwd(), 'src', 'data', 'malayalam.json');
+      const data = fs.readFileSync(filePath, 'utf-8');
+      const bibleJson = JSON.parse(data);
+
+      const bookIndex = BIBLE_BOOKS.findIndex((b: any) => b.apiName === book);
+      if (bookIndex === -1) {
+        return NextResponse.json({ error: 'Book not found' }, { status: 404 });
+      }
+      
+      // holy_bible.json uses Catholic canon (73 books). Our BIBLE_BOOKS uses Protestant canon (66 books).
+      // We must map Protestant index (0-65) to Catholic bookId (1-73).
+      let catholicBookId = bookIndex + 1;
+      if (bookIndex >= 16 && bookIndex <= 16) catholicBookId = 19; // Esther
+      else if (bookIndex >= 17 && bookIndex <= 21) catholicBookId = bookIndex + 5; // Job - Song
+      else if (bookIndex >= 22 && bookIndex <= 24) catholicBookId = bookIndex + 7; // Isaiah - Lam
+      else if (bookIndex >= 25 && bookIndex <= 26) catholicBookId = bookIndex + 8; // Ezek - Dan
+      else if (bookIndex >= 27 && bookIndex <= 38) catholicBookId = bookIndex + 8; // Hosea - Malachi
+      else if (bookIndex >= 39) catholicBookId = bookIndex + 8; // NT (Matt - Rev)
+
+      const bookIdStr = catholicBookId.toString();
+      const targetBook = bibleJson.find((b: any) => b.bookId === bookIdStr);
+      
+      if (!targetBook) {
+        return NextResponse.json({ error: 'Book not found in Malayalam translation' }, { status: 404 });
+      }
+
+      const targetChapter = targetBook.chapters.find((c: any) => c.chapterId === chapter);
+      if (!targetChapter) {
+        return NextResponse.json({ error: 'Chapter not found' }, { status: 404 });
+      }
+
+      const verses = targetChapter.verses.map((text: string, i: number) => ({
+        book_name: BIBLE_BOOKS[bookIndex].name,
+        chapter: parseInt(chapter),
+        verse: i + 1,
+        text
+      }));
+
+      return NextResponse.json({
+        reference: `${BIBLE_BOOKS[bookIndex].name} ${chapter}`,
+        verses,
+        text: targetChapter.verses.join(' '),
+        translation_id: 'mal',
+        translation_name: 'Malayalam Bible'
+      });
+    } catch (err: any) {
+      console.error(err);
+      return NextResponse.json({ error: 'Failed to load Malayalam Bible: ' + err.message }, { status: 500 });
+    }
+  }
+
   const bgUrl = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(query)}&version=${version}`;
 
   try {
