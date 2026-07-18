@@ -67,19 +67,27 @@ export async function awardGracePoints(userId: string, amount: number, reason: s
   if (!(await verifySuperAdmin())) return { success: false, error: "Unauthorized" };
   
   try {
-    await prisma.$transaction([
-      prisma.user.update({
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { xp: { increment: amount } },
+    });
+    
+    await prisma.xPLog.create({
+      data: {
+        userId,
+        amount,
+        reason: `Admin Award: ${reason}`,
+      },
+    });
+
+    const newLevel = Math.floor(user.xp / 500) + 1;
+    if (newLevel > user.level) {
+      await prisma.user.update({
         where: { id: userId },
-        data: { xp: { increment: amount } },
-      }),
-      prisma.xPLog.create({
-        data: {
-          userId,
-          amount,
-          reason: `Admin Award: ${reason}`,
-        },
-      })
-    ]);
+        data: { level: newLevel }
+      });
+    }
+
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };

@@ -1,4 +1,4 @@
-export type Translation = "kjv" | "web" | "asv" | "bbe" | "nrsvue";
+export type Translation = "kjv" | "web" | "asv" | "bbe" | "nrsvue" | "mal";
 
 export interface BibleVerse {
   book_id: string;
@@ -27,11 +27,12 @@ export async function fetchChapter(
   chapter: number,
   translation: Translation = "nrsvue"
 ): Promise<BibleChapterResponse> {
-  // Use our internal proxy scraper for NRSVUE because it's not freely available in public APIs
-  if (translation === "nrsvue") {
-    const url = `/api/bible?book=${encodeURIComponent(apiName)}&chapter=${chapter}&version=NRSVUE`;
+  // Use our internal proxy scraper for NRSVUE and Malayalam
+  if (translation === "nrsvue" || translation === "mal") {
+    const versionStr = translation.toUpperCase();
+    const url = `/api/bible?book=${encodeURIComponent(apiName)}&chapter=${chapter}&version=${versionStr}`;
     const res = await fetch(url, { next: { revalidate: 86400 } });
-    if (!res.ok) throw new Error(`Failed to fetch ${apiName} ${chapter} (NRSVUE)`);
+    if (!res.ok) throw new Error(`Failed to fetch ${apiName} ${chapter} (${versionStr})`);
     return res.json();
   }
 
@@ -52,7 +53,7 @@ export async function fetchVerse(
   verse: number,
   translation: Translation = "nrsvue"
 ): Promise<BibleChapterResponse> {
-  if (translation === "nrsvue") {
+  if (translation === "nrsvue" || translation === "mal") {
     // For a single verse, we fetch the chapter and filter (because scraping a single verse works similarly)
     const chapData = await fetchChapter(apiName, chapter, translation);
     return {
@@ -75,4 +76,5 @@ export const TRANSLATIONS: { id: Translation; name: string; full: string }[] = [
   { id: "web", name: "WEB",  full: "World English Bible" },
   { id: "asv", name: "ASV",  full: "American Standard Version" },
   { id: "bbe", name: "BBE",  full: "Bible in Basic English" },
+  { id: "mal", name: "MAL",  full: "Malayalam Bible" },
 ];
