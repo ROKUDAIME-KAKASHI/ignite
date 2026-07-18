@@ -965,7 +965,7 @@ export default function BibleLudoPage() {
                    <span className="text-3xl font-black tracking-[0.2em] text-foreground">{activeRoom.id}</span>
                    {inviteCopied ? <Check className="w-5 h-5 ml-4 text-green-500 animate-scale" /> : <Share2 className="w-5 h-5 ml-4 text-muted-foreground" />}
                 </div>
-                <p className="text-xs text-muted-foreground mt-3">Share this code with your friends to invite them</p>
+                <p className="text-xs text-muted-foreground mt-3">Click code to copy direct invite link, or share the code</p>
               </div>
               
               {/* Connected Slots List */}
