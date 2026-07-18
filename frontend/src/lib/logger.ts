@@ -10,7 +10,7 @@ import { neon } from '@neondatabase/serverless';
  */
 export async function logAudit(userId: string | null | undefined, action: string, details: any = {}) {
   try {
-    const logDbUrl = process.env.LOG_DATABASE_URL || "postgresql://neondb_owner:npg_xgK6coQO2IzA@ep-calm-brook-at0zflui-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require";
+    const logDbUrl = process.env.LOG_DATABASE_URL || "postgresql://neondb_owner:npg_xgK6coQO2IzA@ep-calm-brook-at0zflui-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
     if (!logDbUrl) {
       console.warn("LOG_DATABASE_URL not set. Skipping audit log.");
       return;
