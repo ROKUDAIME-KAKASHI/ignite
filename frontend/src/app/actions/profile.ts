@@ -131,6 +131,23 @@ export async function joinParish(inviteCode: string) {
   }
 }
 
+export async function leaveParish() {
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not authenticated" };
+
+  try {
+    await prisma.user.update({
+      where: { id: session.id },
+      data: { churchId: null }
+    });
+    await logAudit(session.id, "LEFT_PARISH", {});
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to leave parish:", error);
+    return { success: false, error: "Failed to leave parish." };
+  }
+}
+
 export async function saveFCMToken(token: string) {
   const session = await getSession();
   if (!session?.id) return { success: false, error: "Not authenticated" };

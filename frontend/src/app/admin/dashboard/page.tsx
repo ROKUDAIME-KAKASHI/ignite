@@ -46,7 +46,8 @@ import {
   getKnowledgeDocuments,
   createKnowledgeDocument,
   deleteKnowledgeDocument,
-  sendTargetedPushNotification
+  sendTargetedPushNotification,
+  createCustomQuiz
 } from "../actions";
 import { getMessages, deleteMessage as deleteGlobalMessage } from "@/app/actions/globalChat";
 import { TRIVIA_QUESTIONS } from "@/lib/trivia";
@@ -101,6 +102,15 @@ export default function AdminDashboardPage() {
   const [newBadgeUrl, setNewBadgeUrl] = useState("");
   const [creatingBadge, setCreatingBadge] = useState(false);
 
+  const [newQuizTitle, setNewQuizTitle] = useState("");
+  const [newQuizDesc, setNewQuizDesc] = useState("");
+  const [newQuizQuestion, setNewQuizQuestion] = useState("");
+  const [newQuizAnswer, setNewQuizAnswer] = useState("");
+  const [newQuizOption1, setNewQuizOption1] = useState("");
+  const [newQuizOption2, setNewQuizOption2] = useState("");
+  const [newQuizOption3, setNewQuizOption3] = useState("");
+  const [creatingQuiz, setCreatingQuiz] = useState(false);
+
   const handleCreateBadge = async () => {
     if (!newBadgeName.trim() || !newBadgeDesc.trim()) return;
     setCreatingBadge(true);
@@ -110,6 +120,31 @@ export default function AdminDashboardPage() {
     setNewBadgeUrl("");
     await fetchContent();
     setCreatingBadge(false);
+  };
+
+  const handleCreateQuiz = async () => {
+    if (!newQuizTitle.trim() || !newQuizQuestion.trim() || !newQuizAnswer.trim()) return;
+    setCreatingQuiz(true);
+    const options = [newQuizAnswer, newQuizOption1, newQuizOption2, newQuizOption3].filter(o => o.trim() !== "");
+    // Shuffle options randomly
+    options.sort(() => Math.random() - 0.5);
+    
+    const questions = [{
+      q: newQuizQuestion.trim(),
+      a: newQuizAnswer.trim(),
+      options
+    }];
+    
+    // We need to import createCustomQuiz from actions
+    const res = await createCustomQuiz(newQuizTitle.trim(), newQuizDesc.trim(), questions);
+    if (res?.success) {
+      alert("Custom quiz created!");
+      setNewQuizTitle(""); setNewQuizDesc(""); setNewQuizQuestion(""); setNewQuizAnswer("");
+      setNewQuizOption1(""); setNewQuizOption2(""); setNewQuizOption3("");
+    } else {
+      alert("Failed to create custom quiz");
+    }
+    setCreatingQuiz(false);
   };
 
   const handleDeleteBadge = async (id: string) => {
@@ -1694,6 +1729,30 @@ export default function AdminDashboardPage() {
                     </button>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* ── Custom Quizzes ── */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-border/50 shadow-sm">
+              <h2 className="text-lg font-bold text-foreground mb-4">Custom Parish Quizzes</h2>
+              <p className="text-xs text-muted-foreground mb-4">Create a custom quiz exclusively for your parish members.</p>
+              
+              <div className="space-y-4 mb-6 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-border/50">
+                <Input value={newQuizTitle} onChange={e => setNewQuizTitle(e.target.value)} placeholder="Quiz Title (e.g. Parish History)" className="bg-white dark:bg-slate-900" />
+                <Input value={newQuizDesc} onChange={e => setNewQuizDesc(e.target.value)} placeholder="Description (e.g. Weekly Sunday School Quiz)" className="bg-white dark:bg-slate-900" />
+                
+                <div className="pt-2 border-t border-border/50">
+                  <p className="text-xs font-bold text-muted-foreground mb-3">Add Question</p>
+                  <Input value={newQuizQuestion} onChange={e => setNewQuizQuestion(e.target.value)} placeholder="Question Text" className="mb-2 bg-white dark:bg-slate-900" />
+                  <Input value={newQuizAnswer} onChange={e => setNewQuizAnswer(e.target.value)} placeholder="Correct Answer" className="mb-2 border-green-500 bg-white dark:bg-slate-900" />
+                  <Input value={newQuizOption1} onChange={e => setNewQuizOption1(e.target.value)} placeholder="Wrong Option 1" className="mb-2 bg-white dark:bg-slate-900" />
+                  <Input value={newQuizOption2} onChange={e => setNewQuizOption2(e.target.value)} placeholder="Wrong Option 2" className="mb-2 bg-white dark:bg-slate-900" />
+                  <Input value={newQuizOption3} onChange={e => setNewQuizOption3(e.target.value)} placeholder="Wrong Option 3" className="mb-3 bg-white dark:bg-slate-900" />
+                </div>
+
+                <button onClick={handleCreateQuiz} disabled={creatingQuiz} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold w-full shadow-md transition-colors">
+                  {creatingQuiz ? "Creating..." : "Publish Custom Quiz"}
+                </button>
               </div>
             </div>
 

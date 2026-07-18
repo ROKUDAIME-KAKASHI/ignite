@@ -94,6 +94,7 @@ model Church {
   inviteCode  String?  @unique
   users       User[]
   events      Event[]
+  quizzes     Quiz[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -147,6 +148,8 @@ model Quiz {
   description   String?
   type          String   // e.g., DAILY, WEEKLY, TOPIC
   xpReward      Int      @default(100)
+  churchId      String?
+  church        Church?  @relation(fields: [churchId], references: [id])
   questions     Question[]
   attempts      QuizAttempt[]
   dailyJourneys DailyJourney[]

@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, urlB64ToUint8Array } from "@/lib/utils";
 import Link from "next/link";
-import { getProfileStats, joinParish, saveFCMToken } from "@/app/actions/profile";
+import { getProfileStats, joinParish, leaveParish } from "@/app/actions/profile";
 import { getUserAwardsProgress } from "@/app/actions/gamificationAwards";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLiturgicalSeason } from "@/lib/liturgy";
@@ -456,17 +456,36 @@ export default function ProfilePage() {
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Community</h3>
         <div className="rounded-2xl border border-border/60 card-holy overflow-hidden bg-card divide-y divide-border/50 mb-5">
           {stats.user?.church ? (
-            <div className="px-4 py-4">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Your Parish</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-lg">
-                  ⛪
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">{stats.user.church.name}</p>
-                  <p className="text-xs text-muted-foreground">{stats.user.church.location || "Local Parish"}</p>
+            <div className="px-4 py-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Your Parish</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-lg">
+                    ⛪
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{stats.user.church.name}</p>
+                    <p className="text-xs text-muted-foreground">{stats.user.church.location || "Local Parish"}</p>
+                  </div>
                 </div>
               </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs font-bold text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-900/30"
+                onClick={async () => {
+                  if (confirm("Are you sure you want to leave this parish?")) {
+                    const res = await leaveParish();
+                    if (res.success) {
+                      setStats({ ...stats, user: { ...stats.user, church: null } });
+                    } else {
+                      alert(res.error);
+                    }
+                  }
+                }}
+              >
+                Leave
+              </Button>
             </div>
           ) : (
             <div className="px-4 py-4 space-y-3">

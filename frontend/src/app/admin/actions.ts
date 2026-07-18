@@ -145,6 +145,43 @@ export async function createEvent(title: string, description: string, dateStr: s
   return { success: true, event };
 }
 
+export async function createCustomQuiz(title: string, description: string, questions: { q: string, a: string, options: string[] }[]) {
+  if (!(await verifyAdmin())) return { error: "Unauthorized" };
+
+  const session = await getSession();
+  const user = session?.id ? await prisma.user.findUnique({ where: { id: session.id } }) : null;
+  const churchId = user?.churchId || null;
+
+  try {
+    const quiz = await prisma.quiz.create({
+      data: {
+        title,
+        description,
+        type: "CUSTOM",
+        xpReward: 100,
+        churchId,
+        questions: {
+          create: questions.map(q => ({
+            text: q.q,
+            type: "mcq",
+            explanation: `The correct answer is: ${q.a}`,
+            answers: {
+              create: q.options.map(opt => ({
+                text: opt,
+                isCorrect: opt === q.a
+              }))
+            }
+          }))
+        }
+      }
+    });
+    return { success: true, quiz };
+  } catch (error) {
+    console.error("Failed to create custom quiz:", error);
+    return { error: "Failed to create custom quiz" };
+  }
+}
+
 export async function getAdminDashboardData() {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
