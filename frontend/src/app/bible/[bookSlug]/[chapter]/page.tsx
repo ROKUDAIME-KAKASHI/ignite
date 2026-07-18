@@ -223,19 +223,42 @@ export default function BibleReaderPage() {
 
     const voices = window.speechSynthesis.getVoices();
     
-    // Structured cross-platform voice priority (aiming for a clear, deep male English voice)
-    const preferredVoice = 
-      voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('male')) ||
-      voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('male')) ||
-      voices.find(v => v.lang === 'en-US' && (v.name.includes('David') || v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('male'))) ||
-      voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male')) ||
-      voices.find(v => v.lang.startsWith('en')) ||
-      voices[0];
+    let preferredVoice;
+    
+    if (translation.toLowerCase() === 'mal') {
+      preferredVoice = 
+        voices.find(v => v.lang.toLowerCase().includes('ml')) ||
+        voices.find(v => v.name.toLowerCase().includes('malayalam'));
+    }
+
+    if (!preferredVoice) {
+      // Structured cross-platform voice priority (aiming for a clear, deep male English voice)
+      preferredVoice = 
+        voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('male')) ||
+        voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('male')) ||
+        voices.find(v => v.lang === 'en-US' && (v.name.includes('David') || v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('male'))) ||
+        voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male')) ||
+        voices.find(v => v.lang.startsWith('en')) ||
+        voices[0];
+    }
+    
+    if (translation.toLowerCase() === 'mal') {
+      utterance.lang = 'ml-IN';
+    } else {
+      utterance.lang = 'en-US';
+    }
       
     utterance.rate = 0.92; // Slightly slowed for a calm, reverent reading pace
     utterance.pitch = 0.85; // Low pitch for a deep, narrative voice tone
     
-    if (preferredVoice) utterance.voice = preferredVoice;
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+      // If Malayalam voice is found, we might want to ensure rate and pitch are closer to default
+      if (translation.toLowerCase() === 'mal') {
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+      }
+    }
 
     utterance.onend = () => {
       if (readingRef.current) {
