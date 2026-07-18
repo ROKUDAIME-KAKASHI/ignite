@@ -54,10 +54,21 @@ export default function LionsDenPage() {
     }
   }, [activeRiddles, currentLevel, guess, attemptsLeft, gameState]);
 
+  const [allTrivia, setAllTrivia] = useState(TRIVIA_QUESTIONS);
+  
+  useEffect(() => {
+    // Load global + custom parish trivia
+    import("@/app/actions/quizzes").then(m => {
+      m.getAllTriviaForUser().then(data => {
+        if (data && data.length > 0) setAllTrivia(data);
+      });
+    });
+  }, []);
+
   const startNewGame = () => {
     localStorage.removeItem("ignite_lions_den_state");
     // Pick 3 random questions from the central trivia bank
-    const shuffled = [...TRIVIA_QUESTIONS]
+    const shuffled = [...allTrivia]
       .sort(() => Math.random() - 0.5)
       .slice(0, 3)
       .map(qObj => ({

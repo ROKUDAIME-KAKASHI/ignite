@@ -171,7 +171,20 @@ export default function BibleLudoPage() {
   const [dice, setDice] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [trivia, setTrivia] = useState<typeof TRIVIA_QUESTIONS[0] | null>(null);
+  
+  const [allTrivia, setAllTrivia] = useState(TRIVIA_QUESTIONS);
   const [unusedQuestions, setUnusedQuestions] = useState<typeof TRIVIA_QUESTIONS>([...TRIVIA_QUESTIONS]);
+  
+  useEffect(() => {
+    import("@/app/actions/quizzes").then(m => {
+      m.getAllTriviaForUser().then(data => {
+        if (data && data.length > 0) {
+          setAllTrivia(data);
+          setUnusedQuestions([...data]);
+        }
+      });
+    });
+  }, []);
   const [tokens, setTokens] = useState<Record<Color, number[]>>({
     red: [-1, -1, -1, -1], // -1 = base, 0-51 = path, 100-104 = home stretch, 200 = home
     green: [-1, -1, -1, -1],
@@ -229,25 +242,25 @@ export default function BibleLudoPage() {
     }
   };
 
-  // Load seen questions from localStorage on mount to avoid repetitions
+  // Load seen questions from localStorage on mount and filter allTrivia
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
         const storedSeen = localStorage.getItem("ludo_seen_questions");
         const seenList = storedSeen ? JSON.parse(storedSeen) : [];
-        const remaining = TRIVIA_QUESTIONS.filter(q => !seenList.includes(q.q));
+        const remaining = allTrivia.filter(q => !seenList.includes(q.q));
         if (remaining.length > 0) {
           setUnusedQuestions(remaining);
         } else {
           // Reset seen list once all questions are answered
           localStorage.removeItem("ludo_seen_questions");
-          setUnusedQuestions([...TRIVIA_QUESTIONS]);
+          setUnusedQuestions([...allTrivia]);
         }
       } catch (e) {
         console.error("Error loading seen trivia questions:", e);
       }
     }
-  }, []);
+  }, [allTrivia]);
 
   // Monitor URL params for direct sharing invite link
   useEffect(() => {
@@ -527,7 +540,7 @@ export default function BibleLudoPage() {
       if (isHuman && result === 6) {
         let questionsToUse = unusedQuestions;
         if (questionsToUse.length === 0) {
-          questionsToUse = [...TRIVIA_QUESTIONS];
+          questionsToUse = [...allTrivia];
           if (typeof window !== "undefined") {
             try {
               localStorage.removeItem("ludo_seen_questions");

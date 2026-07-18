@@ -219,3 +219,24 @@ export async function recordQuizAttempt(quizId: string | number, score: number) 
     return { success: false };
   }
 }
+
+export async function getAllTriviaForUser() {
+  const session = await getSession();
+  const user = session?.id ? await prisma.user.findUnique({ where: { id: session.id } }) : null;
+  const churchId = user?.churchId || null;
+
+  const customQuizzes = await prisma.quiz.findMany({
+    where: { churchId, type: "CUSTOM" },
+    include: { questions: { include: { answers: true } } }
+  });
+
+  const customQuestions = customQuizzes.flatMap(q => q.questions).map(q => ({
+    q: q.text,
+    a: q.answers.find(a => a.isCorrect)?.text || "",
+    options: q.answers.map(a => a.text),
+    explanation: q.explanation || ""
+  }));
+
+  const allQuestions = [...TRIVIA_QUESTIONS, ...customQuestions];
+  return allQuestions;
+}
