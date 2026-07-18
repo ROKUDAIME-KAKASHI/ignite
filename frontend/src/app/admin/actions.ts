@@ -40,13 +40,27 @@ async function verifyAdmin() {
 async function verifySuperAdmin() {
   const cookieStore = await cookies();
   const adminToken = cookieStore.get("admin_session")?.value;
-  if (!adminToken) return false;
-  try {
-    const payload = await decrypt(adminToken);
-    return payload?.role === "SUPER_ADMIN";
-  } catch {
-    return false;
+  if (adminToken) {
+    try {
+      const payload = await decrypt(adminToken);
+      if (payload?.role === "SUPER_ADMIN") return true;
+    } catch {}
   }
+  
+  const sessionToken = cookieStore.get("session")?.value;
+  if (sessionToken) {
+    try {
+      const payload = await decrypt(sessionToken);
+      if (payload?.id) {
+        const user = await prisma.user.findUnique({
+          where: { id: payload.id },
+          select: { role: true }
+        });
+        if (user?.role === "ADMIN") return true;
+      }
+    } catch {}
+  }
+  return false;
 }
 
 export async function awardGracePoints(userId: string, amount: number, reason: string) {
@@ -216,15 +230,7 @@ export async function getAdminDashboardData() {
     status: u.role === "ADMIN" ? "Admin" : u.role === "LEADER" ? "Leader" : "Member"
   }));
 
-  const cookieStore = await cookies();
-  const adminToken = cookieStore.get("admin_session")?.value;
-  let isSuperAdmin = false;
-  if (adminToken) {
-    try {
-      const payload = await decrypt(adminToken);
-      if (payload?.role === "SUPER_ADMIN") isSuperAdmin = true;
-    } catch {}
-  }
+  const isSuperAdmin = await verifySuperAdmin();
 
   return {
     success: true,
