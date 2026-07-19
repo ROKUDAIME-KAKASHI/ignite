@@ -36,7 +36,7 @@ export async function GET(req: Request) {
           app_id: appId,
           contents: { en: verseText },
           headings: { en: "Daily Grace" },
-          included_segments: ["Total Subscriptions"],
+          included_segments: ["Subscribed Users"],
         })
       });
     }

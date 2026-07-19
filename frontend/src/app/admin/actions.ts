@@ -134,7 +134,7 @@ export async function createAnnouncement(title: string, content: string) {
           app_id: appId,
           contents: { en: content },
           headings: { en: title },
-          included_segments: ["Total Subscriptions"],
+          included_segments: ["Subscribed Users"],
         })
       });
       const data = await res.text();
@@ -616,7 +616,7 @@ export async function sendDirectPushNotification(title: string, message: string)
           app_id: appId,
           contents: { en: message },
           headings: { en: title },
-          included_segments: ["Total Subscriptions"],
+          included_segments: ["Subscribed Users"],
         })
       });
       const data = await res.text();
