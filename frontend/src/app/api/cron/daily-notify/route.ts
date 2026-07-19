@@ -26,19 +26,25 @@ export async function GET(req: Request) {
       : "This is the day the Lord has made; let us rejoice and be glad in it. - Psalm 118:24";
 
     if (appId && apiKey) {
-      await fetch('https://onesignal.com/api/v1/notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'Authorization': `Basic ${apiKey}`
-        },
-        body: JSON.stringify({
-          app_id: appId,
-          contents: { en: verseText },
-          headings: { en: "Daily Grace" },
-          included_segments: ["Subscribed Users"],
-        })
-      });
+      const allUsers = await prisma.user.findMany({ select: { id: true } });
+      const userIds = allUsers.map(u => u.id);
+      
+      if (userIds.length > 0) {
+        await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': `Basic ${apiKey}`
+          },
+          body: JSON.stringify({
+            app_id: appId,
+            contents: { en: verseText },
+            headings: { en: "Daily Grace" },
+            include_aliases: { external_id: userIds },
+            target_channel: "push"
+          })
+        });
+      }
     }
 
     return NextResponse.json({ success: true, count: 1 });

@@ -123,21 +123,26 @@ export async function createAnnouncement(title: string, content: string) {
     const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
     if (appId && apiKey) {
-      console.log("Sending OneSignal push with appId:", appId, "and title:", title);
-      const res = await fetch('https://onesignal.com/api/v1/notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'Authorization': `Basic ${apiKey}`
-        },
-        body: JSON.stringify({
-          app_id: appId,
-          contents: { en: content },
-          headings: { en: title },
-          included_segments: ["Subscribed Users"],
-        })
-      });
-      const data = await res.text();
+      const allUsers = await prisma.user.findMany({ select: { id: true } });
+      const userIds = allUsers.map(u => u.id);
+      
+      if (userIds.length > 0) {
+        console.log("Sending OneSignal push with appId:", appId, "and title:", title);
+        const res = await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': `Basic ${apiKey}`
+          },
+          body: JSON.stringify({
+            app_id: appId,
+            contents: { en: content },
+            headings: { en: title },
+            include_aliases: { external_id: userIds },
+            target_channel: "push"
+          })
+        });
+        const data = await res.text();
       console.log("OneSignal push response status:", res.status);
       console.log("OneSignal push response data:", data);
     } else {
@@ -604,7 +609,11 @@ export async function sendDirectPushNotification(title: string, message: string)
     const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
     const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
-    if (appId && apiKey) {
+    // 2. Create in-app Notification for all users
+    const allUsers = await prisma.user.findMany({ select: { id: true } });
+    const userIds = allUsers.map(u => u.id);
+
+    if (appId && apiKey && userIds.length > 0) {
       console.log("Sending direct push with appId:", appId, "and title:", title);
       const res = await fetch('https://onesignal.com/api/v1/notifications', {
         method: 'POST',
@@ -616,7 +625,8 @@ export async function sendDirectPushNotification(title: string, message: string)
           app_id: appId,
           contents: { en: message },
           headings: { en: title },
-          included_segments: ["Subscribed Users"],
+          include_aliases: { external_id: userIds },
+          target_channel: "push"
         })
       });
       const data = await res.text();
@@ -626,9 +636,7 @@ export async function sendDirectPushNotification(title: string, message: string)
       console.warn("OneSignal credentials not configured for direct push.", { appId: !!appId, apiKey: !!apiKey });
     }
 
-    // 2. Create in-app Notification for all users
-    const allUsers = await prisma.user.findMany({ select: { id: true } });
-    if (allUsers.length > 0) {
+    if (userIds.length > 0) {
       await prisma.notification.createMany({
         data: allUsers.map(u => ({
           userId: u.id,
@@ -828,12 +836,8 @@ export async function sendTargetedPushNotification(title: string, message: strin
         headings: { en: title },
       };
 
-      if (targetRole === "ALL") {
-        payload.included_segments = ["Subscribed Users"];
-      } else {
-        payload.include_aliases = { external_id: userIds };
-        payload.target_channel = "push";
-      }
+      payload.include_aliases = { external_id: userIds };
+      payload.target_channel = "push";
 
       if (targetRole === "ALL" || userIds.length > 0) {
         await fetch('https://onesignal.com/api/v1/notifications', {
