@@ -807,36 +807,58 @@ export async function sendTargetedPushNotification(title: string, message: strin
   if (!(await verifyAdmin())) return { success: false, error: "Unauthorized" };
 
   try {
-    webpush.setVapidDetails(
-      "mailto:admin@ignite.com",
-      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-      process.env.VAPID_PRIVATE_KEY!
-    );
-
     let whereClause = {};
     if (targetRole !== "ALL") {
-      whereClause = { user: { role: targetRole } };
+      whereClause = { role: targetRole };
     }
 
-    const subscriptions = await prisma.pushSubscription.findMany({
-      where: whereClause
+    const targetUsers = await prisma.user.findMany({ 
+      where: whereClause, 
+      select: { id: true } 
     });
+    const userIds = targetUsers.map(u => u.id);
 
-    const payload = JSON.stringify({ title, body: message });
+    const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
+    const apiKey = process.env.ONESIGNAL_REST_API_KEY;
 
-    const results = await Promise.allSettled(
-      subscriptions.map(sub => 
-        webpush.sendNotification({
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth
-          }
-        }, payload)
-      )
-    );
+    if (appId && apiKey) {
+      const payload: any = {
+        app_id: appId,
+        contents: { en: message },
+        headings: { en: title },
+      };
 
-    return { success: true, sent: results.filter(r => r.status === "fulfilled").length };
+      if (targetRole === "ALL") {
+        payload.included_segments = ["Subscribed Users"];
+      } else {
+        payload.include_external_user_ids = userIds;
+      }
+
+      if (targetRole === "ALL" || userIds.length > 0) {
+        await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': `Basic ${apiKey}`
+          },
+          body: JSON.stringify(payload)
+        });
+      }
+    }
+
+    if (userIds.length > 0) {
+      await prisma.notification.createMany({
+        data: userIds.map(id => ({
+          userId: id,
+          title: title,
+          message: message,
+          link: "/notifications"
+        }))
+      });
+    }
+
+    revalidatePath("/notifications");
+    return { success: true, sent: userIds.length };
   } catch (error: any) {
     console.error("Targeted push error:", error);
     return { success: false, error: "Failed to send notifications" };
