@@ -42,6 +42,24 @@ export async function getMissions() {
 }
 
 export async function completeMission(missionId: string | number, xpReward: number, title: string, reflection?: string) {
+  const session = await getSession();
+  if (!session?.id) return { success: false, error: "Not authenticated" };
+
+  const today = new Date();
+  today.setUTCHours(0,0,0,0);
+  const lookbackLimit = new Date(today.getTime() - 12 * 60 * 60 * 1000);
+  
+  const existing = await prisma.xPLog.findFirst({
+    where: {
+      userId: session.id,
+      awardedAt: { gte: lookbackLimit },
+      reason: `Completed Mission: ${title}`
+    }
+  });
+
+  if (existing) {
+    return { success: false, error: "Mission already completed today." };
+  }
   if (reflection) {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
