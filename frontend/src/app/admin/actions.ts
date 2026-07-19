@@ -831,7 +831,8 @@ export async function sendTargetedPushNotification(title: string, message: strin
       if (targetRole === "ALL") {
         payload.included_segments = ["Subscribed Users"];
       } else {
-        payload.include_external_user_ids = userIds;
+        payload.include_aliases = { external_id: userIds };
+        payload.target_channel = "push";
       }
 
       if (targetRole === "ALL" || userIds.length > 0) {
