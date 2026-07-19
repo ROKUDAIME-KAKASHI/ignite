@@ -322,7 +322,8 @@ export default function BibleLudoPage() {
       const hasMoves = tokens[turn].some((t, idx) => canMove(turn, idx, dice));
       
       const isMyTurn = (gameMode === "live" && turn === myColor);
-      const isHostBot = (gameMode === "live" && activeRoom?.host && roomPlayers[turn]?.isBot);
+      const botDriverColor = COLORS.find(c => roomPlayers[c] && !roomPlayers[c].isBot);
+      const isHostBot = (gameMode === "live" && myColor === botDriverColor && roomPlayers[turn]?.isBot);
       const isLocalOrSoloOrTeam = (gameMode !== "live");
       const shouldAct = isLocalOrSoloOrTeam || isMyTurn || isHostBot;
 
@@ -446,7 +447,8 @@ export default function BibleLudoPage() {
       }
     } else if (dice === null && !winner && !isRolling) {
       // If it's a bot's turn to roll, do it automatically
-      const isHostBot = (gameMode === "live" && activeRoom?.host && roomPlayers[turn]?.isBot);
+      const botDriverColor = COLORS.find(c => roomPlayers[c] && !roomPlayers[c].isBot);
+      const isHostBot = (gameMode === "live" && myColor === botDriverColor && roomPlayers[turn]?.isBot);
       const isSoloOrTeamBot = (gameMode === "solo" && turn !== "red") || (gameMode === "team" && turn !== "red");
         
       if (isHostBot || isSoloOrTeamBot) {
@@ -504,7 +506,8 @@ export default function BibleLudoPage() {
 
     if (sync && gameMode === "live" && gameChannel) {
       const isMyTurn = turn === myColor;
-      const isBotHostTurn = activeRoom?.host && roomPlayers[turn]?.isBot;
+      const botDriverColor = COLORS.find(c => roomPlayers[c] && !roomPlayers[c].isBot);
+      const isBotHostTurn = myColor === botDriverColor && roomPlayers[turn]?.isBot;
       if (isMyTurn || isBotHostTurn) {
         gameChannel.send({ type: 'broadcast', event: 'next_turn', payload: { extraTurn, nextColor: nextColorForBroadcast } });
       }
