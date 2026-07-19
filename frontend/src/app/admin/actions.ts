@@ -143,8 +143,9 @@ export async function createAnnouncement(title: string, content: string) {
           })
         });
         const data = await res.text();
-      console.log("OneSignal push response status:", res.status);
-      console.log("OneSignal push response data:", data);
+        console.log("OneSignal push response status:", res.status);
+        console.log("OneSignal push response data:", data);
+      }
     } else {
       console.warn("OneSignal credentials not configured. Skipping push broadcast.", { appId: !!appId, apiKey: !!apiKey });
     }
