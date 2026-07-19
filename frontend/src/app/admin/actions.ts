@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { encrypt, decrypt, getSession } from "@/lib/auth";
 import { neon } from "@neondatabase/serverless";
+import webpush from "web-push";
 
 async function verifyAdmin() {
   const cookieStore = await cookies();
@@ -806,7 +807,6 @@ export async function sendTargetedPushNotification(title: string, message: strin
   if (!(await verifyAdmin())) return { success: false, error: "Unauthorized" };
 
   try {
-    const webpush = require("web-push");
     webpush.setVapidDetails(
       "mailto:admin@ignite.com",
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,

@@ -79,14 +79,6 @@ export function Navigation() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
 
-  // Hide on public / hero pages / admin or if unauthenticated
-  if (
-    PUBLIC_ROUTES.some((r) => pathname === r) ||
-    pathname.startsWith("/admin") ||
-    !user
-  )
-    return null;
-
   const dailyVerse = getDailyVerse(user?.id);
 
   const [hasUnreadFellowship, setHasUnreadFellowship] = useState(false);
@@ -127,6 +119,14 @@ export function Navigation() {
       }
     };
   }, [pathname, user]);
+
+  // Hide on public / hero pages / admin or if unauthenticated
+  if (
+    PUBLIC_ROUTES.some((r) => pathname === r) ||
+    pathname.startsWith("/admin") ||
+    !user
+  )
+    return null;
 
   return (
     <>

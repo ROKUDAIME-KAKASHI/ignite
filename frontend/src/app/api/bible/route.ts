@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
+import fs from 'fs';
+import path from 'path';
+import { BIBLE_BOOKS } from '@/lib/bible-books';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,10 +18,6 @@ export async function GET(request: Request) {
 
   if (version === 'MAL') {
     try {
-      const fs = require('fs');
-      const path = require('path');
-      const { BIBLE_BOOKS } = require('@/lib/bible-books');
-      
       const filePath = path.join(process.cwd(), 'src', 'data', 'malayalam.json');
       const data = fs.readFileSync(filePath, 'utf-8');
       const bibleJson = JSON.parse(data);
