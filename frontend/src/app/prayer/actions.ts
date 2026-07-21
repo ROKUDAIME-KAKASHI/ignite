@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { awardXP } from "@/app/actions/gamification";
+import { logAudit } from "@/lib/logger";
 
 export async function submitPrayer(content: string, isAnonymous: boolean, categoryName: string, isPrivate: boolean = false) {
   const session = await getSession();
@@ -24,6 +25,10 @@ export async function submitPrayer(content: string, isAnonymous: boolean, catego
   if (session?.id) {
     await awardXP(10, isPrivate ? "Wrote a private prayer" : "Submitted a prayer request");
   }
+
+  const action = isPrivate ? "CREATE_PRIVATE_JOURNAL" : "CREATE_PRAYER_REQUEST";
+  const details = isPrivate ? { contentLength: content.length, categoryName } : { content, isAnonymous, categoryName };
+  await logAudit(session?.id, action, details);
 
   revalidatePath("/prayer");
   return { success: true };

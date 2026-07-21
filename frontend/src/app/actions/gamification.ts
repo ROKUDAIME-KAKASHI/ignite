@@ -9,6 +9,15 @@ export async function awardXP(amount: number, reason: string) {
     const session = await getSession();
     if (!session?.id) return { error: "Not authenticated" };
 
+    if (reason.startsWith("Read Scripture:")) {
+      const existing = await prisma.xPLog.findFirst({
+        where: { userId: session.id, reason }
+      });
+      if (existing) {
+        return { success: true, xp: 0, level: 0, message: "Already read" }; // Don't award again
+      }
+    }
+
     const user = await prisma.user.update({
       where: { id: session.id },
       data: {

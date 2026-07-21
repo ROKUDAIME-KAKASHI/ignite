@@ -7,6 +7,7 @@ import { Search, ChevronRight, BookOpen, Bookmark, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { BIBLE_BOOKS, groupBooksByCategory, getBookBySlug } from "@/lib/bible-books";
+import { TRANSLATIONS, type Translation } from "@/lib/bible-api";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -27,6 +28,18 @@ export default function BiblePage() {
 
   const [featured, setFeatured] = useState<any[]>([]);
   const [readingPlans, setReadingPlans] = useState<any[]>([]);
+  const [globalTranslation, setGlobalTranslation] = useState<Translation>("kjv");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("preferred_translation");
+    if (saved) setGlobalTranslation(saved as Translation);
+  }, []);
+
+  const handleTranslationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value as Translation;
+    setGlobalTranslation(val);
+    localStorage.setItem("preferred_translation", val);
+  };
 
   useEffect(() => {
     getBibleContent().then((res) => {
@@ -131,14 +144,26 @@ export default function BiblePage() {
         </div>
 
         {/* ── Search ── */}
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search books of the Bible…"
-            className="pl-10 rounded-xl border-border/60 bg-card h-11"
-          />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search books of the Bible…"
+              className="pl-10 rounded-xl border-border/60 bg-card h-11"
+            />
+          </div>
+          
+          <select 
+            value={globalTranslation}
+            onChange={handleTranslationChange}
+            className="h-11 rounded-xl border border-border/60 bg-card px-3 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+          >
+            {TRANSLATIONS.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
         </div>
 
         {/* ── Search Results ── */}

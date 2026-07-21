@@ -320,6 +320,7 @@ export async function getAllPrayers() {
   if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
   const prayers = await prisma.prayerRequest.findMany({
+    where: { isPrivate: false },
     orderBy: { createdAt: "desc" },
     include: { user: { select: { firstName: true, lastName: true, email: true } } }
   });
@@ -895,7 +896,7 @@ export async function getTodaysDataExport() {
     });
 
     const newPrayers = await prisma.prayerRequest.findMany({
-      where: { createdAt: { gte: startOfDay, lte: endOfDay } },
+      where: { isPrivate: false, createdAt: { gte: startOfDay, lte: endOfDay } },
       include: { user: { select: { firstName: true, lastName: true } } }
     });
     

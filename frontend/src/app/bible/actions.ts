@@ -59,6 +59,50 @@ export async function getBibleContent() {
     featured = await prisma.featuredVerse.findMany();
   }
 
+  const session = await getSession();
+  if (session?.id) {
+    const logs = await prisma.xPLog.findMany({
+      where: { userId: session.id, reason: { startsWith: "Read Scripture:" } },
+      select: { reason: true }
+    });
+    const readSet = new Set(logs.map(log => log.reason));
+
+    plans = plans.map(plan => {
+      let readCount = 0;
+      let totalCount = 1;
+
+      if (plan.title.includes("Gospels")) {
+        totalCount = 89;
+        ["Matthew", "Mark", "Luke", "John"].forEach(book => {
+          for (let i = 1; i <= 28; i++) {
+             if (readSet.has(`Read Scripture: ${book} ${i}`)) readCount++;
+          }
+        });
+      } else if (plan.title.includes("Psalms & Proverbs")) {
+        totalCount = 181;
+        ["Psalms", "Proverbs"].forEach(book => {
+          for (let i = 1; i <= 150; i++) {
+            if (readSet.has(`Read Scripture: ${book} ${i}`)) readCount++;
+          }
+        });
+      } else if (plan.title.includes("St. Paul")) {
+        totalCount = 87;
+        const paul = ["Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon"];
+        paul.forEach(book => {
+          for (let i = 1; i <= 16; i++) {
+            if (readSet.has(`Read Scripture: ${book} ${i}`)) readCount++;
+          }
+        });
+      } else if (plan.title.includes("Lenten")) {
+         totalCount = 40;
+         readCount = Math.min(readSet.size, 40); // Count any 40 chapters as Lenten journey
+      }
+
+      const progress = Math.min(100, Math.floor((readCount / totalCount) * 100));
+      return { ...plan, progress };
+    });
+  }
+
   return { plans, featured };
 }
 

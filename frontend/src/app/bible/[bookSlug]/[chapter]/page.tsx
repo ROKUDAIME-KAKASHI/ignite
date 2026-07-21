@@ -39,6 +39,11 @@ export default function BibleReaderPage() {
   const book = getBookBySlug(bookSlug);
 
   const [translation, setTranslation] = useState<Translation>("kjv");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("preferred_translation");
+    if (saved) setTranslation(saved as Translation);
+  }, []);
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -189,8 +194,10 @@ export default function BibleReaderPage() {
     if (!user || markedRead || !book) return;
     setMarkingRead(true);
     const res = await awardXP(10, `Read Scripture: ${book.name} ${chapter}`);
-    if (res.success && res.xp) {
-      setUser({ ...user, xp: res.xp, level: res.level });
+    if (res.success) {
+      if (res.xp) {
+        setUser({ ...user, xp: res.xp, level: res.level! });
+      }
       setMarkedRead(true);
     }
     setMarkingRead(false);
@@ -360,7 +367,11 @@ export default function BibleReaderPage() {
                   {TRANSLATIONS.map((t) => (
                     <button
                       key={t.id}
-                      onClick={() => { setTranslation(t.id); setShowTranslationPicker(false); }}
+                      onClick={() => { 
+                        setTranslation(t.id); 
+                        localStorage.setItem("preferred_translation", t.id);
+                        setShowTranslationPicker(false); 
+                      }}
                       className={cn(
                         "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                         translation === t.id ? "bg-primary/15 text-primary" : "hover:bg-muted text-foreground"

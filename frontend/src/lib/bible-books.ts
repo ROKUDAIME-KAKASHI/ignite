@@ -49,6 +49,14 @@ export const BIBLE_BOOKS: BibleBook[] = [
   { name: "Haggai",           slug: "haggai",           apiName: "haggai",            chapters: 2,  testament: "OT", category: "Minor Prophets",  abbr: "Hag"  },
   { name: "Zechariah",        slug: "zechariah",        apiName: "zechariah",         chapters: 14, testament: "OT", category: "Minor Prophets",  abbr: "Zec"  },
   { name: "Malachi",          slug: "malachi",          apiName: "malachi",           chapters: 4,  testament: "OT", category: "Minor Prophets",  abbr: "Mal"  },
+  // ── Deuterocanonical (Apocrypha) ──
+  { name: "Tobit",            slug: "tobit",            apiName: "tobit",             chapters: 14, testament: "OT", category: "Deuterocanonical",abbr: "Tob"  },
+  { name: "Judith",           slug: "judith",           apiName: "judith",            chapters: 16, testament: "OT", category: "Deuterocanonical",abbr: "Jdt"  },
+  { name: "Wisdom",           slug: "wisdom",           apiName: "wisdom",            chapters: 19, testament: "OT", category: "Deuterocanonical",abbr: "Wis"  },
+  { name: "Sirach",           slug: "sirach",           apiName: "sirach",            chapters: 51, testament: "OT", category: "Deuterocanonical",abbr: "Sir"  },
+  { name: "Baruch",           slug: "baruch",           apiName: "baruch",            chapters: 6,  testament: "OT", category: "Deuterocanonical",abbr: "Bar"  },
+  { name: "1 Maccabees",      slug: "1-maccabees",      apiName: "1+maccabees",       chapters: 16, testament: "OT", category: "Deuterocanonical",abbr: "1Ma"  },
+  { name: "2 Maccabees",      slug: "2-maccabees",      apiName: "2+maccabees",       chapters: 15, testament: "OT", category: "Deuterocanonical",abbr: "2Ma"  },
   // ── New Testament ──
   { name: "Matthew",          slug: "matthew",          apiName: "matthew",           chapters: 28, testament: "NT", category: "Gospels",         abbr: "Mat"  },
   { name: "Mark",             slug: "mark",             apiName: "mark",              chapters: 16, testament: "NT", category: "Gospels",         abbr: "Mar"  },

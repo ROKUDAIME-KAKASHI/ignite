@@ -22,9 +22,10 @@ export async function GET(request: Request) {
       const data = fs.readFileSync(filePath, 'utf-8');
       const bibleJson = JSON.parse(data);
 
-      const bookIndex = BIBLE_BOOKS.findIndex((b: any) => b.apiName === book);
+      const traditionalBooks = BIBLE_BOOKS.filter((b: any) => b.category !== "Deuterocanonical");
+      const bookIndex = traditionalBooks.findIndex((b: any) => b.apiName === book);
       if (bookIndex === -1) {
-        return NextResponse.json({ error: 'Book not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Book not found in Malayalam translation' }, { status: 404 });
       }
       
       const targetBook = bibleJson.Book[bookIndex];
@@ -39,14 +40,14 @@ export async function GET(request: Request) {
       }
 
       const verses = targetChapter.Verse.map((v: any, i: number) => ({
-        book_name: BIBLE_BOOKS[bookIndex].name,
+        book_name: traditionalBooks[bookIndex].name,
         chapter: parseInt(chapter),
         verse: i + 1,
         text: v.Verse
       }));
 
       return NextResponse.json({
-        reference: `${BIBLE_BOOKS[bookIndex].name} ${chapter}`,
+        reference: `${traditionalBooks[bookIndex].name} ${chapter}`,
         verses,
         text: verses.map((v: any) => v.text).join(' '),
         translation_id: 'mal',
