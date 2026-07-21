@@ -903,7 +903,7 @@ export default function AdminDashboardPage() {
                           </Badge>
                         </td>
                         <td className="px-6 py-4">
-                          <pre className="text-[10px] bg-slate-100 dark:bg-slate-950 p-2 rounded-lg text-slate-700 dark:text-slate-300 overflow-x-auto max-w-xs md:max-w-md">
+                          <pre className="text-[10px] bg-slate-100 dark:bg-slate-950 p-2 rounded-lg text-slate-700 dark:text-slate-300 overflow-x-auto max-w-xs md:max-w-md whitespace-pre-wrap break-words">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>
                         </td>
