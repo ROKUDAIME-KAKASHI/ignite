@@ -3,7 +3,8 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { awardXP } from "@/app/actions/gamification";
-import { GoogleGenAI, Type } from "@google/genai";
+import { getAIClient } from "@/lib/ai";
+import { Type } from "@google/genai";
 
 export async function getMissions() {
   let missions = await prisma.mission.findMany();
@@ -62,7 +63,7 @@ export async function completeMission(missionId: string | number, xpReward: numb
   }
   if (reflection) {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = getAIClient();
       const prompt = `You are validating a user's completion of a religious mission in a youth ministry app.
 Mission Title: ${title.split(" - ")[0]}
 User's Reflection: "${reflection}"
