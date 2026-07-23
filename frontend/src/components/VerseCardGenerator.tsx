@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Share2, X, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Download, Share2, X, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface VerseCardGeneratorProps {
@@ -14,27 +14,30 @@ interface VerseCardGeneratorProps {
 
 const THEMES = [
   { id: "gold", name: "Deep Gold", bg: "from-amber-950 via-amber-900 to-amber-950", border: "border-amber-500/40", text: "text-amber-100", accent: "text-amber-400" },
-  { id: "midnight", name: "Orthodox Midnight", bg: "from-slate-950 via-indigo-950 to-slate-900", border: "border-indigo-500/40", text: "text-slate-100", accent: "text-indigo-400" },
+  { id: "midnight", name: "Midnight", bg: "from-slate-950 via-indigo-950 to-slate-900", border: "border-indigo-500/40", text: "text-slate-100", accent: "text-indigo-400" },
   { id: "royal", name: "Royal Purple", bg: "from-purple-950 via-violet-900 to-purple-950", border: "border-purple-500/40", text: "text-purple-100", accent: "text-purple-300" },
-  { id: "parchment", name: "Ancient Parchment", bg: "from-amber-100 via-stone-200 to-amber-50", border: "border-amber-800/30", text: "text-stone-900", accent: "text-amber-800" },
-  { id: "emerald", name: "Eden Emerald", bg: "from-emerald-950 via-teal-950 to-emerald-900", border: "border-emerald-500/40", text: "text-emerald-100", accent: "text-emerald-400" },
+  { id: "parchment", name: "Parchment", bg: "from-amber-100 via-stone-200 to-amber-50", border: "border-amber-800/30", text: "text-stone-900", accent: "text-amber-800" },
+  { id: "emerald", name: "Emerald", bg: "from-emerald-950 via-teal-950 to-emerald-900", border: "border-emerald-500/40", text: "text-emerald-100", accent: "text-emerald-400" },
 ];
 
 export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: VerseCardGeneratorProps) {
   const [selectedTheme, setSelectedTheme] = useState(THEMES[0]);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const generateCanvasImage = async (): Promise<string | null> => {
+  const generateCanvasImage = async (): Promise<Blob | null> => {
     if (!cardRef.current) return null;
     try {
       const html2canvas = (await import("html2canvas")).default;
       const canvas = await html2canvas(cardRef.current, {
-        scale: 3, // HD quality for mobile retina displays & Instagram Stories
+        scale: 2, // Optimized scale for mobile performance & clarity
         useCORS: true,
         backgroundColor: null,
       });
-      return canvas.toDataURL("image/png");
+
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), "image/png", 1.0);
+      });
     } catch (e) {
       console.error("Failed to render verse card canvas:", e);
       return null;
@@ -42,56 +45,71 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
   };
 
   const handleDownload = async () => {
-    setDownloading(true);
-    const dataUrl = await generateCanvasImage();
-    if (dataUrl) {
-      const link = document.createElement("a");
-      link.download = `Ignite-Verse-${reference.replace(/\s+/g, "_")}.png`;
-      link.href = dataUrl;
-      link.click();
+    setLoading(true);
+    try {
+      const blob = await generateCanvasImage();
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        a.download = `IGNITE-${reference.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1000);
+      }
+    } catch (e) {
+      console.error("Download failed:", e);
+    } finally {
+      setLoading(false);
     }
-    setDownloading(false);
   };
 
   const handleShare = async () => {
-    setDownloading(true);
-    const dataUrl = await generateCanvasImage();
-    if (dataUrl && typeof navigator !== "undefined" && navigator.share) {
-      try {
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `Ignite-Verse.png`, { type: "image/png" });
-
-        await navigator.share({
-          title: `Scripture: ${reference}`,
-          text: `"${verseText}" — ${reference}\nShared via Ignite App 🕊️`,
-          files: [file],
-        });
-      } catch (e) {
-        console.log("Web Share cancelled or not supported:", e);
+    setLoading(true);
+    try {
+      const blob = await generateCanvasImage();
+      if (blob && typeof navigator !== "undefined" && navigator.share && navigator.canShare) {
+        const file = new File([blob], `IGNITE-${reference.replace(/[^a-zA-Z0-9]/g, "_")}.png`, { type: "image/png" });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: `IGNITE Daily Bread: ${reference}`,
+            text: `"${verseText}" — ${reference}`,
+            files: [file],
+          });
+          setLoading(false);
+          return;
+        }
       }
-    } else {
-      handleDownload();
+      // Fallback to download if Web Share API with files is not supported
+      await handleDownload();
+    } catch (e) {
+      console.log("Share cancelled or failed:", e);
+      await handleDownload();
+    } finally {
+      setLoading(false);
     }
-    setDownloading(false);
   };
 
   if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-card border border-border/60 rounded-3xl p-5 max-w-md w-full shadow-2xl relative flex flex-col space-y-4 max-h-[90vh] overflow-y-auto"
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          className="bg-card border border-border/60 rounded-3xl p-4 sm:p-5 max-w-sm w-full shadow-2xl relative flex flex-col space-y-4 my-auto"
         >
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
-              <h2 className="text-base font-bold font-serif text-foreground">Scripture Card Generator</h2>
+              <h2 className="text-sm sm:text-base font-bold font-serif text-foreground">Scripture Card</h2>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition">
               <X className="w-4 h-4 text-muted-foreground" />
@@ -116,59 +134,56 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
           {/* Rendered Verse Card Preview */}
           <div
             ref={cardRef}
-            className={`w-full aspect-[4/5] rounded-3xl p-6 bg-gradient-to-br ${selectedTheme.bg} border-2 ${selectedTheme.border} shadow-2xl flex flex-col justify-between relative overflow-hidden`}
+            className={`w-full aspect-[4/5] rounded-3xl p-5 sm:p-6 bg-gradient-to-br ${selectedTheme.bg} border-2 ${selectedTheme.border} shadow-2xl flex flex-col justify-between relative overflow-hidden text-left`}
           >
-            {/* Jacobite Orthodox Cross / Emblem watermark background */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-              <div className="w-48 h-48 rounded-full border-[12px] border-white flex items-center justify-center font-serif text-6xl">☦</div>
-            </div>
-
-            {/* Top Branding */}
-            <div className="flex items-center justify-between relative z-10">
-              <span className={`text-[11px] font-bold uppercase tracking-widest ${selectedTheme.accent} font-serif`}>
-                Ignite 🕊️ Jacobite Orthodox
+            {/* Top Branding - Clean & Minimal */}
+            <div className="flex items-center justify-between relative z-10 w-full border-b border-white/10 pb-3">
+              <span className={`text-xs font-extrabold uppercase tracking-widest ${selectedTheme.accent} font-serif`}>
+                IGNITE 🕊️
               </span>
-              <span className="text-[10px] opacity-60 text-white">Daily Bread</span>
+              <span className="text-[11px] font-bold tracking-wider text-white/90 uppercase">
+                Daily Bread
+              </span>
             </div>
 
             {/* Verse Content */}
-            <div className="relative z-10 my-auto text-center space-y-3 px-2">
-              <p className={`text-base sm:text-lg font-serif italic leading-relaxed ${selectedTheme.text} drop-shadow-md`}>
+            <div className="relative z-10 my-auto text-center space-y-3 px-1">
+              <p className={`text-sm sm:text-base font-serif italic leading-relaxed ${selectedTheme.text} drop-shadow-sm`}>
                 "{verseText}"
               </p>
-              <div className="w-12 h-0.5 mx-auto bg-amber-500/50 rounded-full" />
+              <div className="w-10 h-0.5 mx-auto bg-amber-500/50 rounded-full" />
               <p className={`text-xs font-bold uppercase tracking-widest ${selectedTheme.accent}`}>
                 {reference}
               </p>
             </div>
 
             {/* Footer */}
-            <div className="relative z-10 text-center border-t border-white/10 pt-3">
-              <p className="text-[10px] text-white/70 font-semibold tracking-wider">
-                ignite-youth.app • Faith • Scripture • Fellowship
+            <div className="relative z-10 text-center border-t border-white/10 pt-2.5">
+              <p className="text-[9px] text-white/60 font-semibold tracking-wider uppercase">
+                IGNITE • Scripture & Fellowship
               </p>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
+          {/* Actions - Mobile Touch Friendly */}
+          <div className="grid grid-cols-2 gap-2.5 pt-1">
             <Button
               onClick={handleDownload}
-              disabled={downloading}
+              disabled={loading}
               variant="outline"
-              className="rounded-xl h-11 text-xs font-bold border-amber-500/30 hover:bg-amber-500/10"
+              className="rounded-2xl h-12 text-xs font-bold border-amber-500/30 hover:bg-amber-500/10 active:scale-95 transition-transform"
             >
-              <Download className="w-4 h-4 mr-2 text-amber-500" />
-              Download Card
+              {loading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin text-amber-500" /> : <Download className="w-4 h-4 mr-1.5 text-amber-500" />}
+              Save Image
             </Button>
 
             <Button
               onClick={handleShare}
-              disabled={downloading}
-              className="gradient-gold text-white rounded-xl h-11 text-xs font-bold shadow-md hover:opacity-90"
+              disabled={loading}
+              className="gradient-gold text-white rounded-2xl h-12 text-xs font-bold shadow-md hover:opacity-90 active:scale-95 transition-transform"
             >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share to Stories
+              {loading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin text-white" /> : <Share2 className="w-4 h-4 mr-1.5" />}
+              Share Card
             </Button>
           </div>
         </motion.div>
