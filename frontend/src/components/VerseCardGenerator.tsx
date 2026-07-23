@@ -247,10 +247,10 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
             initial={{ opacity: 0, scale: 0.9, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 15 }}
-            className="bg-card border border-border/60 rounded-3xl p-4 sm:p-5 max-w-[340px] sm:max-w-sm w-full shadow-2xl relative flex flex-col space-y-3 my-auto max-h-[92vh] overflow-hidden z-50"
+            className="bg-card border border-border/60 rounded-3xl p-4 sm:p-5 max-w-[340px] sm:max-w-sm w-full shadow-2xl relative flex flex-col space-y-4 my-auto max-h-[90vh] overflow-y-auto z-50 scrollbar-hide"
           >
             {/* Top Control Bar: Save Card, Share, Close Button */}
-            <div className="flex items-center justify-between gap-2 shrink-0 border-b border-border/50 pb-2.5">
+            <div className="flex items-center justify-between gap-2 shrink-0 border-b border-border/50 pb-2.5 sticky top-0 bg-card z-20">
               <div className="flex items-center gap-2 flex-1">
                 <Button
                   onClick={handleDownload}
@@ -273,7 +273,7 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
                   disabled={loading}
                   variant="outline"
                   size="sm"
-                  className="rounded-xl h-10 px-3 text-xs font-bold border-amber-500/30 hover:bg-amber-500/10"
+                  className="rounded-xl h-10 px-3 text-xs font-bold border-amber-500/30 hover:bg-amber-500/10 bg-card"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin text-amber-500" /> : <Share2 className="w-4 h-4 text-amber-500" />}
                 </Button>
@@ -294,7 +294,7 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
                 <button
                   key={t.id}
                   onClick={() => setSelectedTheme(t)}
-                  className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${
+                  className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${
                     selectedTheme.id === t.id ? "bg-amber-500 text-white border-amber-400 shadow-sm" : "bg-muted text-muted-foreground border-transparent"
                   }`}
                 >
@@ -304,10 +304,10 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
             </div>
 
             {/* Rendered Verse Card Preview */}
-            <div className="flex-1 w-full flex items-center justify-center min-h-[250px] sm:min-h-[350px] overflow-hidden rounded-2xl">
+            <div className="w-full flex justify-center items-center py-2 shrink-0">
               <div
                 ref={cardRef}
-                className={`h-full aspect-[4/5] max-h-[45vh] rounded-2xl p-4 sm:p-5 bg-gradient-to-br ${selectedTheme.bgCss} border-2 ${selectedTheme.borderCss} shadow-xl flex flex-col justify-between relative overflow-hidden text-left mx-auto shrink-0`}
+                className={`w-[240px] sm:w-[280px] aspect-[4/5] rounded-2xl p-4 sm:p-5 bg-gradient-to-br ${selectedTheme.bgCss} border-2 ${selectedTheme.borderCss} shadow-xl flex flex-col justify-between relative overflow-hidden text-left shrink-0`}
               >
                 {/* Top Branding */}
                 <div className="flex items-center justify-between relative z-10 w-full border-b border-white/15 pb-2">
@@ -321,7 +321,7 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
 
                 {/* Verse Content */}
                 <div className="relative z-10 my-auto text-center space-y-2 px-1">
-                  <p className={`text-xs sm:text-sm font-serif italic leading-relaxed line-clamp-6 drop-shadow-sm ${selectedTheme.textCss}`}>
+                  <p className={`text-xs sm:text-[13px] font-serif italic leading-relaxed line-clamp-6 drop-shadow-sm ${selectedTheme.textCss}`}>
                     "{verseText.replace(/[*_~\[\]]/g, '').trim()}"
                   </p>
                   <div className="w-8 sm:w-10 h-0.5 mx-auto bg-amber-500/50 rounded-full" />
