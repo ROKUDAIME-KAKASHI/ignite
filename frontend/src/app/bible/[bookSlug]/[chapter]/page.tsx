@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchChapter, TRANSLATIONS, type Translation, type BibleVerse } from "@/lib/bible-api";
 import { getBookBySlug, getAdjacentBook } from "@/lib/bible-books";
-import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Clock as ClockIcon, Volume2, VolumeX } from "lucide-react";
+import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Clock as ClockIcon, Volume2, VolumeX, Image as ImageIcon } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { awardXP } from "@/app/actions/gamification";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 import { getDatabaseBookmarks, toggleDatabaseBookmark } from "../../actions";
+import { VerseCardGenerator } from "@/components/VerseCardGenerator";
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 function VersesSkeleton() {
@@ -54,6 +55,7 @@ export default function BibleReaderPage() {
   const [markingRead, setMarkingRead] = useState(false);
   const [markedRead, setMarkedRead] = useState(false);
   const [isReading, setIsReading] = useState(false);
+  const [cardVerse, setCardVerse] = useState<{ text: string; reference: string } | null>(null);
   const readingRef = useRef(false);
 
   // Load voices on mount for browser voice list caching
@@ -347,6 +349,22 @@ export default function BibleReaderPage() {
             {isReading ? <VolumeX className="w-5 h-5 animate-pulse" /> : <Volume2 className="w-5 h-5" />}
           </button>
 
+          {/* Graphic Card Generator */}
+          <button
+            onClick={() => {
+              if (verses.length > 0) {
+                setCardVerse({
+                  text: verses[0].text,
+                  reference: `${book.name} ${chapter}:${verses[0].verse}`
+                });
+              }
+            }}
+            className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground transition-colors"
+            title="Create Graphic Card"
+          >
+            <ImageIcon className="w-5 h-5 text-amber-500" />
+          </button>
+
           {/* Translation */}
           <div className="relative">
             <button
@@ -500,6 +518,18 @@ export default function BibleReaderPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              setCardVerse({
+                                text: v.text.trim(),
+                                reference: `${book.name} ${chapter}:${v.verse}`
+                              });
+                            }}
+                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition"
+                          >
+                            <ImageIcon className="w-3.5 h-3.5" /> Create Card
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
                               const ref = `${book.name} ${chapter}:${v.verse} (${translation.toUpperCase()})`;
                               const text = `"${v.text.trim()}" — ${ref}`;
                               if (navigator.share) navigator.share({ text });
@@ -619,6 +649,15 @@ export default function BibleReaderPage() {
           </motion.div>
         )}
       </div>
+
+      {cardVerse && (
+        <VerseCardGenerator
+          verseText={cardVerse.text}
+          reference={cardVerse.reference}
+          isOpen={!!cardVerse}
+          onClose={() => setCardVerse(null)}
+        />
+      )}
     </div>
   );
 }
