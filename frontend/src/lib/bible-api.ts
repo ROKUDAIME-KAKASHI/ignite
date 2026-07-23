@@ -19,33 +19,57 @@ export interface BibleChapterResponse {
 const BASE_URL = "https://bible-api.com";
 
 /**
- * Fetch a full chapter from bible-api.com
- * e.g. fetchChapter("john", 3, "kjv")
+ * Fetch a full chapter with automatic localStorage caching for 100% offline access
  */
 export async function fetchChapter(
   apiName: string,
   chapter: number,
   translation: Translation = "nrsvue"
 ): Promise<BibleChapterResponse> {
-  // Use our internal proxy scraper for NRSVUE, NIV, and Malayalam
-  if (translation === "nrsvue" || translation === "mal" || translation === "niv") {
-    const versionStr = translation.toUpperCase();
-    const url = `/api/bible?book=${encodeURIComponent(apiName)}&chapter=${chapter}&version=${versionStr}`;
-    const res = await fetch(url, { next: { revalidate: 86400 } });
-    if (!res.ok) throw new Error(`Failed to fetch ${apiName} ${chapter} (${versionStr})`);
-    return res.json();
-  }
+  const cacheKey = `ignite_bible_cache_${apiName}_${chapter}_${translation}`;
 
-  const ref = `${apiName}+${chapter}`;
-  const url = `${BASE_URL}/${ref}?translation=${translation}`;
-  const res = await fetch(url, { next: { revalidate: 86400 } }); // cache 24h
-  if (!res.ok) throw new Error(`Failed to fetch ${ref}: ${res.status}`);
-  return res.json();
+  // Try fetching network response
+  try {
+    let resultData: BibleChapterResponse;
+
+    if (translation === "nrsvue" || translation === "mal" || translation === "niv") {
+      const versionStr = translation.toUpperCase();
+      const url = `/api/bible?book=${encodeURIComponent(apiName)}&chapter=${chapter}&version=${versionStr}`;
+      const res = await fetch(url, { next: { revalidate: 86400 } });
+      if (!res.ok) throw new Error(`Failed to fetch ${apiName} ${chapter} (${versionStr})`);
+      resultData = await res.json();
+    } else {
+      const ref = `${apiName}+${chapter}`;
+      const url = `${BASE_URL}/${ref}?translation=${translation}`;
+      const res = await fetch(url, { next: { revalidate: 86400 } });
+      if (!res.ok) throw new Error(`Failed to fetch ${ref}: ${res.status}`);
+      resultData = await res.json();
+    }
+
+    // Cache locally for offline access
+    if (typeof window !== "undefined" && resultData && resultData.verses) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(resultData));
+      } catch (e) {
+        console.warn("LocalStorage full, skipping Bible cache write:", e);
+      }
+    }
+
+    return resultData;
+  } catch (err) {
+    // Offline or network error fallback
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    }
+    throw err;
+  }
 }
 
 /**
  * Fetch a single verse
- * e.g. fetchVerse("john", 3, 16, "kjv")
  */
 export async function fetchVerse(
   apiName: string,
@@ -54,7 +78,6 @@ export async function fetchVerse(
   translation: Translation = "nrsvue"
 ): Promise<BibleChapterResponse> {
   if (translation === "nrsvue" || translation === "mal" || translation === "niv") {
-    // For a single verse, we fetch the chapter and filter (because scraping a single verse works similarly)
     const chapData = await fetchChapter(apiName, chapter, translation);
     return {
       ...chapData,

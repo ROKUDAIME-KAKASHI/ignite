@@ -133,8 +133,8 @@ export function GlobalChat() {
     setMessages(prev => [...prev, aiResponse]);
     setIsTyping(false);
 
-    if (isVoiceEnabled && response.success && response.text) {
-      speak(response.text);
+    if (isVoiceEnabled && replyText) {
+      speak(replyText);
     }
   };
 
