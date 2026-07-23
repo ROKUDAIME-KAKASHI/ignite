@@ -10,6 +10,7 @@ import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { CustomGoogleOAuthProvider } from "@/components/providers/GoogleAuthProvider";
 import { InAppBrowserDetector } from "@/components/layout/InAppBrowserDetector";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { OfflineHandler } from "@/components/OfflineHandler";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <CustomGoogleOAuthProvider>
             <AuthProvider>
+              <OfflineHandler />
               <Navigation />
               <MobileHeader />
               <InstallPrompt />

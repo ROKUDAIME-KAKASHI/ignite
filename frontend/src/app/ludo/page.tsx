@@ -540,7 +540,7 @@ export default function BibleLudoPage() {
                       (gameMode === "solo" && turn === "red") ||
                       (gameMode === "team" && turn === "red");
 
-      if (isHuman && result === 6) {
+      if (isHuman && (result === 1 || result === 6)) {
         let questionsToUse = unusedQuestions;
         if (questionsToUse.length === 0) {
           questionsToUse = [...allTrivia];
@@ -1211,7 +1211,7 @@ export default function BibleLudoPage() {
                   <p className="font-bold text-sm leading-none capitalize text-foreground">
                     {getPlayerName(turn)} {gameMode === "live" && turn === myColor && " (You)"}
                   </p>
-                  {dice === 6 && (
+                  {(dice === 1 || dice === 6) && (
                     <p className="text-[10px] text-amber-500 font-bold mt-1 animate-pulse">
                       📖 Answering Trivia...
                     </p>
