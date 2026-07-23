@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Share2, X, Sparkles, Loader2 } from "lucide-react";
+import { Download, Share2, X, Sparkles, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface VerseCardGeneratorProps {
@@ -12,57 +12,148 @@ interface VerseCardGeneratorProps {
   onClose: () => void;
 }
 
-const THEMES = [
-  { id: "gold", name: "Deep Gold", bg: "from-amber-950 via-amber-900 to-amber-950", border: "border-amber-500/40", text: "text-amber-100", accent: "text-amber-400" },
-  { id: "midnight", name: "Midnight", bg: "from-slate-950 via-indigo-950 to-slate-900", border: "border-indigo-500/40", text: "text-slate-100", accent: "text-indigo-400" },
-  { id: "royal", name: "Royal Purple", bg: "from-purple-950 via-violet-900 to-purple-950", border: "border-purple-500/40", text: "text-purple-100", accent: "text-purple-300" },
-  { id: "parchment", name: "Parchment", bg: "from-amber-100 via-stone-200 to-amber-50", border: "border-amber-800/30", text: "text-stone-900", accent: "text-amber-800" },
-  { id: "emerald", name: "Emerald", bg: "from-emerald-950 via-teal-950 to-emerald-900", border: "border-emerald-500/40", text: "text-emerald-100", accent: "text-emerald-400" },
+interface ThemeConfig {
+  id: string;
+  name: string;
+  bgGrad: [string, string, string]; // start, mid, end
+  border: string;
+  text: string;
+  accent: string;
+  subText: string;
+}
+
+const THEMES: ThemeConfig[] = [
+  { id: "gold", name: "Deep Gold", bgGrad: ["#1c1008", "#451a03", "#1a0e07"], border: "rgba(245, 158, 11, 0.4)", text: "#fef3c7", accent: "#fbbf24", subText: "rgba(255, 255, 255, 0.7)" },
+  { id: "midnight", name: "Midnight", bgGrad: ["#020617", "#1e1b4b", "#090d16"], border: "rgba(99, 102, 241, 0.4)", text: "#f8fafc", accent: "#818cf8", subText: "rgba(255, 255, 255, 0.7)" },
+  { id: "royal", name: "Royal Purple", bgGrad: ["#2e1065", "#581c87", "#2e1065"], border: "rgba(168, 85, 247, 0.4)", text: "#faf5ff", accent: "#c084fc", subText: "rgba(255, 255, 255, 0.7)" },
+  { id: "parchment", name: "Parchment", bgGrad: ["#fef3c7", "#e7e5e4", "#fffbeb"], border: "rgba(146, 64, 14, 0.3)", text: "#1c1917", accent: "#92400e", subText: "rgba(28, 25, 23, 0.7)" },
+  { id: "emerald", name: "Emerald", bgGrad: ["#022c22", "#134e4a", "#022c22"], border: "rgba(52, 211, 153, 0.4)", text: "#ecfdf5", accent: "#34d399", subText: "rgba(255, 255, 255, 0.7)" },
 ];
 
 export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: VerseCardGeneratorProps) {
   const [selectedTheme, setSelectedTheme] = useState(THEMES[0]);
-  const cardRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
 
-  const generateCanvasImage = async (): Promise<Blob | null> => {
-    if (!cardRef.current) return null;
-    try {
-      const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2, // Optimized scale for mobile performance & clarity
-        useCORS: true,
-        backgroundColor: null,
-      });
+  // Native HTML5 Canvas Renderer (1080x1350 HD 4:5 Graphic)
+  const drawGraphicCanvas = (): HTMLCanvasElement => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1350;
+    const ctx = canvas.getContext("2d")!;
 
-      return new Promise((resolve) => {
-        canvas.toBlob((blob) => resolve(blob), "image/png", 1.0);
-      });
-    } catch (e) {
-      console.error("Failed to render verse card canvas:", e);
-      return null;
+    const theme = selectedTheme;
+
+    // 1. Background Gradient
+    const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
+    gradient.addColorStop(0, theme.bgGrad[0]);
+    gradient.addColorStop(0.5, theme.bgGrad[1]);
+    gradient.addColorStop(1, theme.bgGrad[2]);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 1080, 1350);
+
+    // 2. Outer & Inner Decorative Frame
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 6;
+    ctx.strokeRect(50, 50, 980, 1250);
+
+    ctx.lineWidth = 2;
+    ctx.strokeRect(65, 65, 950, 1220);
+
+    // 3. Top Header
+    ctx.fillStyle = theme.accent;
+    ctx.font = "bold 38px Georgia, serif";
+    ctx.fillText("IGNITE 🕊️", 100, 130);
+
+    ctx.fillStyle = theme.subText;
+    ctx.font = "bold uppercase 28px sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText("DAILY BREAD", 980, 130);
+
+    // Header Divider Line
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(100, 165);
+    ctx.lineTo(980, 165);
+    ctx.stroke();
+
+    // 4. Word Wrapped Verse Text
+    ctx.textAlign = "center";
+    ctx.fillStyle = theme.text;
+    ctx.font = "italic 46px Georgia, serif";
+
+    const cleanVerse = `"${verseText.replace(/[*_~\[\]]/g, '').trim()}"`;
+    const words = cleanVerse.split(" ");
+    const maxWidth = 860;
+    const lineHeight = 64;
+    const lines: string[] = [];
+    let currentLine = "";
+
+    for (let i = 0; i < words.length; i++) {
+      const testLine = currentLine ? `${currentLine} ${words[i]}` : words[i];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && i > 0) {
+        lines.push(currentLine);
+        currentLine = words[i];
+      } else {
+        currentLine = testLine;
+      }
     }
+    lines.push(currentLine);
+
+    // Calculate vertical centering
+    const totalTextHeight = lines.length * lineHeight;
+    let startY = 650 - totalTextHeight / 2;
+
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], 540, startY + i * lineHeight);
+    }
+
+    // Gold Divider Dot
+    const dividerY = startY + totalTextHeight + 40;
+    ctx.fillStyle = theme.accent;
+    ctx.beginPath();
+    ctx.arc(540, dividerY, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 5. Reference Text
+    ctx.fillStyle = theme.accent;
+    ctx.font = "bold uppercase 36px sans-serif";
+    ctx.fillText(reference.toUpperCase(), 540, dividerY + 70);
+
+    // 6. Footer Branding
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(100, 1240);
+    ctx.lineTo(980, 1240);
+    ctx.stroke();
+
+    ctx.fillStyle = theme.subText;
+    ctx.font = "bold uppercase 24px sans-serif";
+    ctx.fillText("IGNITE • SCRIPTURE & FELLOWSHIP", 540, 1280);
+
+    return canvas;
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     setLoading(true);
     try {
-      const blob = await generateCanvasImage();
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.style.display = "none";
-        a.href = url;
-        a.download = `IGNITE-${reference.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 1000);
-      }
+      const canvas = drawGraphicCanvas();
+      const imageUrl = canvas.toDataURL("image/png");
+
+      const link = document.createElement("a");
+      link.download = `IGNITE_${reference.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
+      link.href = imageUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2500);
     } catch (e) {
-      console.error("Download failed:", e);
+      console.error("Canvas export error:", e);
     } finally {
       setLoading(false);
     }
@@ -71,24 +162,28 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
   const handleShare = async () => {
     setLoading(true);
     try {
-      const blob = await generateCanvasImage();
-      if (blob && typeof navigator !== "undefined" && navigator.share && navigator.canShare) {
-        const file = new File([blob], `IGNITE-${reference.replace(/[^a-zA-Z0-9]/g, "_")}.png`, { type: "image/png" });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: `IGNITE Daily Bread: ${reference}`,
-            text: `"${verseText}" — ${reference}`,
-            files: [file],
-          });
-          setLoading(false);
-          return;
+      const canvas = drawGraphicCanvas();
+
+      canvas.toBlob(async (blob) => {
+        if (blob && typeof navigator !== "undefined" && navigator.share) {
+          const file = new File([blob], `IGNITE_${reference.replace(/[^a-zA-Z0-9]/g, "_")}.png`, { type: "image/png" });
+          try {
+            await navigator.share({
+              title: `IGNITE Daily Bread: ${reference}`,
+              text: `"${verseText}" — ${reference}`,
+              files: [file],
+            });
+            setLoading(false);
+            return;
+          } catch (e) {
+            console.log("Web Share cancelled/unsupported:", e);
+          }
         }
-      }
-      // Fallback to download if Web Share API with files is not supported
-      await handleDownload();
-    } catch (e) {
-      console.log("Share cancelled or failed:", e);
-      await handleDownload();
+        // Fallback to download if Web Share fails or is cancelled
+        handleDownload();
+      }, "image/png");
+    } catch {
+      handleDownload();
     } finally {
       setLoading(false);
     }
@@ -133,33 +228,38 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
 
           {/* Rendered Verse Card Preview */}
           <div
-            ref={cardRef}
-            className={`w-full aspect-[4/5] rounded-3xl p-5 sm:p-6 bg-gradient-to-br ${selectedTheme.bg} border-2 ${selectedTheme.border} shadow-2xl flex flex-col justify-between relative overflow-hidden text-left`}
+            className={`w-full aspect-[4/5] rounded-3xl p-5 sm:p-6 bg-gradient-to-br ${
+              selectedTheme.id === "gold" ? "from-amber-950 via-amber-900 to-amber-950 border-amber-500/40 text-amber-100" :
+              selectedTheme.id === "midnight" ? "from-slate-950 via-indigo-950 to-slate-900 border-indigo-500/40 text-slate-100" :
+              selectedTheme.id === "royal" ? "from-purple-950 via-violet-900 to-purple-950 border-purple-500/40 text-purple-100" :
+              selectedTheme.id === "parchment" ? "from-amber-100 via-stone-200 to-amber-50 border-amber-800/30 text-stone-900" :
+              "from-emerald-950 via-teal-950 to-emerald-900 border-emerald-500/40 text-emerald-100"
+            } border-2 shadow-2xl flex flex-col justify-between relative overflow-hidden text-left`}
           >
             {/* Top Branding - Clean & Minimal */}
             <div className="flex items-center justify-between relative z-10 w-full border-b border-white/10 pb-3">
-              <span className={`text-xs font-extrabold uppercase tracking-widest ${selectedTheme.accent} font-serif`}>
+              <span className="text-xs font-extrabold uppercase tracking-widest font-serif" style={{ color: selectedTheme.accent }}>
                 IGNITE 🕊️
               </span>
-              <span className="text-[11px] font-bold tracking-wider text-white/90 uppercase">
+              <span className="text-[11px] font-bold tracking-wider opacity-80 uppercase">
                 Daily Bread
               </span>
             </div>
 
             {/* Verse Content */}
             <div className="relative z-10 my-auto text-center space-y-3 px-1">
-              <p className={`text-sm sm:text-base font-serif italic leading-relaxed ${selectedTheme.text} drop-shadow-sm`}>
+              <p className="text-sm sm:text-base font-serif italic leading-relaxed drop-shadow-sm">
                 "{verseText}"
               </p>
               <div className="w-10 h-0.5 mx-auto bg-amber-500/50 rounded-full" />
-              <p className={`text-xs font-bold uppercase tracking-widest ${selectedTheme.accent}`}>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: selectedTheme.accent }}>
                 {reference}
               </p>
             </div>
 
             {/* Footer */}
             <div className="relative z-10 text-center border-t border-white/10 pt-2.5">
-              <p className="text-[9px] text-white/60 font-semibold tracking-wider uppercase">
+              <p className="text-[9px] opacity-60 font-semibold tracking-wider uppercase">
                 IGNITE • Scripture & Fellowship
               </p>
             </div>
@@ -173,8 +273,14 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
               variant="outline"
               className="rounded-2xl h-12 text-xs font-bold border-amber-500/30 hover:bg-amber-500/10 active:scale-95 transition-transform"
             >
-              {loading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin text-amber-500" /> : <Download className="w-4 h-4 mr-1.5 text-amber-500" />}
-              Save Image
+              {loading ? (
+                <Loader2 className="w-4 h-4 mr-1.5 animate-spin text-amber-500" />
+              ) : savedSuccess ? (
+                <Check className="w-4 h-4 mr-1.5 text-emerald-500" />
+              ) : (
+                <Download className="w-4 h-4 mr-1.5 text-amber-500" />
+              )}
+              {savedSuccess ? "Saved!" : "Save Image"}
             </Button>
 
             <Button
