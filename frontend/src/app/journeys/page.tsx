@@ -10,6 +10,50 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { getJourneys, enrollCourse, completeNode } from "./actions";
 import { useAuth } from "@/context/AuthContext";
+function parseNodeToBibleRoute(content: string = "", title: string = ""): { bookSlug: string; chapter: number } {
+  const combined = `${title} ${content}`.toLowerCase();
+  if (combined.includes("genesis") || combined.includes("gen")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "genesis", chapter: match ? parseInt(match[1]) : 1 };
+  }
+  if (combined.includes("exodus")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "exodus", chapter: match ? parseInt(match[1]) : 1 };
+  }
+  if (combined.includes("matthew")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "matthew", chapter: match ? parseInt(match[1]) : 1 };
+  }
+  if (combined.includes("mark")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "mark", chapter: match ? parseInt(match[1]) : 1 };
+  }
+  if (combined.includes("luke")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "luke", chapter: match ? parseInt(match[1]) : 1 };
+  }
+  if (combined.includes("john")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "john", chapter: match ? parseInt(match[1]) : 1 };
+  }
+  if (combined.includes("psalm")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "psalms", chapter: match ? parseInt(match[1]) : 23 };
+  }
+  if (combined.includes("corinthians")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "1-corinthians", chapter: match ? parseInt(match[1]) : 13 };
+  }
+  if (combined.includes("hebrews")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "hebrews", chapter: match ? parseInt(match[1]) : 11 };
+  }
+  if (combined.includes("revelation")) {
+    const match = combined.match(/(\d+)/);
+    return { bookSlug: "revelation", chapter: match ? parseInt(match[1]) : 21 };
+  }
+  return { bookSlug: "genesis", chapter: 1 };
+}
 
 export default function JourneysPage() {
   const router = useRouter();
@@ -258,25 +302,25 @@ export default function JourneysPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {selectedNode.type === "read" && (
+                {selectedNode.type === "read" ? (
                   <Button 
                     onClick={() => {
-                      // Basic heuristic to jump to the bible
-                      router.push("/bible");
+                      const target = parseNodeToBibleRoute(selectedNode.content, selectedNode.title);
+                      router.push(`/bible/${target.bookSlug}/${target.chapter}?journeyNodeId=${selectedNode.id}`);
                     }} 
-                    variant="outline"
-                    className="w-full h-12 rounded-xl text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 font-bold text-base"
+                    className="w-full h-12 rounded-xl gradient-gold text-white font-bold text-base shadow-lg halo-glow"
                   >
-                    <BookOpen className="w-4 h-4 mr-2" /> Start Reading
+                    <BookOpen className="w-5 h-5 mr-2" /> Start Reading Chapter
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={handleCompleteNode} 
+                    disabled={isProcessing}
+                    className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
+                  >
+                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Challenge (+50 XP)"}
                   </Button>
                 )}
-                <Button 
-                  onClick={handleCompleteNode} 
-                  disabled={isProcessing}
-                  className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-500/20"
-                >
-                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Step"}
-                </Button>
               </div>
             )}
           </motion.div>

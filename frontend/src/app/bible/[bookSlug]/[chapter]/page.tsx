@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { fetchChapter, TRANSLATIONS, type Translation, type BibleVerse } from "@/lib/bible-api";
 import { getBookBySlug, getAdjacentBook } from "@/lib/bible-books";
-import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Clock as ClockIcon, Volume2, VolumeX, Image as ImageIcon } from "lucide-react";
+import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Clock as ClockIcon, Volume2, VolumeX, Image as ImageIcon, Check } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { awardXP } from "@/app/actions/gamification";
+import { completeNode } from "@/app/journeys/actions";
+import { queueOfflineXP } from "@/lib/offlineSync";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 import { getDatabaseBookmarks, toggleDatabaseBookmark } from "../../actions";
@@ -34,10 +36,40 @@ function VersesSkeleton() {
 export default function BibleReaderPage() {
   const params = useParams<{ bookSlug: string; chapter: string }>();
   const router = useRouter();
-
+  const searchParams = useSearchParams();
   const bookSlug = params.bookSlug;
   const chapter = Number(params.chapter);
   const book = getBookBySlug(bookSlug);
+  const journeyNodeId = searchParams.get("journeyNodeId");
+  const [completingJourney, setCompletingJourney] = useState(false);
+
+  const handleCompleteJourneyNode = async () => {
+    if (!journeyNodeId) return;
+    setCompletingJourney(true);
+    try {
+      if (typeof window !== "undefined" && !navigator.onLine) {
+        queueOfflineXP(50, "Completed Biblical Journey Reading");
+      } else {
+        await completeNode(journeyNodeId);
+        await awardXP(50, "Completed Biblical Journey Reading");
+      }
+
+      if (typeof window !== "undefined") {
+        import("canvas-confetti").then((confetti) => {
+          confetti.default({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+        }).catch(() => {});
+      }
+
+      setTimeout(() => {
+        router.push("/journeys");
+      }, 1200);
+    } catch (e) {
+      console.error("Failed to complete journey node:", e);
+      router.push("/journeys");
+    } finally {
+      setCompletingJourney(false);
+    }
+  };
 
   const [translation, setTranslation] = useState<Translation>("kjv");
 
@@ -576,6 +608,32 @@ export default function BibleReaderPage() {
                   </Button>
                 )}
               </div>
+
+              {/* Journey Assignment Card */}
+              {journeyNodeId && (
+                <div className="mb-6 p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-card to-amber-500/10 border-2 border-amber-500/50 shadow-2xl text-center space-y-3">
+                  <div className="flex items-center justify-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
+                    <Sparkles className="w-4 h-4" /> Biblical Journey Checkpoint Reached
+                  </div>
+                  <p className="text-sm font-serif italic text-foreground leading-relaxed">
+                    "Your word is a lamp for my feet, a light on my path." — Psalm 119:105
+                  </p>
+                  <Button
+                    onClick={handleCompleteJourneyNode}
+                    disabled={completingJourney}
+                    className="w-full h-12 rounded-2xl gradient-gold text-white font-bold text-base shadow-lg halo-glow"
+                  >
+                    {completingJourney ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-white" />
+                    ) : (
+                      <>
+                        <Check className="w-5 h-5 mr-2" /> Mark Chapter Complete & Claim +50 XP
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
               <div className="divider-cross mb-6" />
               <div className="flex gap-3">
                 {/* Previous */}
