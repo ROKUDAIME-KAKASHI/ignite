@@ -156,7 +156,7 @@ export function GlobalChat() {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="w-14 h-14 rounded-full gradient-spirit text-white shadow-xl hover:shadow-2xl hover:scale-105 transition p-0 flex items-center justify-center halo-glow"
+              className="w-14 h-14 rounded-full gradient-spirit text-white shadow-xl hover:shadow-2xl hover:scale-105 transition p-0 flex items-center justify-center relative overflow-hidden"
             >
               <MessageSquare className="w-6 h-6" />
             </Button>

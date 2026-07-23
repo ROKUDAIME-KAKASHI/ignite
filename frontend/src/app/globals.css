@@ -248,11 +248,7 @@
   }
 
   /* === ANIMATIONS === */
-  @keyframes halo {
-    0%, 100% { box-shadow: 0 0 12px rgba(212, 160, 23, 0.4); }
-    50%       { box-shadow: 0 0 28px rgba(212, 160, 23, 0.75); }
-  }
-  .halo-glow { animation: halo 3s ease-in-out infinite; }
+  .halo-glow { box-shadow: 0 0 20px rgba(212, 160, 23, 0.5); }
 
   @keyframes dove-float {
     0%, 100% { transform: translateY(0px) rotate(-1deg); }
@@ -270,21 +266,6 @@
     display: inline-block;
     animation: candle-flicker 1.8s ease-in-out infinite;
     transform-origin: bottom center;
-  }
-
-  @keyframes shimmer-scroll {
-    0%   { background-position: -600px 0; }
-    100% { background-position: 600px 0; }
-  }
-  .shimmer {
-    background: linear-gradient(90deg, #fdf8f0 25%, #fef3e2 50%, #fdf8f0 75%);
-    background-size: 1200px 100%;
-    animation: shimmer-scroll 1.5s infinite;
-  }
-  .dark .shimmer {
-    background: linear-gradient(90deg, #0f1229 25%, #161a3a 50%, #0f1229 75%);
-    background-size: 1200px 100%;
-    animation: shimmer-scroll 1.5s infinite;
   }
 
   /* === 3D UTILITIES === */
