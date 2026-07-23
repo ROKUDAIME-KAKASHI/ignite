@@ -194,6 +194,7 @@ export default function BibleLudoPage() {
   });
   const [winner, setWinner] = useState<Color | null>(null);
   const [triviaResult, setTriviaResult] = useState<"correct" | "wrong" | null>(null);
+  const [remoteTriviaColor, setRemoteTriviaColor] = useState<Color | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [gameEvent, setGameEvent] = useState<{ type: "capture" | "home"; color: Color; message: string } | null>(null);
 
@@ -524,6 +525,9 @@ export default function BibleLudoPage() {
 
   const executeRoll = (sync = true) => {
     setIsRolling(true);
+    if (sync && gameMode === "live" && gameChannel) {
+      gameChannel.send({ type: 'broadcast', event: 'is_rolling', payload: { active: true } });
+    }
     
     // Animate dice
     setTimeout(() => {
@@ -556,6 +560,9 @@ export default function BibleLudoPage() {
         const selectedTrivia = questionsToUse[qIndex];
         
         setTrivia(selectedTrivia);
+        if (sync && gameMode === "live" && gameChannel) {
+          gameChannel.send({ type: 'broadcast', event: 'remote_trivia', payload: { color: turn, active: true } });
+        }
         
         // Remove the selected question from the unused list
         const updatedQuestions = questionsToUse.filter(q => q.q !== selectedTrivia.q);
@@ -716,12 +723,18 @@ export default function BibleLudoPage() {
     if (!trivia || triviaResult) return;
     if (String(opt).trim().toLowerCase() === String(trivia.a).trim().toLowerCase()) {
       setTriviaResult("correct");
+      if (gameMode === "live" && gameChannel) {
+        gameChannel.send({ type: 'broadcast', event: 'remote_trivia', payload: { color: null, active: false } });
+      }
       setTimeout(() => {
         setTriviaResult(null);
         setTrivia(null);
       }, 1500);
     } else {
       setTriviaResult("wrong");
+      if (gameMode === "live" && gameChannel) {
+        gameChannel.send({ type: 'broadcast', event: 'remote_trivia', payload: { color: null, active: false } });
+      }
       setTimeout(() => {
         setTriviaResult(null);
         setTrivia(null);
@@ -781,8 +794,19 @@ export default function BibleLudoPage() {
                 setWinner(null);
                 setTurn("red");
               })
+              .on('broadcast', { event: 'is_rolling' }, ({ payload }) => {
+                if (payload.active) setIsRolling(true);
+              })
               .on('broadcast', { event: 'roll_dice' }, ({ payload }) => {
                 setDice(payload.result);
+                setIsRolling(false);
+              })
+              .on('broadcast', { event: 'remote_trivia' }, ({ payload }) => {
+                if (payload.active) {
+                  setRemoteTriviaColor(payload.color);
+                } else {
+                  setRemoteTriviaColor(null);
+                }
               })
               .on('broadcast', { event: 'update_room_players' }, ({ payload }) => {
                 setRoomPlayers(payload.roomPlayers);
@@ -856,7 +880,39 @@ export default function BibleLudoPage() {
           }
         }
       }
-    }).subscribe(async (status) => {
+    })
+    .on('broadcast', { event: 'start_game' }, ({ payload }) => {
+      setRoomPlayers(payload.roomPlayers);
+      setGameMode("live");
+      setTokens(payload.tokens);
+      setWinner(null);
+      setTurn("red");
+    })
+    .on('broadcast', { event: 'is_rolling' }, ({ payload }) => {
+      if (payload.active) setIsRolling(true);
+    })
+    .on('broadcast', { event: 'roll_dice' }, ({ payload }) => {
+      setDice(payload.result);
+      setIsRolling(false);
+    })
+    .on('broadcast', { event: 'remote_trivia' }, ({ payload }) => {
+      if (payload.active) {
+        setRemoteTriviaColor(payload.color);
+      } else {
+        setRemoteTriviaColor(null);
+      }
+    })
+    .on('broadcast', { event: 'update_room_players' }, ({ payload }) => {
+      setRoomPlayers(payload.roomPlayers);
+    })
+    .on('broadcast', { event: 'next_turn' }, ({ payload }) => {
+      setTurn(payload.nextColor);
+      setDice(null);
+    })
+    .on('broadcast', { event: 'move_token' }, ({ payload }) => {
+      forceMoveToken(payload.color, payload.tokenIdx, payload.newTokens, payload.extraTurn, payload.isWin, payload.winnerColor);
+    })
+    .subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
         await gChannel.track({
           id: user.id,
@@ -920,8 +976,19 @@ export default function BibleLudoPage() {
       setWinner(null);
       setTurn("red");
     })
+    .on('broadcast', { event: 'is_rolling' }, ({ payload }) => {
+      if (payload.active) setIsRolling(true);
+    })
     .on('broadcast', { event: 'roll_dice' }, ({ payload }) => {
       setDice(payload.result);
+      setIsRolling(false);
+    })
+    .on('broadcast', { event: 'remote_trivia' }, ({ payload }) => {
+      if (payload.active) {
+        setRemoteTriviaColor(payload.color);
+      } else {
+        setRemoteTriviaColor(null);
+      }
     })
     .on('broadcast', { event: 'update_room_players' }, ({ payload }) => {
       setRoomPlayers(payload.roomPlayers);
@@ -1308,7 +1375,7 @@ export default function BibleLudoPage() {
                   <p className="font-bold text-sm leading-none capitalize text-foreground">
                     {getPlayerName(turn)} {gameMode === "live" && turn === myColor && " (You)"}
                   </p>
-                  {(dice === 1 || dice === 6) && (
+                  {((trivia !== null) || (remoteTriviaColor === turn)) && (
                     <p className="text-[10px] text-amber-500 font-bold mt-1 animate-pulse">
                       📖 Answering Trivia...
                     </p>
