@@ -242,15 +242,15 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-hidden">
+        <div className="fixed inset-0 z-[100] flex p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 15 }}
-            className="bg-card border border-border/60 rounded-3xl p-4 sm:p-5 max-w-[340px] sm:max-w-sm w-full shadow-2xl relative flex flex-col space-y-4 my-auto max-h-[90vh] overflow-y-auto z-50 scrollbar-hide"
+            className="m-auto bg-card border border-border/60 rounded-3xl p-4 sm:p-5 max-w-[340px] sm:max-w-sm w-full shadow-2xl relative flex flex-col space-y-4 z-50"
           >
             {/* Top Control Bar: Save Card, Share, Close Button */}
-            <div className="flex items-center justify-between gap-2 shrink-0 border-b border-border/50 pb-2.5 sticky top-0 bg-card z-20">
+            <div className="flex items-center justify-between gap-2 shrink-0 border-b border-border/50 pb-2.5">
               <div className="flex items-center gap-2 flex-1">
                 <Button
                   onClick={handleDownload}
