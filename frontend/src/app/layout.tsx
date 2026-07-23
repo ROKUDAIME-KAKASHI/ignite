@@ -5,13 +5,15 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import { Navigation } from "@/components/layout/Navigation";
 import { MobileHeader } from "@/components/layout/MobileHeader";
-import { GlobalChat } from "@/components/GlobalChat";
-import { PushNotificationManager } from "@/components/PushNotificationManager";
+import dynamic from "next/dynamic";
+
+const GlobalChat = dynamic(() => import("@/components/GlobalChat").then(mod => mod.GlobalChat), { ssr: false });
+const PushNotificationManager = dynamic(() => import("@/components/PushNotificationManager").then(mod => mod.PushNotificationManager), { ssr: false });
+const InAppBrowserDetector = dynamic(() => import("@/components/layout/InAppBrowserDetector").then(mod => mod.InAppBrowserDetector), { ssr: false });
+const InstallPrompt = dynamic(() => import("@/components/InstallPrompt").then(mod => mod.InstallPrompt), { ssr: false });
+const OfflineHandler = dynamic(() => import("@/components/OfflineHandler").then(mod => mod.OfflineHandler), { ssr: false });
+const OfflinePrefetcher = dynamic(() => import("@/components/OfflinePrefetcher").then(mod => mod.OfflinePrefetcher), { ssr: false });
 import { CustomGoogleOAuthProvider } from "@/components/providers/GoogleAuthProvider";
-import { InAppBrowserDetector } from "@/components/layout/InAppBrowserDetector";
-import { InstallPrompt } from "@/components/InstallPrompt";
-import { OfflineHandler } from "@/components/OfflineHandler";
-import { OfflinePrefetcher } from "@/components/OfflinePrefetcher";
 
 import { Inter, Playfair_Display } from "next/font/google";
 

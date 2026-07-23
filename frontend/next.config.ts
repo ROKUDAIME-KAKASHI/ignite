@@ -63,6 +63,28 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  async headers() {
+    return [
+      {
+        source: '/(.*).(png|jpg|jpeg|gif|webp|svg|ico)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/(manifest.json|sw.js|workbox-.*.js|worker-.*.js)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 const config = withPWA(nextConfig);
