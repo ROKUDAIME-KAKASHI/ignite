@@ -13,6 +13,7 @@ import { cn, urlB64ToUint8Array } from "@/lib/utils";
 import Link from "next/link";
 import { getProfileStats, joinParish, leaveParish } from "@/app/actions/profile";
 import { getUserAwardsProgress } from "@/app/actions/gamificationAwards";
+import { TrophyShowcase } from "@/components/TrophyShowcase";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLiturgicalSeason } from "@/lib/liturgy";
 
@@ -372,74 +373,15 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ── 10-Tier Gamification Showcase ── */}
-      <div className="px-4 mb-5">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-foreground font-serif flex items-center gap-2">🏅 Medals Showcase</h3>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground font-bold">{awards.filter(a => a.currentLevel > 0).length}/10</span>
-            {awards.length > 0 && awards.some(a => a.currentLevel > 0) && (
-              <button onClick={() => setShowAllAwards(!showAllAwards)} className="text-[10px] text-primary font-bold uppercase tracking-wider">
-                {showAllAwards ? "Show Less" : "View All"}
-              </button>
-            )}
+      {/* ── Trophy & Badges Section ── */}
+      <div className="px-4 mb-6">
+        {loadingAwards ? (
+          <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center bg-card rounded-2xl border border-dashed">
+            <Loader2 className="w-5 h-5 animate-spin mb-2 text-amber-500" /> Loading trophy room...
           </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3 mt-4">
-            {loadingAwards ? (
-              <div className="col-span-2 text-center py-8 text-muted-foreground text-sm flex flex-col items-center bg-card rounded-2xl border border-dashed">
-                 <Loader2 className="w-5 h-5 animate-spin mb-2" /> Loading awards...
-              </div>
-            ) : awards.length > 0 ? (() => {
-              const earnedAwards = awards.filter(a => a.currentLevel > 0);
-              
-              if (earnedAwards.length === 0 && !showAllAwards) {
-                return (
-                  <div className="col-span-2 flex flex-col items-center justify-center p-6 bg-card border border-dashed rounded-2xl text-center">
-                    <span className="text-4xl mb-3 opacity-50 grayscale">🏅</span>
-                    <h4 className="font-bold text-foreground font-serif text-sm">No Medals Yet</h4>
-                    <p className="text-xs text-muted-foreground mt-1 mb-4">Complete missions, read scripture, or attend church to earn your first medal.</p>
-                    <Button onClick={() => setShowAllAwards(true)} variant="outline" size="sm" className="h-8 text-xs font-bold">
-                      View All Medals
-                    </Button>
-                  </div>
-                );
-              }
-
-              const visibleAwards = showAllAwards ? awards : earnedAwards;
-
-              return visibleAwards.map((award) => {
-                const earned = award.currentLevel > 0;
-                return (
-                <div key={award.id} className={cn("p-3 rounded-2xl border flex flex-col items-center text-center shadow-sm relative overflow-hidden transition", earned ? "bg-gradient-to-b from-white to-amber-50/30 dark:from-gray-800 dark:to-amber-900/10 border-amber-200/60 dark:border-amber-800/50 card-holy" : "bg-muted/50 border-border/40 grayscale opacity-60")}>
-                  {earned && award.isMaxed && <div className="absolute top-0 right-0 p-1 px-2 bg-amber-500 text-white text-[7px] font-bold rounded-bl-xl">MAX</div>}
-                  
-                  <div className="relative mb-2 mt-2">
-                    <span className="text-3xl drop-shadow-md">{award.icon}</span>
-                    <div className="absolute -bottom-2 -right-2 w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-[10px] font-extrabold shadow-sm border border-white dark:border-gray-800">
-                      {award.currentLevel}
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] font-extrabold text-foreground font-serif leading-tight mt-2">{award.title}</p>
-                  
-                  <div className="w-full mt-3">
-                    <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
-                      <span>{award.isMaxed ? 'MAX LVL' : `LVL ${award.currentLevel}`}</span>
-                      <span>{award.isMaxed ? 'COMPLETED' : `${award.currentValue} / ${award.nextTierValue}`}</span>
-                    </div>
-                    <Progress value={award.isMaxed ? 100 : (award.currentValue / award.nextTierValue) * 100} className="h-1.5 [&>div]:bg-amber-500" />
-                  </div>
-                </div>
-              )})
-            })() : (
-              <div className="col-span-2 text-center py-8 text-muted-foreground text-sm flex flex-col items-center bg-card rounded-2xl border border-dashed">
-                 <p className="text-red-400 mb-2 text-xs">Failed to load awards: {awardsError}</p>
-                 <Button onClick={() => window.location.reload()} variant="outline" size="sm">Retry</Button>
-              </div>
-            )}
-          </div>
+        ) : (
+          <TrophyShowcase awards={awards} />
+        )}
       </div>
 
       {/* ── Saint Quote ── */}
