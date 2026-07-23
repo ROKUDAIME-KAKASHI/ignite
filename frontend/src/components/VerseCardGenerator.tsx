@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, Share2, X, Sparkles, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,12 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
   const [loading, setLoading] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -239,7 +246,9 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
     }
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
@@ -341,6 +350,7 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
