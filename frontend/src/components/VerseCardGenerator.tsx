@@ -63,138 +63,21 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
     };
   }, [isOpen]);
 
-  // High Quality Direct Canvas Renderer
-  const drawDirectCanvas = (): HTMLCanvasElement => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1080;
-    canvas.height = 1350;
-    const ctx = canvas.getContext("2d")!;
-
-    const theme = selectedTheme;
-    const cleanVerse = `"${verseText.replace(/[*_~\[\]]/g, '').trim()}"`;
-    const charCount = cleanVerse.length;
-
-    let fontSize = 48;
-    let lineHeight = 72;
-    if (charCount < 70) {
-      fontSize = 58;
-      lineHeight = 84;
-    } else if (charCount < 140) {
-      fontSize = 48;
-      lineHeight = 72;
-    } else if (charCount < 220) {
-      fontSize = 40;
-      lineHeight = 60;
-    } else {
-      fontSize = 34;
-      lineHeight = 50;
-    }
-
-    // 1. Gradient Background
-    const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
-    gradient.addColorStop(0, theme.bgGrad[0]);
-    gradient.addColorStop(0.5, theme.bgGrad[1]);
-    gradient.addColorStop(1, theme.bgGrad[2]);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 1080, 1350);
-
-    // 2. Borders
-    ctx.strokeStyle = theme.accentHex;
-    ctx.lineWidth = 6;
-    ctx.strokeRect(40, 40, 1000, 1270);
-    ctx.lineWidth = 2;
-    ctx.strokeRect(52, 52, 976, 1246);
-
-    // 3. Header
-    ctx.fillStyle = theme.accentHex;
-    ctx.font = "bold 36px serif";
-    ctx.fillText("IGNITE 🕊️", 80, 120);
-
-    ctx.fillStyle = theme.subTextHex;
-    ctx.font = "bold uppercase 24px sans-serif";
-    ctx.textAlign = "right";
-    ctx.fillText("DAILY BREAD", 1000, 120);
-
-    ctx.strokeStyle = theme.accentHex;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(80, 150);
-    ctx.lineTo(1000, 150);
-    ctx.stroke();
-
-    // 4. Scripture Verse Text
-    ctx.textAlign = "center";
-    ctx.fillStyle = theme.textHex;
-    ctx.font = `italic ${fontSize}px Georgia, serif`;
-
-    const words = cleanVerse.split(" ");
-    const maxWidth = 880;
-    const lines: string[] = [];
-    let currentLine = "";
-
-    for (let i = 0; i < words.length; i++) {
-      const testLine = currentLine ? `${currentLine} ${words[i]}` : words[i];
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && i > 0) {
-        lines.push(currentLine);
-        currentLine = words[i];
-      } else {
-        currentLine = testLine;
-      }
-    }
-    lines.push(currentLine);
-
-    const totalTextHeight = lines.length * lineHeight;
-    let startY = 675 - totalTextHeight / 2;
-
-    for (let i = 0; i < lines.length; i++) {
-      ctx.fillText(lines[i], 540, startY + i * lineHeight);
-    }
-
-    // Divider Dot
-    const dividerY = Math.min(1150, startY + totalTextHeight + 30);
-    ctx.fillStyle = theme.accentHex;
-    ctx.beginPath();
-    ctx.arc(540, dividerY, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reference Text
-    ctx.fillStyle = theme.accentHex;
-    ctx.font = "bold uppercase 32px sans-serif";
-    ctx.fillText(reference.toUpperCase(), 540, Math.min(1210, dividerY + 60));
-
-    // Footer
-    ctx.strokeStyle = theme.accentHex;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(80, 1250);
-    ctx.lineTo(1000, 1250);
-    ctx.stroke();
-
-    ctx.fillStyle = theme.subTextHex;
-    ctx.font = "bold uppercase 22px sans-serif";
-    ctx.fillText("IGNITE • SCRIPTURE & FELLOWSHIP", 540, 1290);
-
-    return canvas;
-  };
-
   const getCardImage = async (): Promise<string> => {
-    if (cardRef.current) {
-      try {
-        const html2canvas = (await import("html2canvas")).default;
-        const canvas = await html2canvas(cardRef.current, {
-          scale: 3,
-          useCORS: true,
-          backgroundColor: null,
-          logging: false,
-        });
-        return canvas.toDataURL("image/png", 1.0);
-      } catch (e) {
-        console.warn("html2canvas fallback to direct canvas:", e);
+    if (!cardRef.current) throw new Error("Card ref not found");
+    
+    const htmlToImage = await import("html-to-image");
+    
+    // Use html-to-image which is highly reliable for modern CSS (flexbox, gradients)
+    return await htmlToImage.toPng(cardRef.current, {
+      quality: 1.0,
+      pixelRatio: 4, // 4x scale for super crisp HD export
+      skipFonts: false,
+      style: {
+        transform: 'scale(1)',
+        transformOrigin: 'top left',
       }
-    }
-    const canvas = drawDirectCanvas();
-    return canvas.toDataURL("image/png", 1.0);
+    });
   };
 
   const handleDownload = async () => {
