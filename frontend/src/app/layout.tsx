@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/context/AuthContext";
@@ -13,8 +13,19 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineHandler } from "@/components/OfflineHandler";
 import { OfflinePrefetcher } from "@/components/OfflinePrefetcher";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+import { Inter, Playfair_Display } from "next/font/google";
+
+const inter = Inter({ 
+  variable: "--font-inter", 
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({ 
+  variable: "--font-playfair", 
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Ignite — Jacobite Orthodox Youth Movement Platform",
@@ -49,7 +60,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground md:flex-row">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
