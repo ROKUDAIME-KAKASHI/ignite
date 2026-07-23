@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, Share2, X, Sparkles, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,20 +41,38 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
   const [loading, setLoading] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // Ultra-HD 4K Native Canvas Renderer (2160 x 2700 Crisp HD 4:5 Graphic)
+  // Dynamic Canvas Renderer matching on-screen proportions & font sizes
   const drawGraphicCanvas = (): HTMLCanvasElement => {
     const canvas = document.createElement("canvas");
     canvas.width = 2160;
     canvas.height = 2700;
     const ctx = canvas.getContext("2d")!;
 
-    // High quality subpixel text anti-aliasing
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
     const theme = selectedTheme;
+    const cleanVerse = `"${verseText.replace(/[*_~\[\]]/g, '').trim()}"`;
+    const charCount = cleanVerse.length;
 
-    // 1. Ultra-HD Background Gradient
+    // 1. Calculate Proportional Font & Line Height based on verse length
+    let fontSize = 88;
+    let lineHeight = 125;
+    if (charCount < 70) {
+      fontSize = 112;
+      lineHeight = 155;
+    } else if (charCount < 140) {
+      fontSize = 92;
+      lineHeight = 130;
+    } else if (charCount < 220) {
+      fontSize = 76;
+      lineHeight = 110;
+    } else {
+      fontSize = 62;
+      lineHeight = 90;
+    }
+
+    // 2. Background Gradient
     const gradient = ctx.createLinearGradient(0, 0, 2160, 2700);
     gradient.addColorStop(0, theme.bgGrad[0]);
     gradient.addColorStop(0.5, theme.bgGrad[1]);
@@ -62,7 +80,7 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 2160, 2700);
 
-    // 2. Double Decorative Border Frame
+    // 3. Double Decorative Border Frame
     ctx.strokeStyle = theme.border;
     ctx.lineWidth = 12;
     ctx.strokeRect(100, 100, 1960, 2500);
@@ -70,13 +88,13 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
     ctx.lineWidth = 4;
     ctx.strokeRect(130, 130, 1900, 2440);
 
-    // 3. Top Header
+    // 4. Top Header Branding
     ctx.fillStyle = theme.accent;
-    ctx.font = "bold 76px Georgia, serif";
+    ctx.font = "bold 76px serif";
     ctx.fillText("IGNITE 🕊️", 200, 260);
 
     ctx.fillStyle = theme.subText;
-    ctx.font = "bold uppercase 56px sans-serif";
+    ctx.font = "bold uppercase 52px sans-serif";
     ctx.textAlign = "right";
     ctx.fillText("DAILY BREAD", 1960, 260);
 
@@ -88,15 +106,13 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
     ctx.lineTo(1960, 330);
     ctx.stroke();
 
-    // 4. Word Wrapped Scripture Verse
+    // 5. Word Wrapped Verse Text
     ctx.textAlign = "center";
     ctx.fillStyle = theme.text;
-    ctx.font = "italic 92px Georgia, serif";
+    ctx.font = `italic ${fontSize}px Georgia, serif`;
 
-    const cleanVerse = `"${verseText.replace(/[*_~\[\]]/g, '').trim()}"`;
     const words = cleanVerse.split(" ");
     const maxWidth = 1720;
-    const lineHeight = 130;
     const lines: string[] = [];
     let currentLine = "";
 
@@ -114,25 +130,25 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
 
     // Calculate vertical centering
     const totalTextHeight = lines.length * lineHeight;
-    let startY = 1300 - totalTextHeight / 2;
+    let startY = 1350 - totalTextHeight / 2;
 
     for (let i = 0; i < lines.length; i++) {
       ctx.fillText(lines[i], 1080, startY + i * lineHeight);
     }
 
     // Gold Divider Dot
-    const dividerY = startY + totalTextHeight + 80;
+    const dividerY = Math.min(2300, startY + totalTextHeight + 60);
     ctx.fillStyle = theme.accent;
     ctx.beginPath();
     ctx.arc(1080, dividerY, 12, 0, Math.PI * 2);
     ctx.fill();
 
-    // 5. Reference Text
+    // 6. Reference Text
     ctx.fillStyle = theme.accent;
-    ctx.font = "bold uppercase 72px sans-serif";
-    ctx.fillText(reference.toUpperCase(), 1080, dividerY + 140);
+    ctx.font = "bold uppercase 68px sans-serif";
+    ctx.fillText(reference.toUpperCase(), 1080, Math.min(2420, dividerY + 120));
 
-    // 6. Footer Branding
+    // 7. Footer Branding
     ctx.strokeStyle = theme.border;
     ctx.lineWidth = 4;
     ctx.beginPath();
@@ -189,7 +205,6 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
             console.log("Web Share cancelled/unsupported:", e);
           }
         }
-        // Fallback to download if Web Share fails or is cancelled
         handleDownload();
       }, "image/png", 1.0);
     } catch {
@@ -210,7 +225,7 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           className="bg-card border border-border/60 rounded-3xl p-3.5 sm:p-5 max-w-xs sm:max-w-sm w-full shadow-2xl relative flex flex-col space-y-3 max-h-[95vh]"
         >
-          {/* Top Control Bar (Pushed to the very top: Download, Share, Close X) */}
+          {/* Top Control Bar (Download, Share, Close X) */}
           <div className="flex items-center justify-between gap-2 shrink-0 border-b border-border/50 pb-2.5">
             <div className="flex items-center gap-1.5 flex-1">
               <Button
