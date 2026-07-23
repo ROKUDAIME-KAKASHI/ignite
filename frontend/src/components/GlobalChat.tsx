@@ -114,13 +114,19 @@ export function GlobalChat() {
     setInput("");
     setIsTyping(true);
 
-    const history = messages.map(m => ({ role: m.role, content: m.content }));
-    const response = await askAbba(userText, history);
+    let replyText = "";
+    if (typeof window !== "undefined" && !navigator.onLine) {
+      replyText = "Peace be with you! I am currently in Offline Mode as live AI queries require internet connection. Once your connection is restored, full AI guidance will resume automatically. In the meantime, enjoy Bible Ludo, Scripture reading, and Bible Quizzes!";
+    } else {
+      const history = messages.map(m => ({ role: m.role, content: m.content }));
+      const response = await askAbba(userText, history);
+      replyText = response.success && response.text ? response.text : "I apologize, but I am having trouble connecting right now.";
+    }
 
     const aiResponse: Message = {
       id: (Date.now() + 1).toString(),
       role: "ai",
-      content: response.success && response.text ? response.text : "I apologize, but I am having trouble connecting right now.",
+      content: replyText,
       timestamp: new Date()
     };
     
