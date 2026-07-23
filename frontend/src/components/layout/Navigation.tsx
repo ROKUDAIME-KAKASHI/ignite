@@ -195,7 +195,7 @@ export function Navigation() {
         </div>
 
         {/* Nav links */}
-        <ul className="space-y-1 flex-1">
+        <ul className="space-y-0.5 flex-1 overflow-y-auto pr-1 scrollbar-hide">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -204,12 +204,12 @@ export function Navigation() {
                 <Link
                   href={item.href}
                   className={cn(
-                    "relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition duration-200 justify-between",
+                    "relative flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold transition duration-200 justify-between",
                     isActive ? "text-amber-700 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className={cn("w-4.5 h-4.5 relative z-10", isActive ? "text-amber-700" : "")} strokeWidth={isActive ? 2.5 : 1.8} />
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={cn("w-4 h-4 relative z-10", isActive ? "text-amber-700" : "")} strokeWidth={isActive ? 2.5 : 1.8} />
                     <span className="relative z-10">{item.name}</span>
                   </div>
                   {item.name === "Fellowship" && hasUnreadFellowship && (
@@ -225,25 +225,24 @@ export function Navigation() {
         </ul>
 
         {/* Footer */}
-        <div className="mt-auto px-3">
+        <div className="mt-auto px-2 pt-2 border-t border-gray-100 dark:border-gray-800">
           {(user?.role === "ADMIN" || user?.role === "PRIEST") && (
-            <div className="mb-4">
+            <div className="mb-2">
               <Link
                 href={user?.role === "PRIEST" ? "/priest/dashboard" : "/admin/dashboard"}
-                className="flex items-center gap-2 justify-center w-full py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold shadow-md hover:scale-[1.02] transition-transform"
+                className="flex items-center gap-2 justify-center w-full py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold shadow-md hover:scale-[1.02] transition-transform"
               >
-                <ShieldCheck className="w-4 h-4" />
+                <ShieldCheck className="w-3.5 h-3.5" />
                 {user?.role === "PRIEST" ? "Priest Dashboard" : "Admin Dashboard"}
               </Link>
             </div>
           )}
-          <div className="border-t border-gray-100 dark:border-gray-800 my-4" />
-          <div className="rounded-xl p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
-            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1">Verse of the Day</p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 italic leading-relaxed font-serif">&quot;{dailyVerse.text}&quot;</p>
-            <p className="text-[10px] text-amber-700 font-semibold mt-1.5">— {dailyVerse.ref}</p>
+          <div className="rounded-xl p-2.5 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
+            <p className="text-[9px] font-bold text-amber-700 uppercase tracking-widest mb-0.5">Verse of the Day</p>
+            <p className="text-[11px] text-gray-600 dark:text-gray-400 italic leading-snug font-serif">&quot;{dailyVerse.text}&quot;</p>
+            <p className="text-[9px] text-amber-700 font-semibold mt-1">— {dailyVerse.ref}</p>
           </div>
-          <p className="text-center text-[10px] text-gray-400 mt-3 tracking-widest uppercase font-medium">✝ Soli Deo Gloria ✝</p>
+          <p className="text-center text-[9px] text-gray-400 mt-2 tracking-widest uppercase font-medium">✝ Soli Deo Gloria ✝</p>
         </div>
       </nav>
     </>
