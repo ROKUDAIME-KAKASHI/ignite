@@ -75,32 +75,23 @@ export default function HeroPage() {
           
           {/* Left Column: Text & CTAs */}
           <div className="flex flex-col items-start text-left">
-            <FadeUp>
-              <motion.div 
-                animate={{ y: [0, -4, 0] }} 
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="inline-flex items-center gap-3 bg-white border border-gray-200 rounded-full px-5 py-2 mb-8 shadow-sm"
-              >
-                <span className="text-amber-700 font-extrabold text-sm tracking-widest uppercase">Ignite Youth</span>
-                <span className="text-gray-400 text-xs font-medium border-l border-gray-200 pl-3">Ministry Platform</span>
-              </motion.div>
-            </FadeUp>
+            <div className="inline-flex items-center gap-3 bg-white border border-gray-200 rounded-full px-5 py-2 mb-8 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <span className="text-amber-700 font-extrabold text-sm tracking-widest uppercase">Ignite Youth</span>
+              <span className="text-gray-400 text-xs font-medium border-l border-gray-200 pl-3">Ministry Platform</span>
+            </div>
             
-            <h1 className="text-5xl lg:text-7xl font-extrabold font-serif leading-[1.1] mb-6 text-gray-900 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            <h1 className="text-5xl lg:text-7xl font-extrabold font-serif leading-[1.1] mb-6 text-gray-900 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-75 fill-mode-both">
               In a world that never stops, <br />
               <span className="text-amber-700 relative">
                 your faith never should.
-                <motion.svg className="absolute -bottom-2 left-0 w-full h-3 text-amber-300/50" viewBox="0 0 200 12" preserveAspectRatio="none">
-                  <motion.path 
+                <svg className="absolute -bottom-2 left-0 w-full h-3 text-amber-300/50" viewBox="0 0 200 12" preserveAspectRatio="none">
+                  <path 
                     d="M0,10 Q100,0 200,10" 
                     fill="none" 
                     stroke="currentColor" 
                     strokeWidth="4" 
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.5, delay: 0.8, ease: "easeInOut" }}
                   />
-                </motion.svg>
+                </svg>
               </span>
             </h1>
 
@@ -108,31 +99,29 @@ export default function HeroPage() {
               Your daily spiritual companion for scripture, prayer, missions and community. Built for Jacobite Orthodox youth navigating a fast-paced world.
             </p>
 
-            <FadeUp delay={0.3}>
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-amber-700 text-white font-bold text-base hover:bg-amber-800 transition-colors shadow-lg shadow-amber-900/10 group"
-                >
-                  Begin Your Journey 
-                  <motion.span className="group-hover:translate-x-1 transition-transform">
-                    <ArrowRight className="w-5 h-5" />
-                  </motion.span>
-                </Link>
-                <a
-                  href="#discover"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold text-base hover:bg-gray-50 transition-colors"
-                >
-                  Discover More
-                </a>
-              </div>
-            </FadeUp>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-amber-700 text-white font-bold text-base hover:bg-amber-800 transition-colors shadow-lg shadow-amber-900/10 group"
+              >
+                Begin Your Journey 
+                <span className="group-hover:translate-x-1 transition-transform inline-block">
+                  <ArrowRight className="w-5 h-5" />
+                </span>
+              </Link>
+              <a
+                href="#discover"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold text-base hover:bg-gray-50 transition-colors"
+              >
+                Discover More
+              </a>
+            </div>
 
-            <FadeUp delay={0.4} className="mt-12 flex items-center gap-6 text-sm font-medium text-gray-500">
+            <div className="mt-12 flex items-center gap-6 text-sm font-medium text-gray-500 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500 fill-mode-both">
               <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-600" /> Free forever</div>
               <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-600" /> 66 Books</div>
               <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-600" /> Gamified Faith</div>
-            </FadeUp>
+            </div>
           </div>
 
           {/* Right Column: Animated UI Mockups */}
