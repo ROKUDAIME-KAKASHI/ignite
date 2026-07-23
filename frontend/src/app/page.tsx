@@ -86,31 +86,27 @@ export default function HeroPage() {
               </motion.div>
             </FadeUp>
             
-            <FadeUp delay={0.1}>
-              <h1 className="text-5xl lg:text-7xl font-extrabold font-serif leading-[1.1] mb-6 text-gray-900">
-                In a world that never stops, <br />
-                <span className="text-amber-700 relative">
-                  your faith never should.
-                  <motion.svg className="absolute -bottom-2 left-0 w-full h-3 text-amber-300/50" viewBox="0 0 200 12" preserveAspectRatio="none">
-                    <motion.path 
-                      d="M0,10 Q100,0 200,10" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="4" 
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 1.5, delay: 0.8, ease: "easeInOut" }}
-                    />
-                  </motion.svg>
-                </span>
-              </h1>
-            </FadeUp>
+            <h1 className="text-5xl lg:text-7xl font-extrabold font-serif leading-[1.1] mb-6 text-gray-900 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+              In a world that never stops, <br />
+              <span className="text-amber-700 relative">
+                your faith never should.
+                <motion.svg className="absolute -bottom-2 left-0 w-full h-3 text-amber-300/50" viewBox="0 0 200 12" preserveAspectRatio="none">
+                  <motion.path 
+                    d="M0,10 Q100,0 200,10" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="4" 
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1.5, delay: 0.8, ease: "easeInOut" }}
+                  />
+                </motion.svg>
+              </span>
+            </h1>
 
-            <FadeUp delay={0.2}>
-              <p className="text-gray-600 text-lg lg:text-xl leading-relaxed mb-10 max-w-lg">
-                Your daily spiritual companion for scripture, prayer, missions and community. Built for Jacobite Orthodox youth navigating a fast-paced world.
-              </p>
-            </FadeUp>
+            <p className="text-gray-600 text-lg lg:text-xl leading-relaxed mb-10 max-w-lg animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150 fill-mode-both">
+              Your daily spiritual companion for scripture, prayer, missions and community. Built for Jacobite Orthodox youth navigating a fast-paced world.
+            </p>
 
             <FadeUp delay={0.3}>
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
