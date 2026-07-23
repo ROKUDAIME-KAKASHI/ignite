@@ -729,6 +729,92 @@ export default function BibleLudoPage() {
       }, 2500);
     }
   };
+  // Persistent State Sync
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (gameMode !== "setup" && gameMode !== "lobby") {
+        localStorage.setItem("ludo_saved_state", JSON.stringify({
+          gameMode, activeRoom, myColor, roomPlayers, turn, tokens, dice, winner
+        }));
+      } else if (gameMode === "setup") {
+        localStorage.removeItem("ludo_saved_state");
+      }
+    }
+  }, [gameMode, activeRoom, myColor, roomPlayers, turn, tokens, dice, winner]);
+
+  // Persistent State Load
+  useEffect(() => {
+    if (typeof window !== "undefined" && user && gameMode === "setup") {
+      const saved = localStorage.getItem("ludo_saved_state");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.gameMode && parsed.gameMode !== "setup") {
+            setGameMode(parsed.gameMode);
+            setActiveRoom(parsed.activeRoom);
+            setMyColor(parsed.myColor);
+            setRoomPlayers(parsed.roomPlayers);
+            setTurn(parsed.turn);
+            setTokens(parsed.tokens);
+            if (parsed.dice !== undefined) setDice(parsed.dice);
+            if (parsed.winner !== undefined) setWinner(parsed.winner);
+            
+            showToast("Game restored!");
+            
+            if (parsed.gameMode === "live" && parsed.activeRoom) {
+              const roomCode = parsed.activeRoom.id;
+              const isHost = parsed.activeRoom.hostId === user.id;
+              
+              const gChannel = supabase.channel(`ludo_room_${roomCode}`, {
+                config: { presence: { key: user.id } }
+              });
+              
+              gChannel.on('presence', { event: 'sync' }, async () => {
+                const state = gChannel.presenceState();
+                const playersList = extractPresencePlayers(state);
+                updateLobbyPlayersList(playersList);
+              })
+              .on('broadcast', { event: 'start_game' }, ({ payload }) => {
+                setRoomPlayers(payload.roomPlayers);
+                setGameMode("live");
+                setTokens(payload.tokens);
+                setWinner(null);
+                setTurn("red");
+              })
+              .on('broadcast', { event: 'roll_dice' }, ({ payload }) => {
+                setDice(payload.result);
+              })
+              .on('broadcast', { event: 'update_room_players' }, ({ payload }) => {
+                setRoomPlayers(payload.roomPlayers);
+              })
+              .on('broadcast', { event: 'next_turn' }, ({ payload }) => {
+                setTurn(payload.nextColor);
+                setDice(null);
+              })
+              .on('broadcast', { event: 'move_token' }, ({ payload }) => {
+                forceMoveToken(payload.color, payload.tokenIdx, payload.newTokens, payload.extraTurn, payload.isWin, payload.winnerColor);
+              })
+              .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                  await gChannel.track({
+                    id: user.id,
+                    name: `${user.firstName} ${user.lastName}`,
+                    isHost: isHost,
+                    colorSlot: parsed.myColor,
+                    isReady: true
+                  });
+                }
+              });
+              
+              setGameChannel(gChannel);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse saved state", e);
+        }
+      }
+    }
+  }, [user]);
 
   // Lobby management logic
   const handleCreateRoom = () => {
