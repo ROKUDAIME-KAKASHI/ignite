@@ -34,8 +34,8 @@ const withPWA = withPWAInit({
         },
       },
       {
-        // Cache all app pages (Bible, Missions, Prayer, Games, Leaderboard, Profile, etc.)
-        urlPattern: /\/(bible|scripture|guides|missions|prayer|quizzes|ludo|chess|lions-den|noahs-ark|wordle|memory-match|scan|profile|leaderboard|trivia).*/i,
+        // Cache root homepage and all app pages (Bible, Missions, Prayer, Games, Leaderboard, Profile, etc.)
+        urlPattern: /\/(?:$|bible|scripture|guides|missions|prayer|quizzes|ludo|chess|lions-den|noahs-ark|wordle|memory-match|scan|profile|leaderboard|trivia).*/i,
         handler: 'StaleWhileRevalidate',
         options: {
           cacheName: 'offline-pages-cache',
