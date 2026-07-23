@@ -171,17 +171,17 @@ export function Navigation() {
       </nav>
 
       {/* ── Desktop Sidebar ── */}
-      <nav className="hidden md:flex flex-col w-72 h-screen sticky top-0 p-5 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0f1229] shrink-0">
+      <nav className="hidden md:flex flex-col w-72 h-screen sticky top-0 p-4 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0f1229] shrink-0">
         {/* Brand */}
-        <div className="mb-8 px-3 flex items-center justify-between">
-          <div className="flex flex-col gap-3 w-full">
+        <div className="mb-4 px-2 flex items-center justify-between">
+          <div className="flex flex-col gap-2 w-full">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-700 flex items-center justify-center shadow-md">
+              <div className="w-9 h-9 rounded-2xl bg-amber-700 flex items-center justify-center shadow-md">
                 <CrossIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none font-serif">Ignite</h1>
-                <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-widest mt-0.5">Youth Ministry</p>
+                <h1 className="text-base font-bold text-gray-900 dark:text-white leading-none font-serif">Ignite</h1>
+                <p className="text-[9px] text-gray-500 font-semibold uppercase tracking-widest mt-0.5">Youth Ministry</p>
               </div>
             </div>
           </div>
@@ -189,9 +189,9 @@ export function Navigation() {
         </div>
 
         {/* Liturgical season */}
-        <div className="mx-3 mb-6 rounded-xl px-3 py-2 bg-purple-50 dark:bg-purple-900/20">
-          <p className="text-[10px] text-purple-700 dark:text-purple-400 font-bold uppercase tracking-widest">Liturgical Season</p>
-          <p className="text-sm font-bold text-purple-900 dark:text-purple-100 mt-0.5">{getLiturgicalSeason()}</p>
+        <div className="mx-2 mb-3 rounded-xl px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20">
+          <p className="text-[9px] text-purple-700 dark:text-purple-400 font-bold uppercase tracking-widest">Liturgical Season</p>
+          <p className="text-xs font-bold text-purple-900 dark:text-purple-100 mt-0.5">{getLiturgicalSeason()}</p>
         </div>
 
         {/* Nav links */}
@@ -204,7 +204,7 @@ export function Navigation() {
                 <Link
                   href={item.href}
                   className={cn(
-                    "relative flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold transition duration-200 justify-between",
+                    "relative flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition duration-200 justify-between",
                     isActive ? "text-amber-700 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   )}
                 >
