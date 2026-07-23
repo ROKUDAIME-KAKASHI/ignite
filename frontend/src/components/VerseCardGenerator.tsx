@@ -304,36 +304,38 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
             </div>
 
             {/* Rendered Verse Card Preview */}
-            <div
-              ref={cardRef}
-              className={`w-full aspect-[4/5] rounded-2xl p-5 bg-gradient-to-br ${selectedTheme.bgCss} border-2 ${selectedTheme.borderCss} shadow-xl flex flex-col justify-between relative overflow-hidden text-left shrink mx-auto`}
-            >
-              {/* Top Branding */}
-              <div className="flex items-center justify-between relative z-10 w-full border-b border-white/15 pb-2.5">
-                <span className={`text-[12px] font-extrabold uppercase tracking-widest font-serif ${selectedTheme.accentCss}`}>
-                  IGNITE 🕊️
-                </span>
-                <span className={`text-[10px] font-bold tracking-wider uppercase ${selectedTheme.subTextCss}`}>
-                  Daily Bread
-                </span>
-              </div>
+            <div className="flex-1 w-full flex items-center justify-center min-h-[250px] sm:min-h-[350px] overflow-hidden rounded-2xl">
+              <div
+                ref={cardRef}
+                className={`h-full aspect-[4/5] max-h-[45vh] rounded-2xl p-4 sm:p-5 bg-gradient-to-br ${selectedTheme.bgCss} border-2 ${selectedTheme.borderCss} shadow-xl flex flex-col justify-between relative overflow-hidden text-left mx-auto shrink-0`}
+              >
+                {/* Top Branding */}
+                <div className="flex items-center justify-between relative z-10 w-full border-b border-white/15 pb-2">
+                  <span className={`text-[10px] sm:text-[12px] font-extrabold uppercase tracking-widest font-serif ${selectedTheme.accentCss}`}>
+                    IGNITE 🕊️
+                  </span>
+                  <span className={`text-[8px] sm:text-[10px] font-bold tracking-wider uppercase ${selectedTheme.subTextCss}`}>
+                    Daily Bread
+                  </span>
+                </div>
 
-              {/* Verse Content */}
-              <div className="relative z-10 my-auto text-center space-y-2.5 px-1">
-                <p className={`text-xs sm:text-sm font-serif italic leading-relaxed line-clamp-6 drop-shadow-sm ${selectedTheme.textCss}`}>
-                  "{verseText.replace(/[*_~\[\]]/g, '').trim()}"
-                </p>
-                <div className="w-10 h-0.5 mx-auto bg-amber-500/50 rounded-full" />
-                <p className={`text-[11px] font-extrabold uppercase tracking-widest ${selectedTheme.accentCss}`}>
-                  {reference}
-                </p>
-              </div>
+                {/* Verse Content */}
+                <div className="relative z-10 my-auto text-center space-y-2 px-1">
+                  <p className={`text-xs sm:text-sm font-serif italic leading-relaxed line-clamp-6 drop-shadow-sm ${selectedTheme.textCss}`}>
+                    "{verseText.replace(/[*_~\[\]]/g, '').trim()}"
+                  </p>
+                  <div className="w-8 sm:w-10 h-0.5 mx-auto bg-amber-500/50 rounded-full" />
+                  <p className={`text-[9px] sm:text-[11px] font-extrabold uppercase tracking-widest ${selectedTheme.accentCss}`}>
+                    {reference}
+                  </p>
+                </div>
 
-              {/* Footer */}
-              <div className="relative z-10 text-center border-t border-white/15 pt-2">
-                <p className={`text-[8px] font-semibold tracking-wider uppercase ${selectedTheme.subTextCss}`}>
-                  IGNITE • Scripture & Fellowship
-                </p>
+                {/* Footer */}
+                <div className="relative z-10 text-center border-t border-white/15 pt-2">
+                  <p className={`text-[7px] sm:text-[8px] font-semibold tracking-wider uppercase ${selectedTheme.subTextCss}`}>
+                    IGNITE • Scripture & Fellowship
+                  </p>
+                </div>
               </div>
             </div>
           </motion.div>
