@@ -56,7 +56,7 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
     };
   }, [isOpen]);
 
-  // Direct High Quality Canvas Fallback Generator
+  // High Quality Direct Canvas Renderer
   const drawDirectCanvas = (): HTMLCanvasElement => {
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
@@ -239,106 +239,106 @@ export function VerseCardGenerator({ verseText, reference, isOpen, onClose }: Ve
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-hidden">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-card border border-border/60 rounded-3xl p-4 sm:p-5 max-w-[340px] sm:max-w-sm w-full shadow-2xl relative flex flex-col space-y-3 my-auto max-h-[92vh] overflow-hidden"
-        >
-          {/* Top Control Bar: Save Card, Share, Close Button */}
-          <div className="flex items-center justify-between gap-2 shrink-0 border-b border-border/50 pb-2.5">
-            <div className="flex items-center gap-2 flex-1">
-              <Button
-                onClick={handleDownload}
-                disabled={loading}
-                size="sm"
-                className="gradient-gold text-white rounded-xl h-10 px-3 text-xs font-bold shadow-md hover:opacity-90 flex-1"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 mr-1 animate-spin text-white" />
-                ) : savedSuccess ? (
-                  <Check className="w-4 h-4 mr-1 text-white" />
-                ) : (
-                  <Download className="w-4 h-4 mr-1 text-white" />
-                )}
-                {savedSuccess ? "Saved!" : "Save Card"}
-              </Button>
-
-              <Button
-                onClick={handleShare}
-                disabled={loading}
-                variant="outline"
-                size="sm"
-                className="rounded-xl h-10 px-3 text-xs font-bold border-amber-500/30 hover:bg-amber-500/10"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin text-amber-500" /> : <Share2 className="w-4 h-4 text-amber-500" />}
-              </Button>
-            </div>
-
-            <button
-              onClick={onClose}
-              className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground transition border border-border/40 shrink-0"
-              title="Close modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Theme Selector - 10 Visual Templates */}
-          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide shrink-0">
-            {THEMES.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setSelectedTheme(t)}
-                className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${
-                  selectedTheme.id === t.id ? "bg-amber-500 text-white border-amber-400 shadow-sm" : "bg-muted text-muted-foreground border-transparent"
-                }`}
-              >
-                {t.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Rendered Verse Card Preview (Directly captured in 3x HD) */}
-          <div
-            ref={cardRef}
-            className={`w-full aspect-[4/5] rounded-2xl p-5 bg-gradient-to-br ${selectedTheme.bgCss} border-2 ${selectedTheme.borderCss} shadow-xl flex flex-col justify-between relative overflow-hidden text-left shrink mx-auto`}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 15 }}
+            className="bg-card border border-border/60 rounded-3xl p-4 sm:p-5 max-w-[340px] sm:max-w-sm w-full shadow-2xl relative flex flex-col space-y-3 my-auto max-h-[92vh] overflow-hidden z-50"
           >
-            {/* Top Branding */}
-            <div className="flex items-center justify-between relative z-10 w-full border-b border-white/15 pb-2.5">
-              <span className={`text-[12px] font-extrabold uppercase tracking-widest font-serif ${selectedTheme.accentCss}`}>
-                IGNITE 🕊️
-              </span>
-              <span className={`text-[10px] font-bold tracking-wider uppercase ${selectedTheme.subTextCss}`}>
-                Daily Bread
-              </span>
+            {/* Top Control Bar: Save Card, Share, Close Button */}
+            <div className="flex items-center justify-between gap-2 shrink-0 border-b border-border/50 pb-2.5">
+              <div className="flex items-center gap-2 flex-1">
+                <Button
+                  onClick={handleDownload}
+                  disabled={loading}
+                  size="sm"
+                  className="gradient-gold text-white rounded-xl h-10 px-3 text-xs font-bold shadow-md hover:opacity-90 flex-1"
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin text-white" />
+                  ) : savedSuccess ? (
+                    <Check className="w-4 h-4 mr-1 text-white" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-1 text-white" />
+                  )}
+                  {savedSuccess ? "Saved!" : "Save Card"}
+                </Button>
+
+                <Button
+                  onClick={handleShare}
+                  disabled={loading}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl h-10 px-3 text-xs font-bold border-amber-500/30 hover:bg-amber-500/10"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin text-amber-500" /> : <Share2 className="w-4 h-4 text-amber-500" />}
+                </Button>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground transition border border-border/40 shrink-0"
+                title="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            {/* Verse Content */}
-            <div className="relative z-10 my-auto text-center space-y-2.5 px-1">
-              <p className={`text-xs sm:text-sm font-serif italic leading-relaxed line-clamp-6 drop-shadow-sm ${selectedTheme.textCss}`}>
-                "{verseText.replace(/[*_~\[\]]/g, '').trim()}"
-              </p>
-              <div className="w-10 h-0.5 mx-auto bg-amber-500/50 rounded-full" />
-              <p className={`text-[11px] font-extrabold uppercase tracking-widest ${selectedTheme.accentCss}`}>
-                {reference}
-              </p>
+            {/* Theme Selector - 10 Visual Templates */}
+            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide shrink-0">
+              {THEMES.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTheme(t)}
+                  className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${
+                    selectedTheme.id === t.id ? "bg-amber-500 text-white border-amber-400 shadow-sm" : "bg-muted text-muted-foreground border-transparent"
+                  }`}
+                >
+                  {t.name}
+                </button>
+              ))}
             </div>
 
-            {/* Footer */}
-            <div className="relative z-10 text-center border-t border-white/15 pt-2">
-              <p className={`text-[8px] font-semibold tracking-wider uppercase ${selectedTheme.subTextCss}`}>
-                IGNITE • Scripture & Fellowship
-              </p>
+            {/* Rendered Verse Card Preview */}
+            <div
+              ref={cardRef}
+              className={`w-full aspect-[4/5] rounded-2xl p-5 bg-gradient-to-br ${selectedTheme.bgCss} border-2 ${selectedTheme.borderCss} shadow-xl flex flex-col justify-between relative overflow-hidden text-left shrink mx-auto`}
+            >
+              {/* Top Branding */}
+              <div className="flex items-center justify-between relative z-10 w-full border-b border-white/15 pb-2.5">
+                <span className={`text-[12px] font-extrabold uppercase tracking-widest font-serif ${selectedTheme.accentCss}`}>
+                  IGNITE 🕊️
+                </span>
+                <span className={`text-[10px] font-bold tracking-wider uppercase ${selectedTheme.subTextCss}`}>
+                  Daily Bread
+                </span>
+              </div>
+
+              {/* Verse Content */}
+              <div className="relative z-10 my-auto text-center space-y-2.5 px-1">
+                <p className={`text-xs sm:text-sm font-serif italic leading-relaxed line-clamp-6 drop-shadow-sm ${selectedTheme.textCss}`}>
+                  "{verseText.replace(/[*_~\[\]]/g, '').trim()}"
+                </p>
+                <div className="w-10 h-0.5 mx-auto bg-amber-500/50 rounded-full" />
+                <p className={`text-[11px] font-extrabold uppercase tracking-widest ${selectedTheme.accentCss}`}>
+                  {reference}
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div className="relative z-10 text-center border-t border-white/15 pt-2">
+                <p className={`text-[8px] font-semibold tracking-wider uppercase ${selectedTheme.subTextCss}`}>
+                  IGNITE • Scripture & Fellowship
+                </p>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }
