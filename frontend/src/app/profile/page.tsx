@@ -253,7 +253,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto w-full max-w-4xl mx-auto pb-16">
 
       {/* ── Hero Header ── */}
       <div className="relative overflow-hidden px-5 pt-8 pb-20 gradient-dawn">
