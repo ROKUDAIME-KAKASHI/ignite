@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, ChevronLeft, Dices, Trophy, Users, ShieldAlert, Share2, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { awardXP } from "@/app/actions/gamification";
+import { queueOfflineXP } from "@/lib/offlineSync";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -695,9 +696,19 @@ export default function BibleLudoPage() {
 
   const awardTeamXP = () => {
     if (user) {
-      awardXP(gameMode === "team" ? 40 : 25, "Won Bible Ludo").then(res => {
-        if (res.success && res.xp) setUser({...user, xp: res.xp, level: res.level});
-      });
+      const xpAmount = gameMode === "team" ? 40 : 25;
+      const reason = "Won Bible Ludo";
+      if (typeof window !== "undefined" && !navigator.onLine) {
+        queueOfflineXP(xpAmount, reason);
+        showToast(`Offline Win: +${xpAmount} XP queued for sync!`);
+      } else {
+        awardXP(xpAmount, reason).then(res => {
+          if (res?.success && res.xp) setUser({...user, xp: res.xp, level: res.level});
+        }).catch(() => {
+          queueOfflineXP(xpAmount, reason);
+          showToast(`Won Bible Ludo: +${xpAmount} XP queued for sync!`);
+        });
+      }
     }
   };
 
