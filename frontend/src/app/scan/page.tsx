@@ -56,15 +56,32 @@ export default function ScanPage() {
 
   const submitReflection = async () => {
     setStatus("processing");
-    const res = await checkInToEvent(eventIdStr, reflection, scanType);
-    if (res.error) {
-      setMessage(res.error);
-      setStatus("error");
-    } else if (res.success && res.xp && res.level) {
-      if (user) {
-        setUser({ ...user, xp: res.xp, level: res.level });
+    if (typeof window !== "undefined" && !navigator.onLine) {
+      import("@/lib/offlineSync").then(m => {
+        m.queueOfflineXP(150, `Event Check-In & Notes: ${eventTitle || "Parish Event"} - "${reflection}"`);
+      });
+      setMessage("+150 Grace Points Queued (Offline Mode)");
+      setStatus("success");
+      return;
+    }
+
+    try {
+      const res = await checkInToEvent(eventIdStr, reflection, scanType);
+      if (res.error) {
+        setMessage(res.error);
+        setStatus("error");
+      } else if (res.success && res.xp && res.level) {
+        if (user) {
+          setUser({ ...user, xp: res.xp, level: res.level });
+        }
+        setMessage(`+${scanType === "mission" ? "Mission" : "150"} Grace Points Earned!`);
+        setStatus("success");
       }
-      setMessage(`+${scanType === "mission" ? "Mission" : "150"} Grace Points Earned!`);
+    } catch {
+      import("@/lib/offlineSync").then(m => {
+        m.queueOfflineXP(150, `Event Check-In & Notes: ${eventTitle || "Parish Event"} - "${reflection}"`);
+      });
+      setMessage("+150 Grace Points Queued (Offline Mode)");
       setStatus("success");
     }
   };

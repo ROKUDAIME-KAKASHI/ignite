@@ -162,7 +162,54 @@ export default function PrivateJournal() {
   const handleSubmit = async () => {
     if (!text.trim()) return;
     setSubmitting(true);
-    await submitPrayer(text.trim(), false, newCat, true);
+    const newEntryText = text.trim();
+
+    if (typeof window !== "undefined" && !navigator.onLine) {
+      const offlineEntry: PrayerRequest = {
+        id: `offline-${Date.now()}`,
+        text: newEntryText,
+        author: "You (Offline)",
+        anonymous: true,
+        prayers: 1,
+        prayed: true,
+        category: newCat,
+        time: new Date().toISOString()
+      };
+      setPrivatePrayers(prev => [offlineEntry, ...prev]);
+      try {
+        const stored = localStorage.getItem("ignite_offline_journal_list");
+        const list = stored ? JSON.parse(stored) : [];
+        list.unshift(offlineEntry);
+        localStorage.setItem("ignite_offline_journal_list", JSON.stringify(list));
+      } catch {}
+      
+      import("@/lib/offlineSync").then(m => {
+        m.queueOfflineXP(10, `Wrote private prayer: ${newEntryText.substring(0, 30)}...`);
+      });
+
+      setText("");
+      setSubmitting(false);
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 5000);
+      return;
+    }
+
+    try {
+      await submitPrayer(newEntryText, false, newCat, true);
+    } catch {
+      const offlineEntry: PrayerRequest = {
+        id: `offline-${Date.now()}`,
+        text: newEntryText,
+        author: "You (Offline)",
+        anonymous: true,
+        prayers: 1,
+        prayed: true,
+        category: newCat,
+        time: new Date().toISOString()
+      };
+      setPrivatePrayers(prev => [offlineEntry, ...prev]);
+    }
+
     setText("");
     setSubmitting(false);
     setSubmitted(true);
