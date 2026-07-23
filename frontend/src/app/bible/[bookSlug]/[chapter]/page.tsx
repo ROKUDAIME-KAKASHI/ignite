@@ -581,33 +581,35 @@ export default function BibleReaderPage() {
 
             {/* ── Chapter Navigation ── */}
             <div className="mt-10">
-              <div className="flex flex-col items-center mb-8 space-y-3">
-                {timeLeft > 0 ? (
-                  <div className="flex flex-col items-center text-center p-3 rounded-xl bg-muted/50 border border-border/50">
-                    <div className="flex items-center gap-2 text-primary font-bold mb-1">
-                      <ClockIcon className="w-5 h-5 animate-pulse" />
-                      <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}</span>
+              {!journeyNodeId && (
+                <div className="flex flex-col items-center mb-8 space-y-3">
+                  {timeLeft > 0 ? (
+                    <div className="flex flex-col items-center text-center p-3 rounded-xl bg-muted/50 border border-border/50">
+                      <div className="flex items-center gap-2 text-primary font-bold mb-1">
+                        <ClockIcon className="w-5 h-5 animate-pulse" />
+                        <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium">
+                        {!isActive 
+                          ? "Paused (Are you still there? Scroll to resume)" 
+                          : "Active reading required to earn XP"}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground font-medium">
-                      {!isActive 
-                        ? "Paused (Are you still there? Scroll to resume)" 
-                        : "Active reading required to earn XP"}
-                    </p>
-                  </div>
-                ) : (
-                  <Button 
-                    onClick={handleMarkAsRead} 
-                    disabled={markedRead || markingRead}
-                    className={cn(
-                      "rounded-xl h-12 px-8 font-bold shadow-md transition",
-                      markedRead ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30" : "gradient-gold text-white halo-glow"
-                    )}
-                  >
-                    {markingRead ? <Loader2 className="w-4 h-4 animate-spin" /> : 
-                     markedRead ? "Chapter Read (+10 XP) ✅" : "Mark Chapter as Read (+10 XP)"}
-                  </Button>
-                )}
-              </div>
+                  ) : (
+                    <Button 
+                      onClick={handleMarkAsRead} 
+                      disabled={markedRead || markingRead}
+                      className={cn(
+                        "rounded-xl h-12 px-8 font-bold shadow-md transition",
+                        markedRead ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30" : "gradient-gold text-white halo-glow"
+                      )}
+                    >
+                      {markingRead ? <Loader2 className="w-4 h-4 animate-spin" /> : 
+                       markedRead ? "Chapter Read (+10 XP) ✅" : "Mark Chapter as Read (+10 XP)"}
+                    </Button>
+                  )}
+                </div>
+              )}
 
               {/* Journey Assignment Card */}
               {journeyNodeId && (
@@ -618,13 +620,26 @@ export default function BibleReaderPage() {
                   <p className="text-sm font-serif italic text-foreground leading-relaxed">
                     "Your word is a lamp for my feet, a light on my path." — Psalm 119:105
                   </p>
+                  
+                  {!isActive && timeLeft > 0 && (
+                     <p className="text-xs text-amber-600/80 font-medium">Paused (Are you still there? Scroll to resume)</p>
+                  )}
+                  
                   <Button
                     onClick={handleCompleteJourneyNode}
-                    disabled={completingJourney}
-                    className="w-full h-12 rounded-2xl gradient-gold text-white font-bold text-base shadow-lg halo-glow"
+                    disabled={completingJourney || timeLeft > 0}
+                    className={cn(
+                      "w-full h-12 rounded-2xl font-bold text-base shadow-lg transition-all",
+                      timeLeft > 0 ? "bg-muted text-muted-foreground border border-border/50 opacity-80" : "gradient-gold text-white halo-glow"
+                    )}
                   >
                     {completingJourney ? (
                       <Loader2 className="w-5 h-5 animate-spin text-white" />
+                    ) : timeLeft > 0 ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <ClockIcon className="w-5 h-5 animate-pulse text-amber-500" />
+                        <span>Keep reading for {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}</span>
+                      </div>
                     ) : (
                       <>
                         <Check className="w-5 h-5 mr-2" /> Mark Chapter Complete & Claim +50 XP
