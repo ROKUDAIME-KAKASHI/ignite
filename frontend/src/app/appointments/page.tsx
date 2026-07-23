@@ -1,5 +1,5 @@
 "use client";
-
+import Image from 'next/image';
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Calendar as CalendarIcon, Clock, MessageSquare, CheckCircle2 } from "lucide-react";
@@ -34,7 +34,7 @@ export default function AppointmentsPage() {
       <div className="relative overflow-hidden px-5 pt-8 pb-10 bg-gradient-to-br from-stone-800 to-neutral-900">
         <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
         <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-0 pointer-events-none flex flex-col items-center">
-          <img src="/header-image.png" className="h-16 sm:h-24 w-auto rounded-2xl shadow-2xl border-[3px] border-white/20 opacity-95 object-contain rotate-3 drop-shadow-xl mb-2 sm:mb-3" alt="Church emblem" />
+          <Image src="/header-image.png" width={400} height={200} priority className="h-16 sm:h-24 w-auto rounded-2xl shadow-2xl border-[3px] border-white/20 opacity-95 object-contain rotate-3 drop-shadow-xl mb-2 sm:mb-3" alt="Church emblem" />
           <div className="flex flex-col items-center text-center opacity-90 rotate-1">
             <span className="text-[6px] sm:text-[8px] font-extrabold text-white uppercase tracking-widest font-serif leading-tight text-shadow-sm">St. Gregorios Jacobite<br/>Syrian Orthodox Church</span>
             <span className="text-[5px] sm:text-[6px] text-white/80 uppercase tracking-widest mt-0.5 font-semibold text-shadow-sm">Hosa Road - Bangalore</span>
