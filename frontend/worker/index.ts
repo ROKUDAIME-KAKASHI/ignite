@@ -11,6 +11,8 @@ const OFFLINE_ROUTES = [
   '/bible',
   '/missions',
   '/prayer',
+  '/comfort',
+  '/intercession',
   '/~offline'
 ];
 

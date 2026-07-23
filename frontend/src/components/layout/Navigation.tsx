@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy, MessageCircle, ShieldCheck, Heart, BookMarked } from "lucide-react";
+import { Home, BookOpen, Target, Calendar, User as UserIcon, Gamepad2, Bell, Map, Trophy, MessageCircle, ShieldCheck, Heart, BookMarked, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLiturgicalSeason } from "@/lib/liturgy";
@@ -41,6 +41,8 @@ function getDailyVerse(userId?: string) {
 const navItems = [
   { name: "Home",      href: "/dashboard", icon: Home       },
   { name: "Scripture", href: "/bible",     icon: BookOpen   },
+  { name: "Comfort",   href: "/comfort",   icon: ShieldCheck },
+  { name: "Prayer Ring", href: "/intercession", icon: Clock },
   { name: "Journeys",  href: "/journeys",  icon: Map        },
   { name: "Missions",  href: "/missions",  icon: Target     },
   { name: "Prayer",    href: "/prayer",    icon: Heart      },

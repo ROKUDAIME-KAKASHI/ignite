@@ -10,6 +10,8 @@ const ROUTES_TO_PRECACHE = [
   "/bible",
   "/missions",
   "/prayer",
+  "/comfort",
+  "/intercession",
   "/~offline"
 ];
 
