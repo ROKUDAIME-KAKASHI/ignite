@@ -169,6 +169,13 @@ export default function AdminDashboardPage() {
     await fetchContent();
   };
 
+  const handleDeleteQuote = async (id: string) => {
+    if (confirm("Are you sure you want to delete this quote?")) {
+      await deleteQuote(id);
+      await fetchContent();
+    }
+  };
+
   const handleCreateSuggestion = async () => {
     if (!newSuggestionText.trim()) return;
     setCreatingSuggestion(true);
@@ -1696,12 +1703,20 @@ export default function AdminDashboardPage() {
                       <p className="text-sm font-bold">"{q.quote}"</p>
                       <p className="text-xs text-muted-foreground">— {q.author}</p>
                     </div>
-                    <button 
-                      onClick={() => handleToggleQuote(q.id)}
-                      className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase", q.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500 hover:bg-slate-200")}
-                    >
-                      {q.isActive ? "Active" : "Set Active"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleToggleQuote(q.id)}
+                        className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase", q.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500 hover:bg-slate-200")}
+                      >
+                        {q.isActive ? "Active" : "Set Active"}
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteQuote(q.id)}
+                        className="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-700 hover:bg-red-200"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
