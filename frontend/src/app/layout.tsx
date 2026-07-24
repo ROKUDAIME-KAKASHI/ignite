@@ -30,8 +30,21 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Ignite — Christian Youth App",
-  description: "Your daily spiritual companion. Scripture, prayer, missions and community for Christian youth navigating the fast-paced world.",
+  title: "Ignite | Daily Christian Youth Devotional & Prayer App",
+  description: "Ignite is the ultimate Christian youth app. Build daily spiritual habits with a 5-minute devotional, youth Bible reading, prayer tracker, fellowship, and missions.",
+  keywords: [
+    "Ignite",
+    "Christian youth app",
+    "Daily Christian devotional",
+    "Youth Bible app",
+    "Prayer app for youth",
+    "Christian missions",
+    "Faith and fellowship",
+    "Christian spiritual tracker",
+    "5-minute devotional",
+    "Youth faith builder",
+    "Christian habits"
+  ],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -39,8 +52,8 @@ export const metadata: Metadata = {
     title: "Ignite",
   },
   openGraph: {
-    title: "Ignite — Christian Youth App",
-    description: "In a world that never stops, your faith never should.",
+    title: "Ignite | Daily Christian Youth Devotional",
+    description: "Build daily spiritual habits with Ignite: Scripture, prayer, missions, and fellowship for Christian youth.",
     type: "website",
   },
   icons: {
