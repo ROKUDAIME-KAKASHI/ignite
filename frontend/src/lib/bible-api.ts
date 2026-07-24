@@ -39,7 +39,22 @@ export async function fetchChapter(
       if (!res.ok) throw new Error(`Failed to fetch ${apiName} ${chapter} (${versionStr})`);
       resultData = await res.json();
     } else {
-      const ref = `${apiName}+${chapter}`;
+      let ref = `${apiName}+${chapter}`;
+      
+      // bible-api.com has a quirk where for single-chapter books, passing "+1" fetches verse 1 instead of chapter 1.
+      // We must explicitly fetch the verse range for the whole chapter.
+      const singleChapterBooks: Record<string, number> = {
+        "obadiah": 21,
+        "philemon": 25,
+        "2+john": 13,
+        "3+john": 14,
+        "jude": 25
+      };
+      
+      if (singleChapterBooks[apiName] && chapter === 1) {
+        ref = `${apiName}+1:1-${singleChapterBooks[apiName]}`;
+      }
+
       const url = `${BASE_URL}/${ref}?translation=${translation}`;
       const res = await fetch(url, { next: { revalidate: 86400 } });
       if (!res.ok) throw new Error(`Failed to fetch ${ref}: ${res.status}`);

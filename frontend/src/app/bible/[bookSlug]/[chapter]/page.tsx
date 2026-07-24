@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { fetchChapter, TRANSLATIONS, type Translation, type BibleVerse } from "@/lib/bible-api";
 import { getBookBySlug, getAdjacentBook } from "@/lib/bible-books";
-import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Clock as ClockIcon, Volume2, VolumeX, Image as ImageIcon, Check } from "lucide-react";
+import { Book, ChevronLeft, ChevronRight, Share2, Sparkles, AlertCircle, Bookmark, BookmarkCheck, Settings2, ArrowLeft, Home, Clock as ClockIcon, Volume2, VolumeX, Image as ImageIcon, Check } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -88,6 +88,8 @@ export default function BibleReaderPage() {
   const [markedRead, setMarkedRead] = useState(false);
   const [isReading, setIsReading] = useState(false);
   const [cardVerse, setCardVerse] = useState<{ text: string; reference: string } | null>(null);
+  const [showNav, setShowNav] = useState(true);
+  const lastScrollY = useRef(0);
   const readingRef = useRef(false);
 
   // Load voices on mount for browser voice list caching
@@ -345,6 +347,16 @@ export default function BibleReaderPage() {
   }
 
 
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
+      setShowNav(false);
+    } else {
+      setShowNav(true);
+    }
+    lastScrollY.current = currentScrollY;
+  };
+
   const fontSizeClass = {
     sm: "text-sm leading-7",
     base: "text-[15px] leading-8",
@@ -356,12 +368,22 @@ export default function BibleReaderPage() {
     <div className="flex-1 flex flex-col overflow-hidden">
 
       {/* ── Top Bar ── */}
-      <div className="sticky top-0 z-30 glass dark:glass-dark border-b border-amber-200/40 dark:border-amber-900/20">
-        <div className="flex items-center justify-between px-3 h-14 gap-2">
-          {/* Back */}
-          <Link href="/bible" className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted transition-colors">
-            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-          </Link>
+      <div 
+        className={cn(
+          "shrink-0 z-30 glass dark:glass-dark border-b border-amber-200/40 dark:border-amber-900/20 transition-all duration-300 ease-in-out",
+          showNav ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 absolute top-0 left-0 right-0"
+        )}
+      >
+        <div className="flex items-center justify-between px-3 h-14 gap-1">
+          {/* Back & Home */}
+          <div className="flex items-center gap-1">
+            <Link href="/" className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted transition-colors text-muted-foreground" title="Home">
+              <Home className="w-5 h-5" />
+            </Link>
+            <Link href="/bible" className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted transition-colors text-muted-foreground" title="Scripture Selection">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          </div>
 
           {/* Book + Chapter picker */}
           <div className="flex-1 flex flex-col items-center">
@@ -463,7 +485,10 @@ export default function BibleReaderPage() {
       </div>
 
       {/* ── Verses ── */}
-      <div className="flex-1 overflow-y-auto">
+      <div 
+        className={cn("flex-1 overflow-y-auto transition-all duration-300", !showNav && "pt-4")}
+        onScroll={handleScroll}
+      >
         {loading && <VersesSkeleton />}
 
         {error && (
