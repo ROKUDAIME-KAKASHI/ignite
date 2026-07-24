@@ -112,6 +112,7 @@ export function MobileHeader() {
           href="/dashboard"
           className="w-10 h-10 -mr-2 rounded-xl flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
           title="Home"
+          aria-label="Go to Home"
         >
           <Home className="w-5 h-5 text-foreground" />
         </Link>
