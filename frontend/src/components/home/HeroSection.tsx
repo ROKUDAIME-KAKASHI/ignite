@@ -58,7 +58,7 @@ export function HeroSection() {
 
           <FadeUp delay={0.2}>
             <p className="text-gray-600 text-lg lg:text-xl leading-relaxed mb-10 max-w-lg">
-              Your daily spiritual companion for scripture, prayer, missions and community. Built for Jacobite Orthodox youth navigating a fast-paced world.
+              Your daily spiritual companion for scripture, prayer, missions and community. Built for Christian youth navigating a fast-paced world.
             </p>
           </FadeUp>
 

@@ -96,7 +96,7 @@ export default function HeroPage() {
             </h1>
 
             <p className="text-gray-600 text-lg lg:text-xl leading-relaxed mb-10 max-w-lg animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150 fill-mode-both">
-              Your daily spiritual companion for scripture, prayer, missions and community. Built for Jacobite Orthodox youth navigating a fast-paced world.
+              Your daily spiritual companion for scripture, prayer, missions and community. Built for Christian youth navigating a fast-paced world.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
@@ -371,7 +371,7 @@ export default function HeroPage() {
             Your faith journey <br/> begins with one step.
           </h2>
           <p className="text-gray-600 text-lg mb-10 max-w-xl mx-auto">
-            Join thousands of Jacobite Orthodox youth who are reclaiming five minutes a day for God.
+            Join thousands of Christian youth who are reclaiming five minutes a day for God.
           </p>
           <Link
             href="/login"

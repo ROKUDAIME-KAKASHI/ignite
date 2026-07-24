@@ -30,8 +30,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Ignite — Jacobite Orthodox Youth Movement Platform",
-  description: "Your daily spiritual companion. Scripture, prayer, missions and community for Jacobite Orthodox youth navigating the fast-paced world.",
+  title: "Ignite — Christian Youth App",
+  description: "Your daily spiritual companion. Scripture, prayer, missions and community for Christian youth navigating the fast-paced world.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     title: "Ignite",
   },
   openGraph: {
-    title: "Ignite — Jacobite Orthodox Youth Movement",
+    title: "Ignite — Christian Youth App",
     description: "In a world that never stops, your faith never should.",
     type: "website",
   },
