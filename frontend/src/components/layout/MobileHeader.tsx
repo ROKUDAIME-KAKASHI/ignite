@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { useEffect } from "react";
+import { Home, ArrowLeft } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const PUBLIC_ROUTES = ["/", "/login"];
 
@@ -11,32 +13,49 @@ export function MobileHeader() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, loading } = useAuth();
+  
+  const [showNav, setShowNav] = useState(true);
+  const lastScrollY = useRef(0);
 
   // Handle physical back button closing the app
-  // By pushing a history state when the app mounts, we ensure there's a history stack
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // If history length is 1 (app just opened), push a dummy state
       if (window.history.length === 1) {
         window.history.pushState(null, "", window.location.href);
       }
-
-      const handlePopState = (event: PopStateEvent) => {
-        // If they press back and hit our dummy state or we need to prevent exit,
-        // we could push another state, but Next.js usually handles popstate.
-        // The pushState above is usually enough to prevent immediate exit on first back press.
-      };
-
+      const handlePopState = (event: PopStateEvent) => {};
       window.addEventListener("popstate", handlePopState);
       return () => window.removeEventListener("popstate", handlePopState);
     }
   }, [pathname]);
 
+  // Global scroll listener via capture phase
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // Ignore horizontal scrolling or minor elements
+      if (!target || !target.scrollTop) return;
+      
+      const currentScrollY = target.scrollTop;
+      if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
+        setShowNav(false);
+      } else if (currentScrollY < lastScrollY.current || currentScrollY <= 60) {
+        setShowNav(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    // Use capture phase to catch scroll events from any nested container
+    window.addEventListener("scroll", handleScroll, { capture: true, passive: true });
+    return () => window.removeEventListener("scroll", handleScroll, { capture: true });
+  }, []);
+
   if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/admin") || !user) return null;
 
   const isHome = pathname === "/dashboard";
 
-  // Map pathname to a readable title
   const getTitle = () => {
     if (pathname === "/dashboard") return "Home";
     if (pathname === "/bible") return "Scripture";
@@ -51,7 +70,12 @@ export function MobileHeader() {
   };
 
   return (
-    <div className="md:hidden sticky top-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#0f1229]/90 backdrop-blur-md border-b border-border/50 h-14 flex items-center px-4 shrink-0">
+    <div 
+      className={cn(
+        "md:hidden sticky top-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#0f1229]/90 backdrop-blur-md border-b border-border/50 h-14 flex items-center px-4 shrink-0 transition-transform duration-300 ease-in-out",
+        showNav ? "translate-y-0" : "-translate-y-full absolute"
+      )}
+    >
       {!isHome ? (
         <button
           onClick={() => router.back()}
@@ -79,9 +103,19 @@ export function MobileHeader() {
         </div>
       )}
       
-      <h1 className="text-lg font-bold font-serif text-foreground ml-1">
+      <h1 className="text-lg font-bold font-serif text-foreground ml-1 flex-1">
         {getTitle()}
       </h1>
+
+      {!isHome && (
+        <Link 
+          href="/dashboard"
+          className="w-10 h-10 -mr-2 rounded-xl flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+          title="Home"
+        >
+          <Home className="w-5 h-5 text-foreground" />
+        </Link>
+      )}
     </div>
   );
 }
