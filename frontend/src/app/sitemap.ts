@@ -1,20 +1,19 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // Base URL of the application
-  const baseUrl = 'https://www.yourdomain.com';
+  // Base URL of the application (set this in your Vercel or hosting environment variables)
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ignite-platform.vercel.app';
 
-  // Core public routes that we want indexed
+  // Core public routes that we want indexed by Google
   const routes = [
     '',
     '/login',
-    '/about', // Example if you add one later
   ];
 
   return routes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,
-    priority: route === '' ? 1 : 0.8,
+    priority: route === '' ? 1.0 : 0.8,
   }));
 }
