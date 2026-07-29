@@ -153,6 +153,7 @@ export default function MemoryMatchPage() {
     let xp = 20;
     if (moves <= 12) xp += 15;
     else if (moves <= 16) xp += 10;
+    else if (moves > 20) xp = Math.max(5, 20 - (moves - 20)); // Dynamic penalty
 
     const res = await awardXP(xp, "Completed Bible Memory Match");
     if (res.success && res.xp) {

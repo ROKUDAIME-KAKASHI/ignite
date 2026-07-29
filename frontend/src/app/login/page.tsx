@@ -240,17 +240,15 @@ export default function LoginPage() {
 
           <div className="divider-cross my-4" />
 
-          {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
-            <div className="flex justify-center mb-4">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => setError("Google Sign-In Failed")}
-                theme="outline"
-                shape="pill"
-                text={isRegistering ? "signup_with" : "signin_with"}
-              />
-            </div>
-          )}
+          <div className="flex justify-center mb-4">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google Sign-In Failed")}
+              theme="outline"
+              shape="pill"
+              text={isRegistering ? "signup_with" : "signin_with"}
+            />
+          </div>
 
           <div className="text-center">
             <button

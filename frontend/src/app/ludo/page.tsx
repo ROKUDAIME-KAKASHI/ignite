@@ -297,6 +297,14 @@ export default function BibleLudoPage() {
             updated = true;
             showToast(`${rp.name} disconnected. AI took over!`);
           }
+        } else if (rp && rp.isBot) {
+          const isConnected = lobbyPlayers.find(p => p.id === rp.id);
+          if (isConnected && rp.name.includes("(Disconnected - Bot)")) {
+            // Player reconnected! Turn them back to human.
+            newRoomPlayers[color] = { ...rp, name: rp.name.replace(" (Disconnected - Bot)", ""), isBot: false };
+            updated = true;
+            showToast(`${newRoomPlayers[color].name} reconnected! AI stopped.`);
+          }
         }
       });
 
@@ -465,7 +473,7 @@ export default function BibleLudoPage() {
 
   const canMove = (color: Color, tokenIdx: number, roll: number) => {
     const pos = tokens[color][tokenIdx];
-    if (pos === -1) return roll === 6;
+    if (pos === -1) return roll === 6 || roll === 1;
     if (pos === 200) return false;
     
     // Convert to global path index or home stretch index
@@ -637,24 +645,29 @@ export default function BibleLudoPage() {
         newTokens[color][tokenIdx] = nextPos;
         
         // Capture logic
-        COLORS.forEach(c => {
-          if (c !== color) {
-            // Team Mode: No friendly fire between Red & Yellow, and Green & Blue
-            const isTeammate = gameMode === "team" && ((color === "red" && c === "yellow") || (color === "yellow" && c === "red") || (color === "green" && c === "blue") || (color === "blue" && c === "green"));
-            
-            if (!isTeammate) {
-              newTokens[c] = newTokens[c].map(p => {
-                if (p === nextPos) {
-                  extraTurn = true;
-                  setGameEvent({ type: "capture", color: c, message: `${getPlayerName(color)} captured ${getPlayerName(c)}!` });
-                  setTimeout(() => setGameEvent(null), 2500);
-                  return -1; // Send back to base
-                }
-                return p;
-              });
+        const SAFE_CELLS = [1, 9, 14, 22, 27, 35, 40, 48];
+        const isSafeCell = SAFE_CELLS.includes(nextPos);
+        
+        if (!isSafeCell) {
+          COLORS.forEach(c => {
+            if (c !== color) {
+              // Team Mode: No friendly fire between Red & Yellow, and Green & Blue
+              const isTeammate = gameMode === "team" && ((color === "red" && c === "yellow") || (color === "yellow" && c === "red") || (color === "green" && c === "blue") || (color === "blue" && c === "green"));
+              
+              if (!isTeammate) {
+                newTokens[c] = newTokens[c].map(p => {
+                  if (p === nextPos) {
+                    extraTurn = true;
+                    setGameEvent({ type: "capture", color: c, message: `${getPlayerName(color)} captured ${getPlayerName(c)}!` });
+                    setTimeout(() => setGameEvent(null), 2500);
+                    return -1; // Send back to base
+                  }
+                  return p;
+                });
+              }
             }
-          }
-        });
+          });
+        }
       }
     } else if (pos >= 100 && pos < 105) {
       const stretchIdx = pos - 100;
@@ -1635,7 +1648,8 @@ export default function BibleLudoPage() {
                           }
                         }}
                         className={cn(
-                          `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute z-10 transition duration-300 ease-in-out`,
+                          `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute transition duration-300 ease-in-out`,
+                          turn === t.color ? "z-20" : "z-10",
                           BG_COLORS[t.color], BORDER_COLORS[t.color],
                           (((gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor)) && turn === t.color && dice && canMove(turn, t.idx, dice) && !trivia) ? "animate-pulse ring-2 ring-primary ring-offset-1 scale-110" : "")
                         )}
@@ -1679,7 +1693,8 @@ export default function BibleLudoPage() {
                             }
                           }}
                           className={cn(
-                            `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute z-10 transition duration-300 ease-in-out`,
+                            `w-[70%] h-[70%] rounded-full shadow-md border flex items-center justify-center text-[8px] font-bold text-white absolute transition duration-300 ease-in-out`,
+                            turn === t.color ? "z-20" : "z-10",
                             BG_COLORS[t.color], BORDER_COLORS[t.color],
                             (((gameMode === "local" || (gameMode !== "live" && turn === "red") || (gameMode === "live" && turn === myColor)) && turn === t.color && dice && canMove(turn, t.idx, dice) && !trivia) ? "animate-pulse ring-2 ring-primary ring-offset-1 scale-110" : "")
                           )}

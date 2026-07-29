@@ -59,7 +59,7 @@ export default function ChessLobbyPage() {
         </p>
       </div>
 
-      <div className="w-full mb-10 flex justify-center">
+      <div className="w-full mb-10 flex flex-col md:flex-row justify-center gap-4">
         <Button 
           onClick={handleCreate} 
           disabled={loading || fetching}
@@ -67,6 +67,14 @@ export default function ChessLobbyPage() {
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Plus className="w-5 h-5 mr-2" />} 
           Create New Game
+        </Button>
+        <Button 
+          onClick={() => router.push('/chess/bot')} 
+          disabled={loading || fetching}
+          className="w-full max-w-sm h-14 text-lg rounded-2xl shadow-xl bg-gray-900 text-white hover:bg-gray-800 font-bold hover:scale-[1.02] transition-transform"
+        >
+          <UserIcon className="w-5 h-5 mr-2" /> 
+          Play vs AI Bot
         </Button>
       </div>
 

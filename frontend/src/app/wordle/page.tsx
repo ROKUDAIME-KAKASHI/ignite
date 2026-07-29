@@ -109,7 +109,8 @@ export default function WordlePage() {
       
       if (user && !awarded) {
         setAwarded(true);
-        const res = await awardXP(10, "Won Scripture Wordle");
+        const xpAmount = 10 + Math.max(0, (6 - newGuesses.length) * 5); // Dynamic XP
+        const res = await awardXP(xpAmount, "Won Scripture Wordle");
         if (res.success && res.xp) setUser({ ...user, xp: res.xp, level: res.level });
       }
     } else if (newGuesses.length >= MAX_GUESSES) {

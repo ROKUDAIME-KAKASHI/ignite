@@ -72,7 +72,7 @@ export default function IntercessionChainPage() {
         setTimerLeft((prev) => prev - 1);
       }, 1000);
     } else if (activeTimer !== null && timerLeft === 0) {
-      handleCompleteSession();
+      handleCompleteSession(false);
     }
     return () => clearInterval(interval);
   }, [activeTimer, timerLeft]);
@@ -100,23 +100,25 @@ export default function IntercessionChainPage() {
     }
   };
 
-  const handleCompleteSession = () => {
+  const handleCompleteSession = (finishedEarly: boolean = false) => {
     setActiveTimer(null);
     setCompletedPrayer(true);
 
-    const xpAmount = 25;
+    const xpAmount = finishedEarly ? 0 : 25;
     const reason = "Completed 5-Min Intercession Ring Prayer";
 
-    if (typeof window !== "undefined" && !navigator.onLine) {
-      queueOfflineXP(xpAmount, reason);
-    } else {
-      awardXP(xpAmount, reason).then((res) => {
-        if (res?.success && res.xp && user) {
-          setUser({ ...user, xp: res.xp, level: res.level });
-        }
-      }).catch(() => {
+    if (xpAmount > 0) {
+      if (typeof window !== "undefined" && !navigator.onLine) {
         queueOfflineXP(xpAmount, reason);
-      });
+      } else {
+        awardXP(xpAmount, reason).then((res) => {
+          if (res?.success && res.xp && user) {
+            setUser({ ...user, xp: res.xp, level: res.level });
+          }
+        }).catch(() => {
+          queueOfflineXP(xpAmount, reason);
+        });
+      }
     }
   };
 
@@ -180,15 +182,15 @@ export default function IntercessionChainPage() {
               "Where two or three gather in My name, there am I with them." — Matthew 18:20
             </p>
 
-            <Button onClick={handleCompleteSession} variant="outline" className="text-xs font-bold border-purple-500/30">
-              Finish Early & Collect +25 XP
+            <Button onClick={() => handleCompleteSession(true)} variant="outline" className="text-xs font-bold border-purple-500/30">
+              Finish Early (No XP)
             </Button>
           </div>
         ) : completedPrayer ? (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-emerald-500/30 rounded-3xl p-6 shadow-xl text-center space-y-3">
             <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
             <h3 className="text-base font-bold font-serif text-foreground">Prayer Session Complete!</h3>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">+25 Grace Points Awarded to your profile!</p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Thank you for interceding.</p>
             <Button onClick={() => setCompletedPrayer(false)} variant="outline" size="sm" className="text-xs font-bold">
               Join Another Open Ring
             </Button>
