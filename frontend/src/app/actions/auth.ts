@@ -81,18 +81,21 @@ export async function signup(data: FormData) {
   return { success: true, user: sessionData };
 }
 
-export async function googleAuth(idToken: string) {
+export async function googleAuth(accessToken: string) {
   if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
     return { error: "Google authentication is not configured yet. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID." };
   }
 
   try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken,
-      audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${accessToken}` }
     });
     
-    const payload = ticket.getPayload();
+    if (!userInfoRes.ok) {
+      return { error: "Failed to fetch user info from Google." };
+    }
+    
+    const payload = await userInfoRes.json();
     if (!payload || !payload.email) return { error: "Invalid Google token" };
 
     const email = payload.email;
