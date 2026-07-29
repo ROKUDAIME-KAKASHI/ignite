@@ -71,7 +71,8 @@ export default function ChessBotPage() {
         setTimeout(makeRandomMove, 500);
       }
       return true;
-    } catch (e) {
+    } catch (e: any) {
+      alert("Chess Error: " + (e?.message || "Unknown error"));
       return false;
     }
   };

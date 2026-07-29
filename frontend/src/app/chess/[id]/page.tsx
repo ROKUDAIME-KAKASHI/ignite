@@ -40,7 +40,10 @@ export default function ChessGamePage() {
   }, [gameId]);
 
   const onDrop = async (sourceSquare: string, targetSquare: string, piece: string) => {
-    if (!game || !game.isMyTurn) return false;
+    if (!game || !game.isMyTurn) {
+      alert("Not your turn or game not found");
+      return false;
+    }
 
     // Optimistic update isn't strictly necessary but good for UX.
     // Instead we just wait for server action since it's turn based over days
@@ -54,9 +57,10 @@ export default function ChessGamePage() {
       }
       fetchGame();
       return true;
+    } else {
+      alert("Move failed on server: " + res.error);
+      return false;
     }
-    
-    return false;
   };
 
   if (loading) {
