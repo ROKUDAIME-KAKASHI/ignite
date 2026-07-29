@@ -7,6 +7,7 @@ import { Calendar, MapPin, Clock, Users, ChevronRight, Camera, X, Plus } from "l
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { getEvents, rsvpEvent, getEventGallery, uploadEventPhoto } from "./actions";
+import { toast } from "sonner";
 
 const tabs = ["Upcoming", "Registered", "Past"];
 
@@ -126,13 +127,13 @@ export default function EventsPage() {
     // Optimistic update could go here
     const res = await uploadEventPhoto(selectedEventId, url, "Shared memory from the event!");
     if (res.success) {
-      alert("Photo uploaded! You earned 15 Grace Points.");
+      toast.success("Photo uploaded! You earned 15 Grace Points.");
       const updatedPhotos = await getEventGallery(selectedEventId);
       setGalleryPhotos(updatedPhotos);
       // update event photos count in state
       setEvents(events.map(e => e.id === selectedEventId ? {...e, photosCount: (e.photosCount || 0) + 1} : e));
     } else {
-      alert("Error: " + res.error);
+      toast.error("Error: " + res.error);
     }
   };
 

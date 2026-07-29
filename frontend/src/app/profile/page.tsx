@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, urlB64ToUint8Array } from "@/lib/utils";
 import Link from "next/link";
+import { toast } from "sonner";
 import { deleteAccount } from "@/app/actions/auth";
 import { getProfileStats, joinParish, leaveParish } from "@/app/actions/profile";
 import { getUserAwardsProgress } from "@/app/actions/gamificationAwards";
@@ -191,7 +192,7 @@ export default function ProfilePage() {
       if (isIOS) {
         setShowIOSPrompt(true);
       } else {
-        alert("App is either already installed, or your browser requires manual installation.\n\nTry opening your browser menu (usually three dots in the top right) and look for 'Install app' or 'Add to Home Screen'.");
+        toast.error("App is either already installed, or your browser requires manual installation.\n\nTry opening your browser menu (usually three dots in the top right) and look for 'Install app' or 'Add to Home Screen'.", { duration: 6000 });
       }
       return;
     }
@@ -224,16 +225,16 @@ export default function ProfilePage() {
         });
         
         if (res.ok) {
-          alert("Push notifications enabled successfully!");
+          toast.success("Push notifications enabled successfully!");
         } else {
-          alert("Enabled in browser, but failed to save to server.");
+          toast.warning("Enabled in browser, but failed to save to server.");
         }
       } else {
-        alert("Permission denied. You may need to enable notifications in your browser settings.");
+        toast.error("Permission denied. You may need to enable notifications in your browser settings.");
       }
-    } catch (e) {
-      console.error("Failed to enable notifications:", e);
-      alert("Failed to enable notifications. Please check your browser permissions.");
+    } catch (error) {
+      console.error("Error enabling push:", error);
+      toast.error("Failed to enable notifications. Please check your browser permissions.");
     }
   };
 
@@ -260,9 +261,10 @@ export default function ProfilePage() {
       setDeletingAccount(true);
       const res = await deleteAccount();
       if (res.success) {
+        toast.success("Account deleted successfully.");
         window.location.href = "/login";
       } else {
-        alert(res.error || "Failed to delete account");
+        toast.error(res.error || "Failed to delete account");
         setDeletingAccount(false);
       }
     }
@@ -435,9 +437,10 @@ export default function ProfilePage() {
                   if (confirm("Are you sure you want to leave this parish?")) {
                     const res = await leaveParish();
                     if (res.success) {
-                      setStats({ ...stats, user: { ...stats.user, church: null } });
+                      toast.success("Left the parish.");
+                      window.location.reload();
                     } else {
-                      alert(res.error);
+                      toast.error(res.error);
                     }
                   }
                 }}

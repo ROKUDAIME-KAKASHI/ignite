@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus, Play, User as UserIcon, ShieldAlert, Swords, Clock, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import { getAvailableChessGames, getMyActiveChessGames, createNewChessGame, joinChessGame } from "@/app/actions/chess";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -36,7 +37,7 @@ export default function ChessLobbyPage() {
       router.push(`/chess/${res.gameId}`);
     } else {
       setLoading(false);
-      alert(res.error || "Failed to create game");
+      toast.error(res.error || "Failed to create game");
     }
   };
 
@@ -47,7 +48,7 @@ export default function ChessLobbyPage() {
       router.push(`/chess/${res.gameId}`);
     } else {
       setLoading(false);
-      alert(res.error || "Failed to join game");
+      toast.error(res.error || "Failed to join game");
     }
   };
 

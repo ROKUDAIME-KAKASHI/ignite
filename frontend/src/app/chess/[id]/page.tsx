@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Chessboard } from "react-chessboard";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, RefreshCw, Trophy, User as UserIcon } from "lucide-react";
+import { toast } from "sonner";
 import { getChessGame, makeChessMove } from "@/app/actions/chess";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
@@ -45,7 +46,7 @@ export default function ChessGamePage() {
   const onDrop = (args: any) => {
     const { sourceSquare, targetSquare } = args;
     if (!game || !game.isMyTurn) {
-      alert("Not your turn or game not found");
+      toast.error("Not your turn or game not found");
       return false;
     }
 
@@ -59,7 +60,7 @@ export default function ChessGamePage() {
           }
           fetchGame();
         } else {
-          alert("Move failed on server: " + res.error);
+          toast.error("Move failed on server: " + res.error);
           fetchGame();
         }
       });

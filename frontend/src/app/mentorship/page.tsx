@@ -3,6 +3,8 @@ import Image from 'next/image';
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, MessageCircleQuestion, Send, ShieldCheck, User, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -46,7 +48,7 @@ export default function MentorshipPage() {
       setNewQuestion("");
       setActiveTab("my");
     } else {
-      alert(res.error || "Failed to ask question");
+      toast.error(res.error || "Failed to ask question");
     }
     setIsSubmitting(false);
   };

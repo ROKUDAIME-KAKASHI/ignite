@@ -14,6 +14,7 @@ const InstallPrompt = dynamic(() => import("@/components/InstallPrompt").then(mo
 const OfflineHandler = dynamic(() => import("@/components/OfflineHandler").then(mod => mod.OfflineHandler));
 const OfflinePrefetcher = dynamic(() => import("@/components/OfflinePrefetcher").then(mod => mod.OfflinePrefetcher));
 import { CustomGoogleOAuthProvider } from "@/components/providers/GoogleAuthProvider";
+import { Toaster } from "sonner";
 
 import { Inter, Playfair_Display } from "next/font/google";
 
@@ -91,6 +92,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <GlobalChat />
                 <PushNotificationManager />
               </main>
+              <Toaster position="top-center" richColors />
             </AuthProvider>
           </CustomGoogleOAuthProvider>
         </ThemeProvider>
