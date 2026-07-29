@@ -33,7 +33,7 @@ export async function login(data: FormData) {
   const session = await encrypt(sessionData);
 
   const cookieStore = await cookies();
-  cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
+  cookieStore.set("session", session, { expires, httpOnly: true, secure: process.env.NODE_ENV === "production" });
 
   await logAudit(user.id, "USER_LOGIN", { method: "email" });
 
@@ -74,7 +74,7 @@ export async function signup(data: FormData) {
   const session = await encrypt(sessionData);
 
   const cookieStore = await cookies();
-  cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
+  cookieStore.set("session", session, { expires, httpOnly: true, secure: process.env.NODE_ENV === "production" });
 
   await logAudit(user.id, "USER_SIGNUP", { method: "email" });
 
@@ -129,7 +129,7 @@ export async function googleAuth(accessToken: string) {
     const session = await encrypt(sessionData);
 
     const cookieStore = await cookies();
-    cookieStore.set("session", session, { expires, httpOnly: true, secure: true });
+    cookieStore.set("session", session, { expires, httpOnly: true, secure: process.env.NODE_ENV === "production" });
 
     await logAudit(user.id, "USER_LOGIN_GOOGLE");
 
@@ -175,7 +175,7 @@ export async function updateProfile(firstName: string, lastName: string) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const newSessionToken = await encrypt(updatedSession);
   
-  cookieStore.set("session", newSessionToken, { expires, httpOnly: true, secure: true });
+  cookieStore.set("session", newSessionToken, { expires, httpOnly: true, secure: process.env.NODE_ENV === "production" });
   
   await logAudit(sessionData.id as string, "PROFILE_UPDATED", { firstName, lastName });
   

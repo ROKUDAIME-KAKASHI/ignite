@@ -85,26 +85,27 @@ export default function LoginPage() {
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      setError("");
+      setError("Authenticating with Google...");
       setLoading(true);
       try {
         const res = await googleAuth(tokenResponse.access_token);
         if (res.error) {
-          setError(res.error);
+          setError("Server Auth Error: " + res.error);
         } else if (res.success && res.user) {
+          setError("Success! Redirecting...");
           setUser({
             ...res.user,
             displayName: `${res.user.firstName} ${res.user.lastName}`
           });
           router.push("/dashboard");
         }
-      } catch (err) {
-        setError("Failed to sign in with Google.");
+      } catch (err: any) {
+        setError("Network Error: " + err.message);
       } finally {
         setLoading(false);
       }
     },
-    onError: () => setError("Google Sign-In Failed")
+    onError: (errorResponse) => setError("Google Sign-In Popup Failed: " + JSON.stringify(errorResponse))
   });
 
   return (
