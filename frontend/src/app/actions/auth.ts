@@ -181,3 +181,28 @@ export async function updateProfile(firstName: string, lastName: string) {
   
   return { success: true, user: updatedSession };
 }
+
+export async function deleteAccount() {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session")?.value;
+  if (!sessionToken) return { error: "Not logged in" };
+
+  const sessionData = await decrypt(sessionToken).catch(() => null);
+  if (!sessionData || !sessionData.id) return { error: "Invalid session" };
+
+  try {
+    // Delete the user from the database.
+    // Prisma will cascade delete all related models if schema is set up with onDelete: Cascade
+    // Or at least it deletes the main User record containing PII.
+    await prisma.user.delete({
+      where: { id: sessionData.id }
+    });
+
+    cookieStore.delete("session");
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Account deletion error:", error);
+    return { error: "Failed to delete account. Please try again." };
+  }
+}

@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, urlB64ToUint8Array } from "@/lib/utils";
 import Link from "next/link";
+import { deleteAccount } from "@/app/actions/auth";
 import { getProfileStats, joinParish, leaveParish } from "@/app/actions/profile";
 import { getUserAwardsProgress } from "@/app/actions/gamificationAwards";
 import { TrophyShowcase } from "@/components/TrophyShowcase";
@@ -112,6 +113,7 @@ function NameEditor({ currentName, onSave }: { currentName: string; onSave: (n: 
 export default function ProfilePage() {
   const { user, updateDisplayName, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [stats, setStats] = useState<{ chapters: number, badges: number, streakDone: boolean[], badgeList: { emoji: string, label: string, desc: string, color: string }[], user?: any, weekDays?: string[], quoteOfTheDay?: {quote: string, author: string} }>({ chapters: 0, badges: 0, streakDone: defaultStreak, badgeList: [], weekDays: defaultWeekDays, quoteOfTheDay: defaultQuote });
   const [awards, setAwards] = useState<any[]>([]);
   const [awardsError, setAwardsError] = useState("");
@@ -249,7 +251,21 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     setLoggingOut(true);
-    try { await logout(); } finally { setLoggingOut(false); }
+    await logout();
+    setLoggingOut(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Are you sure you want to permanently delete your account and all associated personal data? This action cannot be undone and complies with your Right to Erasure under the DPDP Act 2023.")) {
+      setDeletingAccount(true);
+      const res = await deleteAccount();
+      if (res.success) {
+        window.location.href = "/login";
+      } else {
+        alert(res.error || "Failed to delete account");
+        setDeletingAccount(false);
+      }
+    }
   };
 
   return (
@@ -531,6 +547,30 @@ export default function ProfilePage() {
             )}
           </Button>
         </motion.div>
+        
+        <div className="mt-8 pt-6 border-t border-red-500/20">
+          <p className="text-xs font-bold text-red-500 uppercase tracking-wider mb-2 text-center">DPDP Act Compliance</p>
+          <p className="text-xs text-muted-foreground text-center mb-4 px-4">
+            Under the Digital Personal Data Protection Act, you have the Right to Erasure. Deleting your account will permanently wipe all your personal data.
+          </p>
+          <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              onClick={handleDeleteAccount}
+              disabled={deletingAccount || loggingOut}
+              variant="outline"
+              className="w-full h-11 rounded-2xl border-red-500/50 text-red-500 hover:bg-red-500/10 font-bold text-sm transition"
+            >
+              {deletingAccount ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Deleting Data...
+                </span>
+              ) : (
+                "Delete Account & Data"
+              )}
+            </Button>
+          </motion.div>
+        </div>
         <p className="text-center text-[10px] text-muted-foreground mt-4 tracking-[0.25em] uppercase">✝ Soli Deo Gloria ✝</p>
       </div>
 
