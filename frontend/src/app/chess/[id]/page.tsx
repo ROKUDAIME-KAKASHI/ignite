@@ -92,7 +92,7 @@ export default function ChessGamePage() {
         </Button>
       </div>
 
-      <div className="w-full max-w-md aspect-square rounded-lg shadow-2xl overflow-hidden ring-4 ring-border/50">
+      <div className="w-full max-w-md aspect-square rounded-lg shadow-2xl overflow-hidden ring-4 ring-border/50 relative">
         <Chessboard 
           options={{
             position: game.fen,
@@ -103,6 +103,23 @@ export default function ChessGamePage() {
             lightSquareStyle: { backgroundColor: '#eeeed2' }
           }}
         />
+        
+        {game.status !== 'active' && (
+          <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-4 opacity-0 animate-in fade-in duration-500">
+            <div className="bg-background p-6 rounded-2xl shadow-2xl text-center max-w-sm w-full border border-border scale-95 animate-in zoom-in-95 duration-500 delay-150 fill-mode-forwards">
+              <h2 className="text-3xl font-extrabold font-serif mb-2">
+                {game.status === 'draw' ? "It's a Draw" : "Checkmate!"}
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                {game.status === 'white_won' ? "White takes the victory." : 
+                 game.status === 'black_won' ? "Black takes the victory." : "The game ended in a stalemate."}
+              </p>
+              <Button className="w-full" onClick={() => router.push('/chess')}>
+                Return to Lobby
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       
       <div className="mt-8 text-center text-sm text-muted-foreground max-w-sm">

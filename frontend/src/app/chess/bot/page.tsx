@@ -100,7 +100,7 @@ export default function ChessBotPage() {
         </Button>
       </div>
 
-      <div className="w-full max-w-md aspect-square rounded-lg shadow-2xl overflow-hidden ring-4 ring-border/50">
+      <div className="w-full max-w-md aspect-square rounded-lg shadow-2xl overflow-hidden ring-4 ring-border/50 relative">
         <Chessboard 
           options={{
             position: game.fen(),
@@ -111,20 +111,40 @@ export default function ChessBotPage() {
             lightSquareStyle: { backgroundColor: '#eeeed2' }
           }}
         />
+        
+        {gameStatus !== 'playing' && (
+          <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-4 opacity-0 animate-in fade-in duration-500">
+            <div className="bg-background p-6 rounded-2xl shadow-2xl text-center max-w-sm w-full border border-border scale-95 animate-in zoom-in-95 duration-500 delay-150 fill-mode-forwards">
+              <h2 className="text-3xl font-extrabold font-serif mb-2 text-foreground">
+                {gameStatus === 'draw' ? "It's a Draw" : gameStatus === 'won' ? "You Won!" : "Checkmate!"}
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                {gameStatus === 'won' ? "You defeated the AI Bot." : 
+                 gameStatus === 'lost' ? "The AI Bot takes the victory." : "The game ended in a stalemate."}
+              </p>
+              
+              {gameStatus === 'won' && (
+                <div className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 p-3 rounded-xl flex items-center justify-center gap-2 mb-6">
+                  <Trophy className="w-5 h-5" />
+                  <span className="text-sm font-bold">+50 XP Awarded!</span>
+                </div>
+              )}
+              
+              <div className="flex gap-2">
+                <Button className="flex-1" variant="outline" onClick={() => router.push('/chess')}>
+                  Lobby
+                </Button>
+                <Button className="flex-1" onClick={restartGame}>
+                  Play Again
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       <div className="mt-8 text-center text-sm text-muted-foreground max-w-sm space-y-4">
         {gameStatus === "playing" && "Play locally against our built-in AI Bot. Great for offline practice!"}
-        
-        {gameStatus === "won" && (
-          <div className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 p-4 rounded-xl flex items-center gap-3">
-            <Trophy className="w-8 h-8" />
-            <div className="text-left">
-              <p className="font-bold">Victory!</p>
-              <p className="text-xs">+50 XP Awarded for defeating the bot.</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
