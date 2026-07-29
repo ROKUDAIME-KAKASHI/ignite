@@ -39,7 +39,8 @@ export default function ChessGamePage() {
     return () => { supabase.removeChannel(channel); };
   }, [gameId]);
 
-  const onDrop = async (sourceSquare: string, targetSquare: string, piece: string) => {
+  const onDrop = async (args: any) => {
+    const { sourceSquare, targetSquare } = args;
     if (!game || !game.isMyTurn) {
       alert("Not your turn or game not found");
       return false;
@@ -91,12 +92,14 @@ export default function ChessGamePage() {
 
       <div className="w-full max-w-md aspect-square rounded-lg shadow-2xl overflow-hidden ring-4 ring-border/50">
         <Chessboard 
-          {...{ position: game.fen } as any}
-          onPieceDrop={onDrop}
-          boardOrientation={game.myColor === 'b' ? 'black' : 'white'}
-          arePiecesDraggable={game.status === 'active' && game.isMyTurn}
-          customDarkSquareStyle={{ backgroundColor: '#769656' }}
-          customLightSquareStyle={{ backgroundColor: '#eeeed2' }}
+          options={{
+            position: game.fen,
+            onPieceDrop: onDrop,
+            boardOrientation: game.myColor === 'b' ? 'black' : 'white',
+            allowDragging: game.status === 'active' && game.isMyTurn,
+            darkSquareStyle: { backgroundColor: '#769656' },
+            lightSquareStyle: { backgroundColor: '#eeeed2' }
+          }}
         />
       </div>
       

@@ -52,7 +52,8 @@ export default function ChessBotPage() {
     }
   };
 
-  const onDrop = (sourceSquare: string, targetSquare: string, piece: string) => {
+  const onDrop = (args: any) => {
+    const { sourceSquare, targetSquare } = args;
     if (gameStatus !== "playing") return false;
 
     try {
@@ -101,12 +102,14 @@ export default function ChessBotPage() {
 
       <div className="w-full max-w-md aspect-square rounded-lg shadow-2xl overflow-hidden ring-4 ring-border/50">
         <Chessboard 
-          {...{ position: game.fen() } as any}
-          onPieceDrop={onDrop}
-          boardOrientation={'white'}
-          arePiecesDraggable={gameStatus === 'playing'}
-          customDarkSquareStyle={{ backgroundColor: '#769656' }}
-          customLightSquareStyle={{ backgroundColor: '#eeeed2' }}
+          options={{
+            position: game.fen(),
+            onPieceDrop: onDrop,
+            boardOrientation: 'white',
+            allowDragging: gameStatus === 'playing',
+            darkSquareStyle: { backgroundColor: '#769656' },
+            lightSquareStyle: { backgroundColor: '#eeeed2' }
+          }}
         />
       </div>
       
