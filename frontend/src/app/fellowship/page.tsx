@@ -56,12 +56,21 @@ export default function FellowshipChatPage() {
     };
   }, []);
 
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
   useEffect(() => {
-    // Scroll to bottom when messages change
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    // Only auto-scroll if we are already near the bottom, or if it's the very first load
+    if (messagesEndRef.current && chatContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+      
+      if (isNearBottom || isInitialLoad) {
+        messagesEndRef.current.scrollIntoView({ behavior: isInitialLoad ? "auto" : "smooth" });
+        if (isInitialLoad && messages.length > 0) setIsInitialLoad(false);
+      }
     }
-  }, [messages]);
+  }, [messages, isInitialLoad]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,7 +161,7 @@ export default function FellowshipChatPage() {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30 relative">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30 relative">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-60">
             <MessageCircle className="w-12 h-12 mb-4 text-muted-foreground" />
