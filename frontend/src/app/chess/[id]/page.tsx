@@ -39,29 +39,31 @@ export default function ChessGamePage() {
     return () => { supabase.removeChannel(channel); };
   }, [gameId]);
 
-  const onDrop = async (args: any) => {
+  const onDrop = (args: any) => {
     const { sourceSquare, targetSquare } = args;
     if (!game || !game.isMyTurn) {
       alert("Not your turn or game not found");
       return false;
     }
 
-    // Optimistic update isn't strictly necessary but good for UX.
-    // Instead we just wait for server action since it's turn based over days
     const promotion = "q";
     
-    const res = await makeChessMove(gameId, { from: sourceSquare, to: targetSquare, promotion });
-    if (res.success) {
-      // Broadcast to other player using the already subscribed channel
-      if (channelRef.current) {
-        channelRef.current.send({ type: 'broadcast', event: 'move' });
-      }
-      fetchGame();
-      return true;
-    } else {
-      alert("Move failed on server: " + res.error);
-      return false;
-    }
+    // Optimistic return so the piece doesn't snap back
+    // Perform server action in background
+    makeChessMove(gameId, { from: sourceSquare, to: targetSquare, promotion })
+      .then(res => {
+        if (res.success) {
+          if (channelRef.current) {
+            channelRef.current.send({ type: 'broadcast', event: 'move' });
+          }
+          fetchGame();
+        } else {
+          alert("Move failed on server: " + res.error);
+          fetchGame(); // revert optimistic update
+        }
+      });
+      
+    return true;
   };
 
   if (loading) {
