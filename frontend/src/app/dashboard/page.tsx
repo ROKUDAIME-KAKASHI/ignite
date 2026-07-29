@@ -69,7 +69,7 @@ async function getSaintOfTheDay() {
       // For demo MVP, randomly select one if missing
       const saints = [
         { name: "St. Thomas the Apostle", title: "My Lord and my God! — John 20:28", bio: "The apostle who doubted." },
-        { name: "St. Peter", title: "Upon this rock... — Matt 16:18", bio: "The first Pope." },
+        { name: "St. Peter", title: "Upon this rock... — Matt 16:18", bio: "Apostle of Christ." },
         { name: "St. Mary Magdalene", title: "Apostle to the Apostles", bio: "First witness of the Resurrection." },
         { name: "St. John Chrysostom", title: "Golden-mouthed", bio: "Archbishop of Constantinople and important Early Church Father." },
       ];

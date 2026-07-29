@@ -18,6 +18,17 @@ export async function awardXP(amount: number, reason: string) {
       }
     }
 
+    if (reason === "Prayed for someone in need") {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const count = await prisma.xPLog.count({
+        where: { userId: session.id, reason, awardedAt: { gte: today } }
+      });
+      if (count >= 5) {
+        return { success: true, xp: 0, level: 0, message: "Max prayer XP reached" };
+      }
+    }
+
     const user = await prisma.user.update({
       where: { id: session.id },
       data: {

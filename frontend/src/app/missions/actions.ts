@@ -13,7 +13,7 @@ export async function getMissions() {
     await prisma.mission.createMany({
       data: [
         { title: "Corporal Work of Mercy", description: "Feed the hungry today. Share a meal, donate food, or volunteer at a soup kitchen. (Matthew 25:40)", xpReward: 50 },
-        { title: "Holy Mass", description: "Attend Sunday Liturgy and participate fully in the Eucharist. (CCC 1324)", xpReward: 150 },
+        { title: "Holy Qurbana", description: "Attend Sunday Liturgy and participate fully. (John 6:53)", xpReward: 150 },
         { title: "Lectio Divina", description: "Spend 10 minutes in Sacred Reading — Read, Meditate, Pray, and Contemplate a passage. (Col 3:16)", xpReward: 30 },
         { title: "Pilgrimage of the Gospels", description: "Read chapters from all four Gospels — Matthew, Mark, Luke, and John.", xpReward: 500 },
       ]
