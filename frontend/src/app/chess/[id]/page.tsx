@@ -170,7 +170,7 @@ export default function ChessGamePage() {
             {game.myColor === 'w' ? '♔' : '♚'}
           </div>
           <div>
-            <p className="font-bold text-white text-lg">{user?.user_metadata?.display_name || "You"}</p>
+            <p className="font-bold text-white text-lg">{user?.displayName || "You"}</p>
             <p className="text-xs font-medium text-emerald-500 uppercase tracking-widest">{game.myColor === 'w' ? 'White' : 'Black'}</p>
           </div>
         </div>
