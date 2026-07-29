@@ -44,7 +44,7 @@ export default function ChessGamePage() {
 
     // Optimistic update isn't strictly necessary but good for UX.
     // Instead we just wait for server action since it's turn based over days
-    const promotion = piece[1].toLowerCase() ?? "q";
+    const promotion = "q";
     
     const res = await makeChessMove(gameId, { from: sourceSquare, to: targetSquare, promotion });
     if (res.success) {

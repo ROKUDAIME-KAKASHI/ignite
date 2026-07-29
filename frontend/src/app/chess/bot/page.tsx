@@ -59,7 +59,7 @@ export default function ChessBotPage() {
       const move = game.move({
         from: sourceSquare,
         to: targetSquare,
-        promotion: piece[1]?.toLowerCase() ?? 'q',
+        promotion: "q" // always promote to queen for simplicity
       });
 
       if (move === null) return false;
