@@ -1,4 +1,5 @@
 "use client";
+import { toast } from 'sonner';
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -139,11 +140,11 @@ export default function AdminDashboardPage() {
     // We need to import createCustomQuiz from actions
     const res = await createCustomQuiz(newQuizTitle.trim(), newQuizDesc.trim(), questions);
     if (res?.success) {
-      alert("Custom quiz created!");
+      toast.success("Custom quiz created!");
       setNewQuizTitle(""); setNewQuizDesc(""); setNewQuizQuestion(""); setNewQuizAnswer("");
       setNewQuizOption1(""); setNewQuizOption2(""); setNewQuizOption3("");
     } else {
-      alert("Failed to create custom quiz");
+      toast.error("Failed to create custom quiz");
     }
     setCreatingQuiz(false);
   };
@@ -196,7 +197,7 @@ export default function AdminDashboardPage() {
     if (res.success) {
       await fetchAllUsersData();
     } else {
-      alert(res.error);
+      toast.error(res.error || "An error occurred");
     }
   };
 
@@ -205,7 +206,7 @@ export default function AdminDashboardPage() {
     if (res.success) {
       await fetchAllUsersData();
     } else {
-      alert(res.error);
+      toast.error(res.error || "An error occurred");
     }
   };
 
@@ -490,7 +491,7 @@ export default function AdminDashboardPage() {
                           downloadAnchorNode.click();
                           downloadAnchorNode.remove();
                         } else {
-                          alert(res.error || "Failed to download data.");
+                          toast.error(res.error || "Failed to download data.");
                         }
                       }}
                       className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-200 transition-colors flex items-center gap-1"
@@ -502,10 +503,10 @@ export default function AdminDashboardPage() {
                         if (confirm("End the current gamification season? This will award the 'Season Champion' badge to the top 3 players and reset EVERYONE's XP to zero!")) {
                           const res = await endSeason();
                           if (res.success) {
-                            alert(`Season ended! Champions: ${res.topUsers?.map((u: any) => u.firstName).join(", ") || "None"}`);
+                            toast.success(`Season ended! Champions: ${res.topUsers?.map((u: any) => u.firstName).join(", ") || "None"}`);
                             window.location.reload();
                           } else {
-                            alert(res.error);
+                            toast.error(res.error || "An error occurred");
                           }
                         }
                       }}
@@ -649,7 +650,7 @@ export default function AdminDashboardPage() {
                                   if (res.success) {
                                     await fetchDashboardData();
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}
@@ -664,7 +665,7 @@ export default function AdminDashboardPage() {
                                   if (res.success) {
                                     window.location.href = "/dashboard";
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}
@@ -679,7 +680,7 @@ export default function AdminDashboardPage() {
                                   if (res.success) {
                                     await fetchDashboardData();
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}
@@ -747,7 +748,7 @@ export default function AdminDashboardPage() {
                                   if (res.success) {
                                     setGlobalMessages(prev => prev.filter(m => m.id !== msg.id));
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}
@@ -761,10 +762,10 @@ export default function AdminDashboardPage() {
                                   if (confirm(`Ban ${msg.user?.firstName} ${msg.user?.lastName}?`)) {
                                      const res = await toggleBanUser(msg.user.id);
                                      if (res.success) {
-                                       alert(`User is now ${res.isBanned ? 'banned' : 'unbanned'}.`);
+                                       toast.success(`User is now ${res.isBanned ? 'banned' : 'unbanned'}.`);
                                        await fetchDashboardData();
                                      } else {
-                                       alert(res.error);
+                                       toast.error(res.error || "An error occurred");
                                      }
                                   }
                                 }}
@@ -1043,10 +1044,10 @@ export default function AdminDashboardPage() {
                                   if (reason) {
                                     const res = await awardGracePoints(user.id, Number(pts), reason);
                                     if (res.success) {
-                                      alert("Points granted!");
+                                      toast.success("Points granted!");
                                       await fetchAllUsersData();
                                     } else {
-                                      alert(res.error);
+                                      toast.error(res.error || "An error occurred");
                                     }
                                   }
                                 }
@@ -1065,7 +1066,7 @@ export default function AdminDashboardPage() {
                                     await fetchAllUsersData();
                                     await fetchDashboardData();
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}
@@ -1083,7 +1084,7 @@ export default function AdminDashboardPage() {
                                   if (res.success) {
                                     window.location.href = "/dashboard";
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}
@@ -1099,7 +1100,7 @@ export default function AdminDashboardPage() {
                                     await fetchAllUsersData();
                                     await fetchDashboardData();
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}
@@ -1112,10 +1113,10 @@ export default function AdminDashboardPage() {
                                 if (confirm(`${user.isBanned ? 'Unban' : 'Ban'} ${user.name}?`)) {
                                   const res = await toggleBanUser(user.id);
                                   if (res.success) {
-                                    alert(`User is now ${res.isBanned ? 'banned' : 'unbanned'}.`);
+                                    toast.success(`User is now ${res.isBanned ? 'banned' : 'unbanned'}.`);
                                     await fetchAllUsersData();
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}

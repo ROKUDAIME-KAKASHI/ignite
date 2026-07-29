@@ -1,4 +1,5 @@
 "use client";
+import { toast } from 'sonner';
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -138,11 +139,11 @@ export default function PriestDashboardPage() {
     // We need to import createCustomQuiz from actions
     const res = await createCustomQuiz(newQuizTitle.trim(), newQuizDesc.trim(), questions);
     if (res?.success) {
-      alert("Custom quiz created!");
+      toast.success("Custom quiz created!");
       setNewQuizTitle(""); setNewQuizDesc(""); setNewQuizQuestion(""); setNewQuizAnswer("");
       setNewQuizOption1(""); setNewQuizOption2(""); setNewQuizOption3("");
     } else {
-      alert("Failed to create custom quiz");
+      toast.error("Failed to create custom quiz");
     }
     setCreatingQuiz(false);
   };
@@ -188,7 +189,7 @@ export default function PriestDashboardPage() {
     if (res.success) {
       await fetchAllUsersData();
     } else {
-      alert(res.error);
+      toast.error(res.error || "An error occurred");
     }
   };
 
@@ -197,7 +198,7 @@ export default function PriestDashboardPage() {
     if (res.success) {
       await fetchAllUsersData();
     } else {
-      alert(res.error);
+      toast.error(res.error || "An error occurred");
     }
   };
 
@@ -501,7 +502,7 @@ export default function PriestDashboardPage() {
                                   if (res.success) {
                                     setGlobalMessages(prev => prev.filter(m => m.id !== msg.id));
                                   } else {
-                                    alert(res.error);
+                                    toast.error(res.error || "An error occurred");
                                   }
                                 }
                               }}

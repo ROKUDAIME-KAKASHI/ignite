@@ -1,4 +1,5 @@
 "use client";
+import { toast } from 'sonner';
 
 import { useEffect, useState } from "react";
 import { X, Download } from "lucide-react";
@@ -51,7 +52,7 @@ export function InstallPrompt() {
         setIsInstallable(false);
       }
     } else if (isIOS) {
-      alert('To install the app and remove the browser header, tap the Share icon at the bottom of your screen and select "Add to Home Screen".');
+      toast.info('To install the app and remove the browser header, tap the Share icon at the bottom of your screen and select "Add to Home Screen".');
     }
   };
 

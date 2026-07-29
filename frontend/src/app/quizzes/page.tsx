@@ -1,4 +1,5 @@
 "use client";
+import { toast } from 'sonner';
 import Image from 'next/image';
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -525,7 +526,7 @@ export default function QuizzesPage() {
                                 if (room.type === "Quiz") {
                                   joinGameRoom({ ...room, host: false });
                                 } else {
-                                  alert(`Joining ${room.type} rooms is coming soon!`);
+                                  toast.info(`Joining ${room.type} rooms is coming soon!`);
                                 }
                               }} 
                               disabled={room.players >= room.max}
