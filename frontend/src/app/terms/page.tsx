@@ -3,17 +3,17 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, AlertCircle, Handshake } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 export default function TermsOfServicePage() {
   const router = useRouter();
 
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
