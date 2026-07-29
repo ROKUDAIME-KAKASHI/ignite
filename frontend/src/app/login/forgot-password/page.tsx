@@ -41,49 +41,59 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-50 items-center justify-center p-6 relative">
-      <Link href="/login" className="absolute top-6 left-6 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm text-slate-600 hover:text-slate-900 z-10">
+    <div className="flex-1 flex flex-col items-center justify-center h-full px-6 relative overflow-hidden bg-background">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-15"
+          style={{ background: "radial-gradient(circle, #d4a017 0%, #c2410c 50%, transparent 75%)" }}
+        />
+        <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.04] text-foreground" fill="none" stroke="currentColor" strokeWidth="8">
+          <line x1="150" y1="30" x2="150" y2="270" />
+          <line x1="40" y1="110" x2="260" y2="110" />
+        </svg>
+      </div>
+
+      <Link href="/login" className="absolute top-6 left-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white hover:bg-white/20 transition-colors z-20">
         <ArrowLeft className="w-5 h-5" />
       </Link>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-slate-100"
+        className="relative z-10 w-full max-w-sm glass dark:glass-dark rounded-3xl shadow-2xl p-8 border border-white/50 dark:border-white/10 card-holy"
       >
-        <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 mb-6">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 shadow-inner border border-emerald-500/30">
           <Mail className="w-6 h-6" />
         </div>
         
-        <h1 className="text-3xl font-black font-serif text-slate-900 mb-2">Reset Password</h1>
+        <h1 className="text-3xl font-black font-serif text-white mb-2">Reset Password</h1>
         
         {status === "success" ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            <p className="text-slate-600">
-              If an account with that email exists, we have sent a password reset link to <strong className="text-slate-900">{email}</strong>.
+            <p className="text-slate-300 text-sm leading-relaxed">
+              If an account with that email exists, we have sent a password reset link to <strong className="text-white">{email}</strong>.
             </p>
-            <div className="p-4 bg-emerald-50 rounded-2xl flex flex-col items-start gap-3">
+            <div className="p-4 bg-emerald-950/40 border border-emerald-500/20 rounded-2xl flex flex-col items-start gap-3">
               <div className="flex gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                <p className="text-sm text-emerald-800 font-medium">Please check your inbox and spam folder for the link.</p>
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <p className="text-sm text-emerald-200 font-medium">Please check your inbox and spam folder for the link.</p>
               </div>
               
               {/* DEV ONLY: Show the reset link directly */}
               {resetUrl && (
                 <div className="w-full mt-2">
-                  <p className="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">DEV MODE: Reset Link</p>
-                  <div className="flex items-center gap-2 bg-white rounded-xl border border-emerald-200 p-2">
+                  <p className="text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider">DEV MODE: Reset Link</p>
+                  <div className="flex items-center gap-2 bg-black/40 rounded-xl border border-emerald-500/30 p-2">
                     <input 
                       type="text" 
                       readOnly 
                       value={resetUrl}
-                      className="flex-1 bg-transparent text-xs text-slate-600 focus:outline-none px-2"
+                      className="flex-1 bg-transparent text-xs text-slate-300 focus:outline-none px-2"
                     />
                     <Button 
                       onClick={copyLink}
                       variant="secondary"
                       size="sm"
-                      className="h-8 rounded-lg text-xs font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-700"
+                      className="h-8 rounded-lg text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30"
                     >
                       {copied ? "Copied!" : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
                     </Button>
@@ -92,37 +102,37 @@ export default function ForgotPasswordPage() {
               )}
             </div>
             <Link href="/login" className="block w-full">
-              <Button className="w-full h-12 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-white">
+              <Button className="w-full h-11 rounded-xl font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-colors">
                 Return to Login
               </Button>
             </Link>
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <p className="text-slate-600">
+            <p className="text-slate-300 text-sm leading-relaxed">
               Enter the email address associated with your account, and we'll send you a link to reset your password.
             </p>
             
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">Email Address</label>
+              <label className="text-sm font-bold text-white">Email Address</label>
               <Input 
                 type="email" 
                 value={email} 
                 onChange={e => setEmail(e.target.value)} 
                 required 
                 placeholder="hello@example.com"
-                className="h-12 rounded-xl bg-slate-50 border-slate-200"
+                className="h-11 rounded-xl bg-background/70 border-border/60 text-white"
               />
             </div>
 
             {status === "error" && (
-              <p className="text-sm text-red-500 font-bold bg-red-50 p-3 rounded-lg">{errorMsg}</p>
+              <p className="text-sm text-red-400 font-bold bg-red-950/30 border border-red-500/30 p-3 rounded-xl">{errorMsg}</p>
             )}
 
             <Button 
               type="submit" 
               disabled={status === "loading" || !email}
-              className="w-full h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+              className="w-full h-11 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all"
             >
               {status === "loading" ? <Loader2 className="w-5 h-5 animate-spin" /> : "Send Reset Link"}
             </Button>

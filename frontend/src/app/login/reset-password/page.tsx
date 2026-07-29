@@ -50,13 +50,13 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="text-center">
-        <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 mx-auto flex items-center justify-center mb-4">
+        <div className="w-12 h-12 rounded-2xl bg-red-950/40 border border-red-500/30 text-red-400 mx-auto flex items-center justify-center mb-6 shadow-inner">
           <Lock className="w-6 h-6" />
         </div>
-        <h2 className="text-xl font-bold text-foreground mb-2">Invalid Link</h2>
-        <p className="text-muted-foreground mb-6">This password reset link is invalid or missing.</p>
+        <h2 className="text-2xl font-black font-serif text-white mb-2">Invalid Link</h2>
+        <p className="text-slate-300 text-sm mb-6 leading-relaxed">This password reset link is invalid or missing.</p>
         <Link href="/login/forgot-password">
-          <Button className="w-full bg-foreground text-background rounded-xl hover:opacity-90">Request New Link</Button>
+          <Button className="w-full h-11 bg-white/10 text-white rounded-xl hover:bg-white/20 border border-white/20 backdrop-blur-md transition-colors">Request New Link</Button>
         </Link>
       </div>
     );
@@ -65,13 +65,13 @@ function ResetPasswordForm() {
   if (status === "success") {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-6">
-        <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 mx-auto flex items-center justify-center mb-4 shadow-inner">
           <CheckCircle2 className="w-8 h-8" />
         </div>
-        <h2 className="text-2xl font-black font-serif text-foreground">Password Reset!</h2>
-        <p className="text-muted-foreground">Your password has been successfully updated. You can now sign in with your new password.</p>
+        <h2 className="text-3xl font-black font-serif text-white">Password Reset!</h2>
+        <p className="text-slate-300 text-sm leading-relaxed">Your password has been successfully updated. You can now sign in with your new password.</p>
         <Link href="/login" className="block w-full mt-4">
-          <Button className="w-full h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20">
+          <Button className="w-full h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all">
             Sign In Now
           </Button>
         </Link>
@@ -81,16 +81,18 @@ function ResetPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6">
+      <div className="w-12 h-12 rounded-2xl bg-blue-950/40 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-6 shadow-inner">
         <Lock className="w-6 h-6" />
       </div>
       
-      <h1 className="text-3xl font-black font-serif text-foreground mb-2">New Password</h1>
-      <p className="text-muted-foreground">Please enter your new password below.</p>
+      <div>
+        <h1 className="text-3xl font-black font-serif text-white mb-2">New Password</h1>
+        <p className="text-slate-300 text-sm leading-relaxed">Please enter your new password below.</p>
+      </div>
       
       <div className="space-y-4 pt-2">
         <div className="space-y-2">
-          <label className="text-sm font-bold text-foreground">New Password</label>
+          <label className="text-sm font-bold text-white">New Password</label>
           <Input 
             type="password" 
             value={password} 
@@ -98,11 +100,11 @@ function ResetPasswordForm() {
             required 
             minLength={6}
             placeholder="••••••••"
-            className="h-12 rounded-xl bg-background/70 border-border/60"
+            className="h-11 rounded-xl bg-background/70 border-border/60 text-white"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-bold text-foreground">Confirm Password</label>
+          <label className="text-sm font-bold text-white">Confirm Password</label>
           <Input 
             type="password" 
             value={confirmPassword} 
@@ -110,19 +112,19 @@ function ResetPasswordForm() {
             required 
             minLength={6}
             placeholder="••••••••"
-            className="h-12 rounded-xl bg-background/70 border-border/60"
+            className="h-11 rounded-xl bg-background/70 border-border/60 text-white"
           />
         </div>
       </div>
 
       {status === "error" && (
-        <p className="text-sm text-red-500 font-bold bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 p-3 rounded-lg">{errorMsg}</p>
+        <p className="text-sm text-red-400 font-bold bg-red-950/30 border border-red-500/30 p-3 rounded-xl">{errorMsg}</p>
       )}
 
       <Button 
         type="submit" 
         disabled={status === "loading" || !password || !confirmPassword}
-        className="w-full h-12 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
+        className="w-full h-11 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 transition-all"
       >
         {status === "loading" ? <Loader2 className="w-5 h-5 animate-spin" /> : "Reset Password"}
       </Button>
@@ -132,13 +134,23 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex-1 flex flex-col h-full bg-background items-center justify-center p-6">
+    <div className="flex-1 flex flex-col items-center justify-center h-full px-6 relative overflow-hidden bg-background">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-15"
+          style={{ background: "radial-gradient(circle, #d4a017 0%, #c2410c 50%, transparent 75%)" }}
+        />
+        <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.04] text-foreground" fill="none" stroke="currentColor" strokeWidth="8">
+          <line x1="150" y1="30" x2="150" y2="270" />
+          <line x1="40" y1="110" x2="260" y2="110" />
+        </svg>
+      </div>
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md glass dark:glass-dark rounded-3xl shadow-2xl p-8 border border-white/50 dark:border-white/10 card-holy"
+        className="relative z-10 w-full max-w-sm glass dark:glass-dark rounded-3xl shadow-2xl p-8 border border-white/50 dark:border-white/10 card-holy"
       >
-        <Suspense fallback={<div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense fallback={<div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-slate-500" /></div>}>
           <ResetPasswordForm />
         </Suspense>
       </motion.div>
