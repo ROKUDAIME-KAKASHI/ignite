@@ -83,30 +83,16 @@ export default function LoginPage() {
     }
   };
 
-  const loginWithGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setError("Authenticating with Google...");
-      setLoading(true);
-      try {
-        const res = await googleAuth(tokenResponse.access_token);
-        if (res.error) {
-          setError("Server Auth Error: " + res.error);
-        } else if (res.success && res.user) {
-          setError("Success! Redirecting...");
-          setUser({
-            ...res.user,
-            displayName: `${res.user.firstName} ${res.user.lastName}`
-          });
-          window.location.href = "/dashboard";
-        }
-      } catch (err: any) {
-        setError("Network Error: " + err.message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: (errorResponse) => setError("Google Sign-In Popup Failed: " + JSON.stringify(errorResponse))
-  });
+  const handleGoogleClick = () => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      setError("Google Client ID is missing.");
+      return;
+    }
+    const redirectUri = typeof window !== "undefined" ? window.location.origin + "/auth/callback" : "http://localhost:3000/auth/callback";
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20profile`;
+    window.location.href = googleAuthUrl;
+  };
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center h-full px-6 relative overflow-hidden bg-background">
@@ -246,7 +232,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Button
               type="button"
-              onClick={() => loginWithGoogle()}
+              onClick={handleGoogleClick}
               variant="outline"
               disabled={loading}
               className="w-full h-11 rounded-xl bg-white text-gray-700 hover:bg-gray-50 border-gray-300 shadow-sm font-semibold flex items-center justify-center gap-3 transition-colors"

@@ -83,7 +83,7 @@ export async function signup(data: FormData) {
 
 export async function googleAuth(accessToken: string) {
   if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-    return { error: "Google authentication is not configured yet. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID." };
+    return { error: "Google authentication is not configured yet." };
   }
 
   try {
