@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Chessboard } from "react-chessboard";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, RefreshCw, Trophy, User as UserIcon } from "lucide-react";
@@ -10,10 +10,11 @@ import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 
-export default function ChessGamePage({ params }: { params: { id: string } }) {
+export default function ChessGamePage() {
   const router = useRouter();
+  const params = useParams();
   const { user } = useAuth();
-  const gameId = params.id;
+  const gameId = params.id as string;
   const [game, setGame] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const channelRef = useRef<any>(null);
