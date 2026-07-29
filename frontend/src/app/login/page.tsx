@@ -74,7 +74,7 @@ export default function LoginPage() {
           ...res.user,
           displayName: `${res.user.firstName} ${res.user.lastName}`
         });
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       setError("An unexpected error occurred. Please try again.");
@@ -97,7 +97,7 @@ export default function LoginPage() {
             ...res.user,
             displayName: `${res.user.firstName} ${res.user.lastName}`
           });
-          router.push("/dashboard");
+          window.location.href = "/dashboard";
         }
       } catch (err: any) {
         setError("Network Error: " + err.message);
@@ -144,7 +144,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="glass dark:glass-dark rounded-3xl p-7 border border-white/50 dark:border-white/10 shadow-2xl card-holy">
+        <div className="glass dark:glass-dark rounded-3xl p-7 border border-white/50 dark:border-white/10 shadow-2xl card-holy" suppressHydrationWarning>
           <h2 className="text-xl font-bold text-foreground font-serif mb-1">
             {isRegistering ? "Begin Your Journey" : "Welcome Back"}
           </h2>
@@ -152,7 +152,7 @@ export default function LoginPage() {
             {isRegistering ? "Join the community of faith." : "Continue your walk with Christ."}
           </p>
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={handleAuth} className="space-y-4" suppressHydrationWarning>
             {isRegistering && (
               <div className="flex gap-2">
                 <div className="space-y-2 flex-1">
