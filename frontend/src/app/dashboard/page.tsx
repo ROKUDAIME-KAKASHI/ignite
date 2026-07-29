@@ -148,11 +148,11 @@ export default async function DashboardPage() {
   const upcomingEvents = await getNextEvents();
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] bg-fixed bg-[#0a0a0a]">
+    <div className="flex-1 overflow-y-auto">
 
       {/* ── Hero ── */}
-      <div className="relative overflow-hidden px-5 pt-8 pb-12 bg-[#111]/80 backdrop-blur-xl border-b border-white/10 shadow-2xl">
-        <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-30 mix-blend-overlay" />
+      <div className="relative overflow-hidden px-5 pt-8 pb-12 gradient-dawn">
+        <div className="absolute inset-0 bg-[url('/header-image.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
         <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-0 pointer-events-none flex flex-col items-center">
           <Image src="/header-image.png" width={400} height={200} priority className="h-16 sm:h-24 w-auto rounded-2xl shadow-2xl border-[3px] border-white/20 opacity-95 object-contain rotate-3 drop-shadow-xl mb-2 sm:mb-3" alt="Church emblem" />
           <div className="flex flex-col items-center text-center opacity-90 rotate-1">
@@ -186,17 +186,17 @@ export default async function DashboardPage() {
 
       {/* ── Grace Points Card ── */}
       <div className="relative z-20 px-4 -mt-6 mb-5">
-        <Link href="/leaderboard" className="block bg-[#111]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 shadow-2xl hover:shadow-emerald-500/10 hover:border-white/20 transition-all group">
+        <Link href="/leaderboard" className="block glass dark:glass-dark rounded-2xl p-4 card-holy shadow-xl group hover:shadow-2xl transition">
           <div className="flex justify-between items-center mb-3">
             <div>
               <p className="text-[10px] font-bold text-primary uppercase tracking-widest group-hover:text-amber-500 transition-colors">Your Grace Points & Rank</p>
-              <p className="text-2xl font-extrabold text-gradient-gold mt-0.5">{xp.toLocaleString()} <span className="text-base font-normal text-slate-400">/ {nextLevelXp.toLocaleString()}</span></p>
+              <p className="text-2xl font-extrabold text-gradient-gold mt-0.5">{xp.toLocaleString()} <span className="text-base font-normal text-muted-foreground">/ {nextLevelXp.toLocaleString()}</span></p>
             </div>
             <div className="w-14 h-14 rounded-full gradient-gold flex items-center justify-center halo-glow text-2xl shadow-lg group-hover:scale-105 transition-transform">🏆</div>
           </div>
           <div className="flex items-center gap-3">
             <Progress value={progress} className="h-2 rounded-full bg-amber-100 dark:bg-amber-900/20 [&>div]:gradient-gold [&>div]:rounded-full flex-1" />
-            <span className="text-xs font-bold text-slate-400 whitespace-nowrap">{nextLevelXp - xp} to rank up</span>
+            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">{nextLevelXp - xp} to rank up</span>
           </div>
         </Link>
       </div>
@@ -204,13 +204,13 @@ export default async function DashboardPage() {
       {/* ── Admin Announcements ── */}
       {announcements.length > 0 && (
         <div className="px-4 mb-6">
-          <div className="flex items-center justify-between mb-4 bg-white/5 backdrop-blur-xl p-3 rounded-2xl border border-white/10 shadow-lg relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
+          <div className="flex items-center justify-between mb-4 bg-muted/40 backdrop-blur-xl p-3 rounded-2xl border border-border/60 shadow-sm relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-transparent to-transparent pointer-events-none" />
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center text-white shadow-md">
                 <Megaphone className="w-4 h-4" />
               </div>
-              <h2 className="text-sm font-extrabold text-white uppercase tracking-widest">Parish Notices</h2>
+              <h2 className="text-sm font-extrabold text-foreground uppercase tracking-widest">Parish Notices</h2>
             </div>
             <Badge className="text-[10px] font-bold bg-background/80 dark:bg-background/80 text-amber-600 dark:text-amber-400 border border-amber-500/30 backdrop-blur-md shadow-sm relative z-10 px-2.5 py-0.5">
               {announcements.length} New
@@ -220,13 +220,13 @@ export default async function DashboardPage() {
             {announcements.map((ann) => (
               <div
                 key={ann.id}
-                className="rounded-2xl bg-[#111]/80 backdrop-blur-xl border border-amber-500/20 px-4 py-3 shadow-lg hover:border-amber-500/40 transition-colors"
+                className="rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 border border-amber-200/60 dark:border-amber-800/30 px-4 py-3 card-holy"
               >
                 <div className="flex items-start gap-2.5">
                   <span className="text-lg mt-0.5">📢</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white font-serif leading-snug">{ann.title}</p>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">{ann.content}</p>
+                    <p className="text-sm font-bold text-foreground font-serif leading-snug">{ann.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">{ann.content}</p>
                     <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-1">
                       {new Date(ann.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </p>
@@ -244,7 +244,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">Upcoming Events</h2>
+              <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Upcoming Events</h2>
             </div>
             <Link href="/events" className="text-xs font-bold text-primary flex items-center gap-0.5 hover:opacity-80 transition-opacity">
               See all <ChevronRight className="w-3.5 h-3.5" />
@@ -255,14 +255,14 @@ export default async function DashboardPage() {
               <Link
                 key={ev.id}
                 href="/events"
-                className="block rounded-2xl bg-[#111]/80 backdrop-blur-xl border border-white/10 px-4 py-3 shadow-lg hover:border-emerald-500/40 transition-colors group"
+                className="block rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/20 border border-green-200/60 dark:border-green-800/30 px-4 py-3 card-holy card-holy-hover"
               >
                 <div className="flex items-start gap-2.5">
                   <span className="text-lg mt-0.5">📅</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white font-serif leading-snug">{ev.title}</p>
+                    <p className="text-sm font-bold text-foreground font-serif leading-snug">{ev.title}</p>
                     {ev.description && (
-                      <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{ev.description}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</p>
                     )}
                     <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                       <span className="flex items-center gap-1 text-[10px] text-green-700 dark:text-green-400 font-semibold">
@@ -270,15 +270,15 @@ export default async function DashboardPage() {
                         {new Date(ev.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                       </span>
                       {ev.location && (
-                        <span className="flex items-center gap-1 text-[10px] text-slate-400">
+                        <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                           <MapPin className="w-3 h-3" />
                           {ev.location}
                         </span>
                       )}
-                      <span className="text-[10px] text-slate-400">{ev.attendances.length} going</span>
+                      <span className="text-[10px] text-muted-foreground">{ev.attendances.length} going</span>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 mt-1" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
                 </div>
               </Link>
             ))}
@@ -306,39 +306,39 @@ export default async function DashboardPage() {
 
         {/* Daily Verse */}
         <Link href="/bible" className="block rounded-2xl overflow-hidden card-holy card-holy-hover">
-          <div className="bg-[#111]/80 backdrop-blur-xl px-4 pt-4 pb-3 border-b border-white/10">
+          <div className="bg-gradient-to-r from-amber-700/15 to-yellow-600/10 dark:from-amber-700/25 dark:to-yellow-600/15 px-4 pt-4 pb-3 border-b border-amber-200/30 dark:border-amber-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center shadow-md text-lg">📖</div>
                 <div>
-                  <p className="font-bold text-sm text-white">Sacred Scripture</p>
+                  <p className="font-bold text-sm text-foreground">Sacred Scripture</p>
                   <p className="text-xs text-primary font-semibold">{journey?.verseRef || "Philippians 4:13"}</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
-          <div className="px-5 py-4 bg-white/5 border-t border-white/10">
-            <p className="text-sm font-serif italic text-slate-300 leading-relaxed">"{journey?.verse || "I can do all things through Christ who strengthens me."}"</p>
+          <div className="px-5 py-4 bg-card">
+            <p className="text-sm font-serif italic text-foreground/80 leading-relaxed">"{journey?.verse || "I can do all things through Christ who strengthens me."}"</p>
           </div>
         </Link>
 
         {/* Reflection */}
         <div className="rounded-2xl overflow-hidden card-holy card-holy-hover">
-          <div className="bg-[#111]/80 backdrop-blur-xl px-4 pt-4 pb-3 border-b border-white/10">
+          <div className="bg-gradient-to-r from-blue-700/10 to-indigo-600/8 dark:from-blue-700/20 dark:to-indigo-600/15 px-4 pt-4 pb-3 border-b border-blue-200/30 dark:border-blue-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl gradient-royal flex items-center justify-center shadow-md text-lg">🕊️</div>
                 <div>
-                  <p className="font-bold text-sm text-white">Contemplation</p>
+                  <p className="font-bold text-sm text-foreground">Contemplation</p>
                   <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold">+20 Grace Points</p>
                 </div>
               </div>
               <Badge className="text-[10px] bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">New</Badge>
             </div>
           </div>
-          <div className="px-5 py-4 bg-white/5 border-t border-white/10">
-            <p className="text-sm text-slate-400 leading-relaxed line-clamp-3">
+          <div className="px-5 py-4 bg-card">
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
               {journey?.reflection || "Reflect on the strength that comes not from within, but from your faith in Christ. When facing challenges, remember that you are never walking alone."}
             </p>
           </div>
@@ -346,12 +346,12 @@ export default async function DashboardPage() {
 
         {/* Mission */}
         <Link href="/missions" className="block rounded-2xl overflow-hidden card-holy card-holy-hover">
-          <div className="bg-[#111]/80 backdrop-blur-xl px-4 pt-4 pb-3 border-b border-white/10">
+          <div className="bg-gradient-to-r from-red-700/10 to-rose-600/8 dark:from-red-700/20 dark:to-rose-600/15 px-4 pt-4 pb-3 border-b border-red-200/30 dark:border-red-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl gradient-crimson flex items-center justify-center shadow-md text-lg">⚔️</div>
                 <div>
-                  <p className="font-bold text-sm text-white">{journey?.mission?.title || "Act of Charity"}</p>
+                  <p className="font-bold text-sm text-foreground">{journey?.mission?.title || "Act of Charity"}</p>
                   <p className="text-xs text-red-600 dark:text-red-400 font-semibold">+{journey?.mission?.xpReward || 50} Grace Points</p>
                 </div>
               </div>
@@ -365,8 +365,8 @@ export default async function DashboardPage() {
               </Badge>
             </div>
           </div>
-          <div className="px-5 py-4 bg-white/5 border-t border-white/10 space-y-3">
-            <p className="text-sm text-slate-400 leading-relaxed">
+          <div className="px-5 py-4 bg-card space-y-3">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {journey?.mission?.description || "Reach out to a friend you haven't spoken to in a while and offer a prayer for them."}
             </p>
             
@@ -376,7 +376,7 @@ export default async function DashboardPage() {
                 <span className={isMissionCompleted ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}>
                   {isMissionCompleted ? "Status: Accomplished" : "Status: Active"}
                 </span>
-                <span className="text-slate-400">
+                <span className="text-muted-foreground">
                   {isMissionCompleted ? "100%" : "0%"}
                 </span>
               </div>
@@ -387,7 +387,7 @@ export default async function DashboardPage() {
                   isMissionCompleted ? "[&>div]:bg-emerald-500 bg-emerald-100 dark:bg-emerald-950/30" : "[&>div]:bg-red-500 bg-red-100 dark:bg-red-950/20"
                 )}
               />
-              <p className="text-[10px] text-slate-400 italic mt-1">
+              <p className="text-[10px] text-muted-foreground italic mt-1">
                 {isMissionCompleted 
                   ? "Deo Gratias! You have finished this daily mission." 
                   : "Write a brief reflection in the Missions tab to complete this work."}
@@ -398,20 +398,20 @@ export default async function DashboardPage() {
 
         {/* Quizzes */}
         <Link href="/quizzes" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
-          <div className="bg-[#111]/80 backdrop-blur-xl px-4 pt-4 pb-3 border-b border-white/10">
+          <div className="bg-gradient-to-r from-orange-700/10 to-amber-600/8 dark:from-orange-700/20 dark:to-amber-600/15 px-4 pt-4 pb-3 border-b border-orange-200/30 dark:border-orange-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl gradient-spirit flex items-center justify-center shadow-md text-lg">🎓</div>
                 <div>
-                  <p className="font-bold text-sm text-white">Daily Quiz</p>
+                  <p className="font-bold text-sm text-foreground">Daily Quiz</p>
                   <p className="text-xs text-orange-600 dark:text-orange-400 font-semibold">Earn up to 100 Grace Points</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
           </div>
-          <div className="px-5 py-4 bg-white/5 border-t border-white/10">
-            <p className="text-sm text-slate-400 leading-relaxed">
+          <div className="px-5 py-4 bg-card">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Test your knowledge of Scripture and Orthodox teaching. New quiz available every day.
             </p>
           </div>
@@ -419,20 +419,20 @@ export default async function DashboardPage() {
 
         {/* Prayer Wall */}
         <Link href="/prayer" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
-          <div className="bg-[#111]/80 backdrop-blur-xl px-4 pt-4 pb-3 border-b border-white/10">
+          <div className="bg-gradient-to-r from-purple-700/10 to-violet-600/8 dark:from-purple-700/20 dark:to-violet-600/15 px-4 pt-4 pb-3 border-b border-purple-200/30 dark:border-purple-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl gradient-lent flex items-center justify-center shadow-md text-lg">🙏</div>
                 <div>
-                  <p className="font-bold text-sm text-white">Prayer Wall</p>
+                  <p className="font-bold text-sm text-foreground">Prayer Wall</p>
                   <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold">Lift each other up</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
           </div>
-          <div className="px-5 py-4 bg-white/5 border-t border-white/10 flex items-center justify-between">
-            <p className="text-sm text-slate-400 leading-relaxed">
+          <div className="px-5 py-4 bg-card flex items-center justify-between">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Share your intentions or pray for others in the community.
             </p>
             <Badge className="text-[10px] bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 shrink-0 ml-2">Active</Badge>
@@ -441,20 +441,20 @@ export default async function DashboardPage() {
 
         {/* Spiritual Guides */}
         <Link href="/guides" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
-          <div className="bg-[#111]/80 backdrop-blur-xl px-4 pt-4 pb-3 border-b border-white/10">
+          <div className="bg-gradient-to-r from-teal-700/10 to-emerald-600/8 dark:from-teal-700/20 dark:to-emerald-600/15 px-4 pt-4 pb-3 border-b border-teal-200/30 dark:border-teal-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-600 text-white flex items-center justify-center shadow-md text-lg">📿</div>
                 <div>
-                  <p className="font-bold text-sm text-white">Spiritual Guides</p>
+                  <p className="font-bold text-sm text-foreground">Spiritual Guides</p>
                   <p className="text-xs text-teal-600 dark:text-teal-400 font-semibold">Confession & Prayers</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
           </div>
-          <div className="px-5 py-4 bg-white/5 border-t border-white/10">
-            <p className="text-sm text-slate-400 leading-relaxed">
+          <div className="px-5 py-4 bg-card">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Examination of conscience, Orthodox prayers, and spiritual preparation for the Holy Mysteries.
             </p>
           </div>
@@ -462,20 +462,20 @@ export default async function DashboardPage() {
 
         {/* Book a Priest */}
         <Link href="/appointments" className="block rounded-2xl overflow-hidden card-holy card-holy-hover group">
-          <div className="bg-[#111]/80 backdrop-blur-xl px-4 pt-4 pb-3 border-b border-white/10">
+          <div className="bg-gradient-to-r from-indigo-700/10 to-blue-600/8 dark:from-indigo-700/20 dark:to-blue-600/15 px-4 pt-4 pb-3 border-b border-indigo-200/30 dark:border-indigo-800/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-blue-600 text-white flex items-center justify-center shadow-md text-lg">🗓️</div>
                 <div>
-                  <p className="font-bold text-sm text-white">Meet with a Priest</p>
+                  <p className="font-bold text-sm text-foreground">Meet with a Priest</p>
                   <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">Book an Appointment</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
           </div>
-          <div className="px-5 py-4 bg-white/5 border-t border-white/10">
-            <p className="text-sm text-slate-400 leading-relaxed">
+          <div className="px-5 py-4 bg-card">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Schedule a time for confession, spiritual guidance, or general counseling with a parish priest.
             </p>
           </div>
@@ -483,24 +483,24 @@ export default async function DashboardPage() {
 
         {/* Spiritual Stats */}
         <div>
-          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Spiritual Progress</h2>
+          <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Spiritual Progress</h2>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { emoji: "📖", label: "Chapters Read", value: chaptersRead, color: "bg-white/5 border-white/10 text-white" },
-              { emoji: "🙏", label: "Prayers Said", value: prayersSaid, color: "bg-white/5 border-white/10 text-white" },
-              { emoji: "✝️", label: "Masses/Events", value: eventsAttended, color: "bg-white/5 border-white/10 text-white" },
+              { emoji: "📖", label: "Chapters Read", value: chaptersRead, color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/30" },
+              { emoji: "🙏", label: "Prayers Said", value: prayersSaid, color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/30" },
+              { emoji: "✝️", label: "Masses/Events", value: eventsAttended, color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200/50 dark:border-purple-800/30" },
             ].map((s) => (
               <div key={s.label} className={`rounded-2xl p-3 text-center border card-holy ${s.color}`}>
                 <p className="text-2xl mb-1">{s.emoji}</p>
-                <p className="text-xl font-extrabold text-white">{s.value}</p>
-                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider leading-tight mt-0.5">{s.label}</p>
+                <p className="text-xl font-extrabold text-foreground">{s.value}</p>
+                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider leading-tight mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Saint of the Day */}
-        <div className="rounded-2xl p-4 bg-gradient-to-br from-purple-900 to-[#111] border border-purple-500/20 shadow-xl shadow-purple-500/10 card-holy">
+        <div className="rounded-2xl p-4 gradient-lent card-holy">
           <p className="text-[10px] text-purple-200 font-bold uppercase tracking-widest">Saint of the Day</p>
           <p className="text-base font-bold text-white font-serif mt-1">{saint?.name}</p>
           <p className="text-purple-200 text-xs mt-1 italic leading-relaxed">{saint?.title}</p>

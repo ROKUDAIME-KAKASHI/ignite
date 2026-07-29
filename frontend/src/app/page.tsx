@@ -54,21 +54,17 @@ export default function HeroPage() {
   }, [user, loading, router]);
 
   return (
-    <div className="flex-1 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] bg-fixed bg-[#0a0a0a] text-white font-sans h-full overflow-hidden relative">
+    <div className="flex-1 bg-[#fdfbf7] text-gray-900 font-sans h-full overflow-hidden">
       <HeroNav />
-      
-      {/* Global decorative background glows */}
-      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[150px] pointer-events-none" />
 
       {/* ── HERO SECTION (SPLIT LAYOUT) ── */}
       <section className="relative pt-32 pb-20 px-6 lg:min-h-screen flex items-center">
         {/* Subtle animated background pattern */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-[0.02]">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-[0.03]">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/>
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
@@ -79,12 +75,12 @@ export default function HeroPage() {
           
           {/* Left Column: Text & CTAs */}
           <div className="flex flex-col items-start text-left">
-            <div className="inline-flex items-center gap-3 bg-[#111]/80 backdrop-blur-xl border border-white/10 rounded-full px-5 py-2 mb-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <span className="text-amber-500 font-extrabold text-sm tracking-widest uppercase">Ignite Youth</span>
-              <span className="text-slate-400 text-xs font-medium border-l border-white/10 pl-3">Ministry Platform</span>
+            <div className="inline-flex items-center gap-3 bg-white border border-gray-200 rounded-full px-5 py-2 mb-8 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <span className="text-amber-700 font-extrabold text-sm tracking-widest uppercase">Ignite Youth</span>
+              <span className="text-gray-400 text-xs font-medium border-l border-gray-200 pl-3">Ministry Platform</span>
             </div>
             
-            <h1 className="text-5xl lg:text-7xl font-extrabold font-serif leading-[1.1] mb-6 text-white drop-shadow-lg animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-75 fill-mode-both">
+            <h1 className="text-5xl lg:text-7xl font-extrabold font-serif leading-[1.1] mb-6 text-gray-900 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-75 fill-mode-both">
               In a world that never stops, <br />
               <span className="text-amber-700 relative">
                 your faith never should.
@@ -99,14 +95,14 @@ export default function HeroPage() {
               </span>
             </h1>
 
-            <p className="text-slate-400 text-lg lg:text-xl leading-relaxed mb-10 max-w-lg animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150 fill-mode-both">
+            <p className="text-gray-600 text-lg lg:text-xl leading-relaxed mb-10 max-w-lg animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150 fill-mode-both">
               Your daily spiritual companion for scripture, prayer, missions and community. Built for Christian youth navigating a fast-paced world.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-amber-600 text-white font-bold text-base hover:bg-amber-700 transition-colors shadow-lg shadow-amber-600/20 group"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-amber-700 text-white font-bold text-base hover:bg-amber-800 transition-colors shadow-lg shadow-amber-900/10 group"
               >
                 Begin Your Journey 
                 <span className="group-hover:translate-x-1 transition-transform inline-block">
@@ -115,16 +111,16 @@ export default function HeroPage() {
               </Link>
               <a
                 href="#discover"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#111]/80 backdrop-blur-xl border border-white/10 text-white font-bold text-base hover:bg-white/5 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold text-base hover:bg-gray-50 transition-colors"
               >
                 Discover More
               </a>
             </div>
 
-            <div className="mt-12 flex items-center gap-6 text-sm font-medium text-slate-400 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500 fill-mode-both">
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-500" /> Free forever</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-500" /> 66 Books</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-500" /> Gamified Faith</div>
+            <div className="mt-12 flex items-center gap-6 text-sm font-medium text-gray-500 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500 fill-mode-both">
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-600" /> Free forever</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-600" /> 66 Books</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber-600" /> Gamified Faith</div>
             </div>
           </div>
 
@@ -132,64 +128,64 @@ export default function HeroPage() {
           <div className="relative h-[500px] lg:h-[600px] w-full hidden md:block">
             {/* Main App Mockup Card */}
             <motion.div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-[#111]/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/10 p-6 z-20"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 z-20"
               initial={{ opacity: 0, y: 50, x: "-50%" }}
               animate={{ opacity: 1, y: "-50%", x: "-50%" }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-xl">✝️</div>
+                <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-xl">✝️</div>
                 <div>
-                  <div className="h-3 w-24 bg-white/20 rounded-full mb-2"></div>
-                  <div className="h-2 w-16 bg-white/10 rounded-full"></div>
+                  <div className="h-3 w-24 bg-gray-200 rounded-full mb-2"></div>
+                  <div className="h-2 w-16 bg-gray-100 rounded-full"></div>
                 </div>
               </div>
               <div className="space-y-3 mb-6">
-                <div className="h-16 w-full bg-white/5 rounded-xl border border-white/10 p-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-sm">📖</div>
+                <div className="h-16 w-full bg-[#fdfbf7] rounded-xl border border-gray-100 p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-sm">📖</div>
                   <div className="flex-1">
-                    <div className="h-2 w-full bg-white/20 rounded-full mb-2"></div>
-                    <div className="h-2 w-2/3 bg-white/10 rounded-full"></div>
+                    <div className="h-2 w-full bg-gray-200 rounded-full mb-2"></div>
+                    <div className="h-2 w-2/3 bg-gray-100 rounded-full"></div>
                   </div>
                 </div>
-                <div className="h-16 w-full bg-white/5 rounded-xl border border-white/10 p-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-sm">⚔️</div>
+                <div className="h-16 w-full bg-[#fdfbf7] rounded-xl border border-gray-100 p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-sm">⚔️</div>
                   <div className="flex-1">
-                    <div className="h-2 w-full bg-white/20 rounded-full mb-2"></div>
-                    <div className="h-2 w-1/2 bg-white/10 rounded-full"></div>
+                    <div className="h-2 w-full bg-gray-200 rounded-full mb-2"></div>
+                    <div className="h-2 w-1/2 bg-gray-100 rounded-full"></div>
                   </div>
                 </div>
               </div>
-              <div className="h-10 w-full bg-amber-600 rounded-xl text-white flex items-center justify-center font-bold text-sm shadow-md shadow-amber-600/20">
+              <div className="h-10 w-full bg-amber-700 rounded-xl text-white flex items-center justify-center font-bold text-sm shadow-md">
                 Complete Daily Mission
               </div>
             </motion.div>
 
             {/* Floating Element 1: Streak Badge */}
             <motion.div 
-              className="absolute top-16 right-4 lg:right-12 bg-[#111]/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/10 z-30 flex items-center gap-4"
+              className="absolute top-16 right-4 lg:right-12 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 z-30 flex items-center gap-4"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
             >
               <div className="text-3xl">🕯️</div>
               <div>
-                <p className="font-bold text-white font-serif">12 Day Streak</p>
-                <p className="text-xs text-amber-500 font-medium">On fire for Christ!</p>
+                <p className="font-bold text-gray-900 font-serif">12 Day Streak</p>
+                <p className="text-xs text-amber-700 font-medium">On fire for Christ!</p>
               </div>
             </motion.div>
 
             {/* Floating Element 2: Notification */}
             <motion.div 
-              className="absolute bottom-24 left-0 lg:left-8 bg-[#111]/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/10 z-30 flex items-center gap-3"
+              className="absolute bottom-24 left-0 lg:left-8 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 z-30 flex items-center gap-3"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1, y: [0, 10, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.7 }}
             >
-              <div className="w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-lg">🙏</div>
+              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🙏</div>
               <div>
-                <p className="font-bold text-white text-sm">New Prayer Request</p>
-                <p className="text-xs text-slate-400">Maria is asking for prayers...</p>
+                <p className="font-bold text-gray-900 text-sm">New Prayer Request</p>
+                <p className="text-xs text-gray-500">Maria is asking for prayers...</p>
               </div>
             </motion.div>
 
@@ -204,14 +200,13 @@ export default function HeroPage() {
       </section>
 
       {/* ── THE PROBLEM ── */}
-      <section id="discover" className="py-20 px-6 border-y border-white/10 relative">
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl -z-10" />
+      <section id="discover" className="py-20 px-6 bg-white border-y border-gray-100">
         <div className="max-w-4xl mx-auto text-center">
           <FadeUp>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif mb-6 text-white drop-shadow-lg">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif mb-6 text-gray-900">
               Notifications pull us everywhere — except toward God.
             </h2>
-            <p className="text-slate-400 text-lg leading-relaxed mb-12">
+            <p className="text-gray-600 text-lg leading-relaxed mb-12">
               The average young person checks their phone 96 times a day — yet finds no time for a moment of prayer. Ignite changes that.
             </p>
           </FadeUp>
@@ -225,11 +220,11 @@ export default function HeroPage() {
               <FadeUp key={s.label} delay={i * 0.1}>
                 <motion.div 
                   whileHover={{ y: -5 }}
-                  className="bg-[#111]/80 backdrop-blur-xl rounded-2xl p-8 border border-white/10 text-center h-full transition-all hover:shadow-emerald-500/10 hover:shadow-2xl hover:border-white/20"
+                  className="bg-[#fdfbf7] rounded-2xl p-8 border border-gray-200 text-center h-full transition-shadow hover:shadow-md"
                 >
-                  <p className="text-4xl mb-4 drop-shadow-lg">{s.icon}</p>
-                  <p className="text-3xl font-extrabold font-serif text-white">{s.stat}</p>
-                  <p className="text-sm text-slate-400 mt-2 font-medium uppercase tracking-wider">{s.label}</p>
+                  <p className="text-4xl mb-4">{s.icon}</p>
+                  <p className="text-3xl font-extrabold font-serif text-gray-900">{s.stat}</p>
+                  <p className="text-sm text-gray-500 mt-2 font-medium uppercase tracking-wider">{s.label}</p>
                 </motion.div>
               </FadeUp>
             ))}
@@ -238,14 +233,14 @@ export default function HeroPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="py-24 px-6 relative">
-        <div className="max-w-6xl mx-auto relative z-10">
+      <section className="py-24 px-6 bg-[#fdfbf7]">
+        <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <FadeUp className="max-w-xl text-left">
-              <h2 className="text-3xl md:text-4xl font-bold font-serif mb-4 text-white drop-shadow-lg">
+              <h2 className="text-3xl md:text-4xl font-bold font-serif mb-4 text-gray-900">
                 Your complete spiritual companion
               </h2>
-              <p className="text-slate-400 text-lg">
+              <p className="text-gray-600 text-lg">
                 Six powerful modules bringing your faith alive — every single day.
               </p>
             </FadeUp>
@@ -257,13 +252,13 @@ export default function HeroPage() {
                 <Link href="/login" className="block h-full group">
                   <motion.div 
                     whileHover={{ y: -5 }}
-                    className="bg-[#111]/80 backdrop-blur-xl rounded-2xl p-8 border border-white/10 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10 transition h-full"
+                    className="bg-white rounded-2xl p-8 border border-gray-200 hover:border-amber-700/30 shadow-sm hover:shadow-lg transition h-full"
                   >
-                    <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-amber-500/10">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-50 text-2xl flex items-center justify-center mb-6 text-amber-700 group-hover:scale-110 transition-transform">
                       {f.icon}
                     </div>
-                    <p className="font-bold text-xl text-white font-serif mb-2 group-hover:text-amber-500 transition-colors">{f.title}</p>
-                    <p className="text-sm text-slate-400 leading-relaxed">{f.sub}</p>
+                    <p className="font-bold text-xl text-gray-900 font-serif mb-2 group-hover:text-amber-700 transition-colors">{f.title}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{f.sub}</p>
                   </motion.div>
                 </Link>
               </FadeUp>
@@ -273,49 +268,48 @@ export default function HeroPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="py-24 px-6 border-y border-white/10 relative">
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl -z-10" />
+      <section className="py-24 px-6 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <div className="order-2 md:order-1 relative h-[500px] bg-[#111]/50 backdrop-blur-sm rounded-3xl border border-white/10 overflow-hidden flex items-center justify-center shadow-2xl">
+          <div className="order-2 md:order-1 relative h-[500px] bg-[#fdfbf7] rounded-3xl border border-gray-200 overflow-hidden flex items-center justify-center">
             {/* Minimal animated representation of the app's timeline */}
             <div className="w-64 space-y-4">
               {[1, 2, 3].map((item, i) => (
-                  <motion.div 
-                    key={i}
-                    className="bg-[#111]/80 backdrop-blur-xl p-4 rounded-xl shadow-lg border border-white/10 flex gap-3 items-center"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.2 }}
-                  >
-                    <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center font-bold text-amber-500 font-serif">
-                      0{item}
-                    </div>
-                    <div className="flex-1">
-                      <div className="h-2 w-full bg-white/20 rounded-full mb-2"></div>
-                      <div className="h-2 w-2/3 bg-white/10 rounded-full"></div>
-                    </div>
-                  </motion.div>
+                <motion.div 
+                  key={i}
+                  className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 items-center"
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.2 }}
+                >
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-800 font-serif">
+                    0{item}
+                  </div>
+                  <div className="flex-1">
+                    <div className="h-2 w-full bg-gray-200 rounded-full mb-2"></div>
+                    <div className="h-2 w-2/3 bg-gray-100 rounded-full"></div>
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
 
           <div className="order-1 md:order-2">
             <FadeUp>
-              <p className="text-sm font-bold text-amber-500 tracking-widest uppercase mb-2">Simple. Powerful. Sacred.</p>
-              <h2 className="text-3xl md:text-5xl font-bold font-serif text-white mb-10 drop-shadow-lg">How Ignite works</h2>
+              <p className="text-sm font-bold text-amber-700 tracking-widest uppercase mb-2">Simple. Powerful. Sacred.</p>
+              <h2 className="text-3xl md:text-5xl font-bold font-serif text-gray-900 mb-10">How Ignite works</h2>
             </FadeUp>
             
             <div className="space-y-8">
               {steps.map((step, i) => (
                 <FadeUp key={step.num} delay={i * 0.1}>
                   <div className="flex gap-5 items-start group">
-                    <div className="w-14 h-14 rounded-full bg-[#111]/80 backdrop-blur-xl border border-white/10 flex items-center justify-center shrink-0 text-2xl group-hover:border-amber-500/50 group-hover:bg-amber-500/10 transition-colors shadow-lg shadow-black/50">
+                    <div className="w-14 h-14 rounded-full bg-[#fdfbf7] border border-gray-200 flex items-center justify-center shrink-0 text-2xl group-hover:bg-amber-50 group-hover:border-amber-200 transition-colors">
                       {step.emoji}
                     </div>
                     <div>
-                      <h3 className="font-bold text-xl text-white font-serif mb-2">{step.title}</h3>
-                      <p className="text-slate-400 leading-relaxed text-lg">{step.desc}</p>
+                      <h3 className="font-bold text-xl text-gray-900 font-serif mb-2">{step.title}</h3>
+                      <p className="text-gray-600 leading-relaxed text-lg">{step.desc}</p>
                     </div>
                   </div>
                 </FadeUp>
@@ -326,10 +320,10 @@ export default function HeroPage() {
       </section>
 
       {/* ── TESTIMONIALS (ANIMATED TICKER) ── */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 text-center mb-16 relative z-10">
+      <section className="py-24 bg-[#fdfbf7] overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6 text-center mb-16">
           <FadeUp>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-white drop-shadow-lg">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-gray-900">
               Voices of the Community
             </h2>
           </FadeUp>
@@ -343,20 +337,20 @@ export default function HeroPage() {
           >
             {/* Double the array for seamless scrolling */}
             {[...testimonials, ...testimonials].map((t, i) => (
-              <div key={i} className="w-[350px] shrink-0 bg-[#111]/80 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl flex flex-col hover:border-white/20 transition-colors">
+              <div key={i} className="w-[350px] shrink-0 bg-white rounded-2xl p-8 border border-gray-200 shadow-sm flex flex-col">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-2xl drop-shadow-md">
+                  <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-2xl">
                     {t.emoji}
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-white font-serif">{t.name}</p>
-                    <p className="text-xs text-slate-400 uppercase tracking-wider">{t.role}</p>
+                    <p className="font-bold text-gray-900 font-serif">{t.name}</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider">{t.role}</p>
                   </div>
                 </div>
-                <p className="text-slate-300 italic font-serif leading-relaxed text-left flex-1">"{t.quote}"</p>
+                <p className="text-gray-600 italic font-serif leading-relaxed text-left flex-1">"{t.quote}"</p>
                 <div className="mt-6 flex items-center gap-2">
-                  <span className="text-amber-500 drop-shadow-md">🕯️</span>
-                  <span className="text-sm font-bold text-amber-500">{t.streak} day streak</span>
+                  <span className="text-amber-700">🕯️</span>
+                  <span className="text-sm font-bold text-amber-700">{t.streak} day streak</span>
                 </div>
               </div>
             ))}
@@ -365,28 +359,28 @@ export default function HeroPage() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section className="py-32 px-6 text-center border-t border-white/10 relative overflow-hidden">
+      <section className="py-32 px-6 text-center border-t border-gray-200 bg-white relative overflow-hidden">
         {/* Subtle radial glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-full bg-amber-500/20 rounded-full blur-[150px] pointer-events-none -z-10" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-full bg-amber-50/50 rounded-full blur-[120px] pointer-events-none" />
         
         <FadeUp className="max-w-2xl mx-auto relative z-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center mx-auto mb-8 shadow-lg shadow-amber-500/20 text-white text-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-amber-700 flex items-center justify-center mx-auto mb-8 shadow-md text-white text-2xl">
             ✝️
           </div>
-          <h2 className="text-4xl md:text-6xl font-extrabold font-serif text-white drop-shadow-lg leading-[1.1] mb-6">
+          <h2 className="text-4xl md:text-6xl font-extrabold font-serif text-gray-900 leading-[1.1] mb-6">
             Your faith journey <br/> begins with one step.
           </h2>
-          <p className="text-slate-400 text-lg mb-10 max-w-xl mx-auto">
+          <p className="text-gray-600 text-lg mb-10 max-w-xl mx-auto">
             Join thousands of Christian youth who are reclaiming five minutes a day for God.
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-2 px-10 py-5 rounded-xl bg-amber-600 text-white font-bold text-lg hover:bg-amber-700 transition hover:scale-105 shadow-2xl shadow-amber-600/30"
+            className="inline-flex items-center justify-center gap-2 px-10 py-5 rounded-xl bg-amber-700 text-white font-bold text-lg hover:bg-amber-800 transition hover:scale-105 shadow-xl shadow-amber-900/10"
           >
             Join Ignite — It&apos;s Free
             <ArrowRight className="w-5 h-5" />
           </Link>
-          <p className="text-slate-500 text-xs mt-12 tracking-[0.3em] uppercase drop-shadow-md">✝ Soli Deo Gloria ✝</p>
+          <p className="text-gray-400 text-xs mt-12 tracking-[0.3em] uppercase">✝ Soli Deo Gloria ✝</p>
         </FadeUp>
       </section>
     </div>
